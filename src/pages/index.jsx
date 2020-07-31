@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Button from '@material-ui/core/Button';
 import Container from '@material-ui/core/Container';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
@@ -12,9 +11,6 @@ export default function App() {
             <CssBaseline />
             <LandingAppBar />
             <Container fixed>
-                <Button variant="contained" color="primary">
-                    Hello World
-                </Button>
             </Container>
         </React.Fragment>
     );

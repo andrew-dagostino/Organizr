@@ -29,10 +29,12 @@ export default function LandingAppBar() {
             <AppBar position="static">
                 <Toolbar>
                     <IconButton edge="start" className={classes.menuButton} color="inherit">
-                        <ArrowBackIcon />
+                        <Link href="/" color="inherit" underline="none">
+                            <ArrowBackIcon />
+                        </Link>
                     </IconButton>
                     <Typography variant="h6" className={classes.title}>
-                        Login
+                        Login / Register
                     </Typography>
                 </Toolbar>
             </AppBar>
