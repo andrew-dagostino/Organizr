@@ -4,9 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "webpack --mode production",
+    "build": "npm run build-ui && npm run build-server",
+    "build-ui": "webpack --mode production",
     "build-server": "go build server/server.go",
-    "start": "webpack-dev-server --mode development --hot --open --port 3100",
+    "start": "server",
+    "start-ui": "webpack-dev-server --mode development --hot --open --port 3100",
     "start-server": "server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -192,7 +192,7 @@ function submitLogin(e) {
     e.preventDefault();
 
     let formdata = new FormData(document.getElementById("loginForm"));
-    axios.post("/login", formdata).then(
+    axios.post("/api/login", formdata).then(
         (res) => {
 
         },
@@ -206,7 +206,7 @@ function submitRegister(e) {
     e.preventDefault();
 
     let formdata = new FormData(document.getElementById("registerForm"));
-    axios.post("/register", formdata).then(
+    axios.post("/api/register", formdata).then(
         (res) => {
 
         },
