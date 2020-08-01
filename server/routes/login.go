@@ -44,6 +44,8 @@ func LoginUser(c echo.Context) error {
 		})
 	}
 
+	err = updateLastLogin(user.Id)
+
 	return c.JSON(http.StatusOK, map[string]string{
 		"token": token,
 	})
@@ -112,4 +114,38 @@ func generateJWT(user types.User) (string, error) {
 	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
 
 	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+}
+
+// Updates the last login timestamp
+func updateLastLogin(id int) error {
+	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
+	if err != nil {
+		return err
+	}
+	defer conn.Close(context.Background())
+
+	tx, err := conn.Begin(context.Background())
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(context.Background())
+
+	_, err = tx.Exec(context.Background(),
+		`
+			UPDATE site_user
+			SET last_login = $1
+			WHERE id = $2;
+		`,
+		time.Now(), id,
+	)
+	if err != nil {
+		return err
+	}
+
+	err = tx.Commit(context.Background())
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
