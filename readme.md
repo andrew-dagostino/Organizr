@@ -37,6 +37,11 @@ This project is for experimenting with creating a website using Go, React, and P
     PG_URL: user=<db_user> password=<db_user_pwd> host=<db_host> port=<db_port> dbname=<db_name>
     ```
 
+1. Set the `JWT_SECRET` environment variable
+    ```
+    JWT_SECRET: <secret>
+    ```
+
 ## Building & Running
 
 ### Building
