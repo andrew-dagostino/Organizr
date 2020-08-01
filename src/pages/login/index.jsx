@@ -108,14 +108,14 @@ function NavTabs() {
                             fullWidth
                             margin="normal"
                         />
-                    </form>
-                    <Grid container spacing={4} justify="flex-end">
-                        <Grid item>
-                            <Button variant="contained" fullWidth color="primary" type="submit">
-                                Submit
-                            </Button>
+                        <Grid container spacing={4} justify="flex-end">
+                            <Grid item>
+                                <Button variant="contained" fullWidth color="primary" type="submit">
+                                    Submit
+                                </Button>
+                            </Grid>
                         </Grid>
-                    </Grid>
+                    </form>
                 </Container>
             </TabPanel>
             <TabPanel value={value} index={1}>
@@ -128,7 +128,7 @@ function NavTabs() {
                     <Typography variant="h5" align="left" color="primary" gutterBottom noWrap>
                         Create Account
                     </Typography>
-                    <form id="registerForm" onSubmit={submitLogin}>
+                    <form id="registerForm" onSubmit={submitRegister}>
                         <TextField
                             id="registerUsername"
                             name="username"
@@ -161,14 +161,14 @@ function NavTabs() {
                             fullWidth
                             margin="normal"
                         />
-                    </form>
-                    <Grid container spacing={4} justify="flex-end">
-                        <Grid item>
-                            <Button variant="contained" fullWidth color="primary" type="submit">
-                                Submit
-                            </Button>
+                        <Grid container spacing={4} justify="flex-end">
+                            <Grid item>
+                                <Button variant="contained" fullWidth color="primary" type="submit">
+                                    Submit
+                                </Button>
+                            </Grid>
                         </Grid>
-                    </Grid>
+                    </form>
                 </Container>
             </TabPanel>
         </div>
@@ -194,10 +194,10 @@ function submitLogin(e) {
     let formdata = new FormData(document.getElementById("loginForm"));
     axios.post("/api/login", formdata).then(
         (res) => {
-
+            console.log(res);
         },
         (err) => {
-
+            console.log(err);
         }
     );
 }
@@ -208,10 +208,10 @@ function submitRegister(e) {
     let formdata = new FormData(document.getElementById("registerForm"));
     axios.post("/api/register", formdata).then(
         (res) => {
-
+            console.log(res);
         },
         (err) => {
-
+            console.log(err);
         }
     );
 }
