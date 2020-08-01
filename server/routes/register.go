@@ -13,7 +13,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func CreateUser(c echo.Context) (err error) {
+func RegisterUser(c echo.Context) (err error) {
 	username := strings.TrimSpace(c.FormValue("username"))
 	password := strings.TrimSpace(c.FormValue("password"))
 
