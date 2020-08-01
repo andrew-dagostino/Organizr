@@ -1,4 +1,4 @@
-module andrew-dagostino/test-website
+module test-website
 
 go 1.14
 

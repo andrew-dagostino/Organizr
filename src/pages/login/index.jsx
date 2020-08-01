@@ -194,10 +194,10 @@ function submitLogin(e) {
     let formdata = new FormData(document.getElementById("loginForm"));
     axios.post("/api/login", formdata).then(
         (res) => {
-            console.log(res);
+            console.log(res.data);
         },
         (err) => {
-            console.log(err);
+            console.log(err.response ? err.response.data.error : err);
         }
     );
 }
@@ -208,10 +208,10 @@ function submitRegister(e) {
     let formdata = new FormData(document.getElementById("registerForm"));
     axios.post("/api/register", formdata).then(
         (res) => {
-            console.log(res);
+            console.log(res.data);
         },
         (err) => {
-            console.log(err);
+            console.log(err.response ? err.response.data.error : err);
         }
     );
 }
