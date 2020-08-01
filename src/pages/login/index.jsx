@@ -195,6 +195,8 @@ function submitLogin(e) {
     axios.post("/api/login", formdata).then(
         (res) => {
             console.log(res.data);
+
+            axios.get(`/api/restricted/user/9`, { headers: { Authorization: `Bearer ${res.data.token}` } }).then(res => console.log(res.data))
         },
         (err) => {
             console.log(err.response ? err.response.data.error : err);
