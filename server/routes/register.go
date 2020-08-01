@@ -2,7 +2,6 @@ package routes
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -18,68 +17,58 @@ func RegisterUser(c echo.Context) (err error) {
 	password := strings.TrimSpace(c.FormValue("password"))
 
 	if len(username) < 1 || len(username) > 32 {
-		return c.JSON(http.StatusBadRequest, &types.Error{
-			Code:  "create_failed",
-			Error: "Failed to create user",
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error_code": "create_failed",
+			"error":      "Failed to create user",
 		})
 	}
 
+	user, err := createUser(username, password)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error_code": "create_failed",
+			"error":      "Failed to create user",
+		})
+	}
+
+	return c.JSON(http.StatusOK, user)
+}
+
+func createUser(username string, password string) (types.User, error) {
+	var user types.User
+
 	hash, err := hashPassword(password)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, &types.Error{
-			Code:  "create_failed",
-			Error: "Failed to create user",
-		})
+		return user, err
 	}
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-		return c.JSON(http.StatusInternalServerError, &types.Error{
-			Code:  "create_failed",
-			Error: "Failed to create user",
-		})
+		return user, err
 	}
 	defer conn.Close(context.Background())
 
 	tx, err := conn.Begin(context.Background())
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, &types.Error{
-			Code:  "create_failed",
-			Error: "Failed to create user",
-		})
+		return user, err
 	}
 	defer tx.Rollback(context.Background())
-
-	r_name := ""
-	r_id := -1
 
 	err = tx.QueryRow(context.Background(),
 		`INSERT INTO site_user (username, password) VALUES ($1, $2)
 			RETURNING id, username;`,
 		username, hash,
-	).Scan(&r_id, &r_name)
+	).Scan(&user.Id, &user.Username)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, &types.Error{
-			Code:  "create_failed",
-			Error: "Failed to create user",
-		})
-	}
-
-	u := &types.User{
-		Id:       r_id,
-		Username: r_name,
+		return user, err
 	}
 
 	err = tx.Commit(context.Background())
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, &types.Error{
-			Code:  "create_failed",
-			Error: "Failed to create user",
-		})
+		return user, err
 	}
 
-	return c.JSON(http.StatusOK, u)
+	return user, nil
 }
 
 func hashPassword(password string) (string, error) {
