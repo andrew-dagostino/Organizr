@@ -12,9 +12,10 @@ This project is for experimenting with creating a website using Go, React, and P
 * NPM
 * Go
     * [echo](https://echo.labstack.com/)
+    * [pgx](https://github.com/jackc/pgx)
 * ReactJS
     * [Material-UI](https://material-ui.com/)
-* Postgresql - todo
+* Postgresql 12.3
 
 ### Steps
 
@@ -26,8 +27,15 @@ This project is for experimenting with creating a website using Go, React, and P
 1. Install the go modules
     ```
     go get github.com/labstack/echo/v4
+    go get github.com/jackc/pgx/v4
+    go get golang.org/x/crypto/bcrypt
     ```
-1. postgresql setup - todo
+
+1. Set the `PGHOST` and `PG_URL` environment variables
+    ```
+    PGHOST: <db_host>
+    PG_URL: user=<db_user> password=<db_user_pwd> host=<db_host> port=<db_port> dbname=<db_name>
+    ```
 
 ## Building & Running
 
