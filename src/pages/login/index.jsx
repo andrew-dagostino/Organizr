@@ -77,7 +77,7 @@ function NavTabs() {
         axios.post("/api/login", formdata).then(
             (res) => {
                 localStorage.setItem("session", res.data.token);
-                location.replace(document.referrer);
+                (!document.referrer || document.location == document.referrer) ? location.replace("/") : location.replace(document.referrer);
             },
             (err) => {
                 let msg = (err.response && err.response.data && err.response.data.error ? err.response.data.error : err.message)
