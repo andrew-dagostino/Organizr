@@ -111,6 +111,7 @@ func generateJWT(user types.User) (string, error) {
 	claims := token.Claims.(jwt.MapClaims)
 	claims["username"] = user.Username
 	claims["id"] = user.Id
+	claims["iat"] = time.Now().Unix()
 	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
 
 	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
