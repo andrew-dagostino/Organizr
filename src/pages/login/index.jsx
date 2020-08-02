@@ -17,9 +17,10 @@ import Tabs from '@material-ui/core/Tabs';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 
-import LoginAppBar from '../../components/LoginAppBar.jsx';
-
 import axios from 'axios';
+
+import LoginAppBar from '../../components/LoginAppBar.jsx';
+import Toast from '../../components/Toast.jsx';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -63,9 +64,43 @@ function NavTabs() {
     const classes = useStyles();
     const [value, setValue] = React.useState(0);
 
+    const [toast, setToast] = React.useState("");
+
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
+
+    const submitLogin = (e) => {
+        e.preventDefault();
+
+        let formdata = new FormData(document.getElementById("loginForm"));
+        axios.post("/api/login", formdata).then(
+            (res) => {
+                localStorage.setItem("session", res.data.token);
+                location.replace(document.referrer);
+            },
+            (err) => {
+                let msg = (err.response && err.response.data && err.response.data.error ? err.response.data.error : err.message)
+                setToast({ title: msg, type: "error" });
+            }
+        );
+    }
+
+    const submitRegister = (e) => {
+        e.preventDefault();
+
+        let formdata = new FormData(document.getElementById("registerForm"));
+        axios.post("/api/register", formdata).then(
+            (res) => {
+                setToast({ title: "Registration Successful", type: "success" });
+                document.getElementById("nav-tab-0").click();
+            },
+            (err) => {
+                let msg = (err.response && err.response.data && err.response.data.error ? err.response.data.error : err.message)
+                setToast({ title: msg, type: "error" });
+            }
+        );
+    }
 
     return (
         <div className={classes.root}>
@@ -171,6 +206,7 @@ function NavTabs() {
                     </form>
                 </Container>
             </TabPanel>
+            {toast ? <Toast title={toast.title} type={toast.type} /> : null}
         </div>
     );
 }
@@ -187,33 +223,3 @@ ReactDOM.render(
     </React.Fragment>,
     document.querySelector('#app')
 );
-
-function submitLogin(e) {
-    e.preventDefault();
-
-    let formdata = new FormData(document.getElementById("loginForm"));
-    axios.post("/api/login", formdata).then(
-        (res) => {
-            console.log(res.data);
-
-            axios.get(`/api/restricted/user/9`, { headers: { Authorization: `Bearer ${res.data.token}` } }).then(res => console.log(res.data))
-        },
-        (err) => {
-            console.log(err.response ? err.response.data.error : err);
-        }
-    );
-}
-
-function submitRegister(e) {
-    e.preventDefault();
-
-    let formdata = new FormData(document.getElementById("registerForm"));
-    axios.post("/api/register", formdata).then(
-        (res) => {
-            console.log(res.data);
-        },
-        (err) => {
-            console.log(err.response ? err.response.data.error : err);
-        }
-    );
-}
