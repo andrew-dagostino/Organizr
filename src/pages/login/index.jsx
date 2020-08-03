@@ -1,225 +1,148 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import Person from '@material-ui/icons/Person';
-import PersonAdd from '@material-ui/icons/PersonAdd';
-
-import { makeStyles } from '@material-ui/core/styles';
-import Box from '@material-ui/core/Box';
-import AppBar from '@material-ui/core/AppBar';
-import Button from '@material-ui/core/Button';
-import Container from '@material-ui/core/Container';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
-import Tab from '@material-ui/core/Tab';
-import Tabs from '@material-ui/core/Tabs';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
-
 import axios from 'axios';
 
+import {
+    Button,
+    Container,
+    Card,
+    CardHeader,
+    CardBody,
+    CardText,
+    CardTitle,
+    Col,
+    Form,
+    FormControl,
+    FormGroup,
+    FormLabel,
+    FormText,
+    Nav,
+    NavItem,
+    NavLink,
+    Row,
+    Tab,
+    TabContainer,
+    TabContent,
+    Tabs,
+} from 'react-bootstrap';
+
 import LoginAppBar from '../../components/LoginAppBar.jsx';
-import Toast from '../../components/Toast.jsx';
 
-function TabPanel(props) {
-    const { children, value, index, ...other } = props;
-
-    return (
-        <div
-            role="tabpanel"
-            hidden={value !== index}
-            id={`nav-tabpanel-${index}`}
-            aria-labelledby={`nav-tab-${index}`}
-            {...other}
-        >
-            {value === index && (
-                <Box p={3}>
-                    <Typography component={"span"}>{children}</Typography>
-                </Box>
-            )}
-        </div>
-    );
-}
-
-const useStyles = makeStyles((theme) => ({
-    root: {
-        flexGrow: 1,
-        backgroundColor: theme.palette.background.paper,
-    },
-    largeIcon: {
-        width: 64,
-        height: 64
-    },
-}));
-
-function a11yProps(index) {
-    return {
-        id: `nav-tab-${index}`,
-        'aria-controls': `nav-tabpanel-${index}`,
-    };
-}
-
-function NavTabs() {
-    const classes = useStyles();
-    const [value, setValue] = React.useState(0);
-
-    const [toast, setToast] = React.useState("");
-
-    const handleChange = (event, newValue) => {
-        setValue(newValue);
-    };
-
+function LoginRegisterCard() {
     const submitLogin = (e) => {
         e.preventDefault();
 
-        let formdata = new FormData(document.getElementById("loginForm"));
-        axios.post("/api/login", formdata).then(
+        let formdata = new FormData(document.getElementById('loginForm'));
+        axios.post('/api/login', formdata).then(
             (res) => {
-                localStorage.setItem("session", res.data.token);
-                (!document.referrer || document.location == document.referrer) ? location.replace("/") : location.replace(document.referrer);
+                localStorage.setItem('session', res.data.token);
+                !document.referrer || document.location == document.referrer
+                    ? location.replace('/')
+                    : location.replace(document.referrer);
             },
             (err) => {
-                let msg = (err.response && err.response.data && err.response.data.error ? err.response.data.error : err.message)
-                setToast({ title: msg, type: "error" });
-            }
+                let msg =
+                    err.response && err.response.data && err.response.data.error
+                        ? err.response.data.error
+                        : err.message;
+                toastr.error(msg);
+            },
         );
-    }
+    };
 
     const submitRegister = (e) => {
         e.preventDefault();
 
-        let formdata = new FormData(document.getElementById("registerForm"));
-        axios.post("/api/register", formdata).then(
+        let formdata = new FormData(document.getElementById('registerForm'));
+        axios.post('/api/register', formdata).then(
             (res) => {
-                setToast({ title: "Registration Successful", type: "success" });
-                document.getElementById("nav-tab-0").click();
+                toastr.success('Registration Successful!');
+                document.getElementById('loginTabHeader').click();
             },
             (err) => {
-                let msg = (err.response && err.response.data && err.response.data.error ? err.response.data.error : err.message)
-                setToast({ title: msg, type: "error" });
-            }
+                let msg =
+                    err.response && err.response.data && err.response.data.error
+                        ? err.response.data.error
+                        : err.message;
+                toastr.error(msg);
+            },
         );
-    }
+    };
 
     return (
-        <div className={classes.root}>
-            <AppBar position="static">
-                <Tabs variant="fullWidth" value={value} onChange={handleChange}>
-                    <Tab label="Login" {...a11yProps(0)} />
-                    <Tab label="Register" {...a11yProps(1)} />
-                </Tabs>
-            </AppBar>
-            <TabPanel value={value} index={0}>
-                <Container fixed maxWidth="xs">
-                    <Grid container spacing={4} justify="center">
-                        <Grid item>
-                            <Person color="primary" className={classes.largeIcon} />
-                        </Grid>
-                    </Grid>
-                    <Typography variant="h5" align="left" color="primary" gutterBottom noWrap>
-                        Sign In
-                    </Typography>
-                    <form id="loginForm" onSubmit={submitLogin}>
-                        <TextField
-                            id="loginUsername"
-                            name="username"
-                            label="Username"
-                            variant="outlined"
-                            type="text"
-                            autoComplete="current-username"
-                            required
-                            fullWidth
-                            margin="normal"
-                        />
-                        <TextField
-                            id="loginPassword"
-                            name="password"
-                            label="Password"
-                            variant="outlined"
-                            type="password"
-                            autoComplete="current-password"
-                            required
-                            fullWidth
-                            margin="normal"
-                        />
-                        <Grid container spacing={4} justify="flex-end">
-                            <Grid item>
-                                <Button variant="contained" fullWidth color="primary" type="submit">
-                                    Submit
-                                </Button>
-                            </Grid>
-                        </Grid>
-                    </form>
-                </Container>
-            </TabPanel>
-            <TabPanel value={value} index={1}>
-                <Container fixed maxWidth="xs">
-                    <Grid container spacing={4} justify="center">
-                        <Grid item>
-                            <PersonAdd color="primary" className={classes.largeIcon} />
-                        </Grid>
-                    </Grid>
-                    <Typography variant="h5" align="left" color="primary" gutterBottom noWrap>
-                        Create Account
-                    </Typography>
-                    <form id="registerForm" onSubmit={submitRegister}>
-                        <TextField
-                            id="registerUsername"
-                            name="username"
-                            label="Username"
-                            variant="outlined"
-                            type="text"
-                            autoComplete="off"
-                            required
-                            fullWidth
-                            margin="normal"
-                        />
-                        <TextField
-                            id="registerPassword"
-                            name="password"
-                            label="Password"
-                            variant="outlined"
-                            type="password"
-                            autoComplete="off"
-                            required
-                            fullWidth
-                            margin="normal"
-                        />
-                        <TextField
-                            id="registerPasswordConfirm"
-                            label="Confirm Password"
-                            variant="outlined"
-                            type="password"
-                            autoComplete="off"
-                            required
-                            fullWidth
-                            margin="normal"
-                        />
-                        <Grid container spacing={4} justify="flex-end">
-                            <Grid item>
-                                <Button variant="contained" fullWidth color="primary" type="submit">
-                                    Submit
-                                </Button>
-                            </Grid>
-                        </Grid>
-                    </form>
-                </Container>
-            </TabPanel>
-            {toast ? <Toast title={toast.title} type={toast.type} /> : null}
-        </div>
+        <Row className='justify-content-center'>
+            <Col xs={12} sm={8} md={6}>
+                <Card>
+                    <Tab.Container defaultActiveKey='login'>
+                        <Card.Header as='h5'>
+                            <Nav variant='pills' className='text-center'>
+                                <Nav.Item className='w-50'>
+                                    <Nav.Link id='loginTabHeader' eventKey='login'>
+                                        Login
+                                    </Nav.Link>
+                                </Nav.Item>
+                                <Nav.Item className='w-50'>
+                                    <Nav.Link id='registerTabHeader' eventKey='register'>
+                                        Register
+                                    </Nav.Link>
+                                </Nav.Item>
+                            </Nav>
+                        </Card.Header>
+                        <Card.Body bg='light'>
+                            <Tab.Content>
+                                <Tab.Pane eventKey='login'>
+                                    <Form id='loginForm' onSubmit={submitLogin}>
+                                        <Form.Group controlId='loginUsername'>
+                                            <Form.Label>Username</Form.Label>
+                                            <Form.Control type='text' name='username' />
+                                        </Form.Group>
+
+                                        <Form.Group controlId='loginPassword'>
+                                            <Form.Label>Password</Form.Label>
+                                            <Form.Control type='password' name='password' />
+                                        </Form.Group>
+                                        <Button variant='primary' type='submit'>
+                                            Submit
+                                        </Button>
+                                    </Form>
+                                </Tab.Pane>
+                                <Tab.Pane eventKey='register'>
+                                    <Form id='registerForm' onSubmit={submitRegister}>
+                                        <Form.Group controlId='registerUsername'>
+                                            <Form.Label>Username</Form.Label>
+                                            <Form.Control type='text' name='username' />
+                                        </Form.Group>
+
+                                        <Form.Group controlId='registerPassword'>
+                                            <Form.Label>Password</Form.Label>
+                                            <Form.Control type='password' name='password' />
+                                        </Form.Group>
+
+                                        <Form.Group controlId='registerPasswordConfirm'>
+                                            <Form.Label>Confirm Password</Form.Label>
+                                            <Form.Control type='password' />
+                                        </Form.Group>
+                                        <Button variant='primary' type='submit'>
+                                            Submit
+                                        </Button>
+                                    </Form>
+                                </Tab.Pane>
+                            </Tab.Content>
+                        </Card.Body>
+                    </Tab.Container>
+                </Card>
+            </Col>
+        </Row>
     );
 }
 
 ReactDOM.render(
     <React.Fragment>
-        <CssBaseline />
         <LoginAppBar />
-        <Container fixed maxWidth="xs">
-            <Paper elevation={2}>
-                <NavTabs />
-            </Paper>
+        <Container>
+            <LoginRegisterCard />
         </Container>
     </React.Fragment>,
-    document.querySelector('#app')
+    document.querySelector('#app'),
 );

@@ -1,57 +1,36 @@
 import React from 'react';
 
-import AppBar from '@material-ui/core/AppBar';
-import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-import Link from '@material-ui/core/Link';
-import { makeStyles } from '@material-ui/core/styles';
-import MenuIcon from '@material-ui/icons/Menu';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
+import { Button, Container, Navbar, NavbarBrand, NavbarToggle, NavbarCollapse, NavLink, Nav } from 'react-bootstrap';
 
 const jwtDecode = require('jwt-decode');
 
-const useStyles = makeStyles((theme) => ({
-    root: {
-        flexGrow: 1,
-    },
-    menuButton: {
-        marginRight: theme.spacing(2),
-    },
-    title: {
-        flexGrow: 1,
-    },
-}));
-
 export default function LandingAppBar(props) {
-    const classes = useStyles();
-
     const submitLogout = (e) => {
         props.setJWT(null);
-        localStorage.removeItem("session");
-        location.replace("/");
-    }
+        localStorage.removeItem('session');
+        location.replace('/');
+    };
 
     return (
-        <div className={classes.root}>
-            <AppBar position="static">
-                <Toolbar>
-                    <IconButton edge="start" className={classes.menuButton} color="inherit">
-                        <MenuIcon />
-                    </IconButton>
-                    <Typography variant="h6" className={classes.title}>
-                        {props.jwt ? "Welcome, " + jwtDecode(props.jwt).username : "Landing Page"}
-                    </Typography>
-                    {
-                        props.jwt ?
-                        <Button color="inherit" type="button" onClick={submitLogout}>Logout</Button>
-                        :
-                        <Button color="inherit">
-                            <Link href="/login" color="inherit" underline="none">Login</Link>
-                        </Button>
-                    }
-                </Toolbar>
-            </AppBar>
-        </div>
+        <Navbar sticky='top' collapseOnSelect expand='md' bg='primary' variant='dark' className='mb-5'>
+            <Container>
+                <Navbar.Brand href='/'>
+                    {props.jwt ? 'Welcome, ' + jwtDecode(props.jwt).username : 'Landing Page'}
+                </Navbar.Brand>
+                <Navbar.Toggle />
+                <Navbar.Collapse>
+                    <Nav className='mr-auto'></Nav>
+                    <Nav>
+                        {props.jwt ? (
+                            <Nav.Link href='javascript:void(0)' onClick={submitLogout}>
+                                Logout
+                            </Nav.Link>
+                        ) : (
+                            <Nav.Link href='/login'>Login</Nav.Link>
+                        )}
+                    </Nav>
+                </Navbar.Collapse>
+            </Container>
+        </Navbar>
     );
 }

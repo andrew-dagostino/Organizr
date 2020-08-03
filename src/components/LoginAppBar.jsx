@@ -1,43 +1,17 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-import Link from '@material-ui/core/Link';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
-const useStyles = makeStyles((theme) => ({
-    root: {
-        flexGrow: 1,
-        marginBottom: "3.5rem"
-    },
-    menuButton: {
-        marginRight: theme.spacing(2),
-    },
-    title: {
-        flexGrow: 1,
-    },
-}));
+import { Button, Container, Navbar, NavbarBrand, NavbarToggle, NavbarCollapse, NavLink, Nav } from 'react-bootstrap';
 
-export default function LandingAppBar() {
-    const classes = useStyles();
-
+export default function LoginAppBar(props) {
     return (
-        <div className={classes.root}>
-            <AppBar position="static">
-                <Toolbar>
-                    <IconButton edge="start" className={classes.menuButton} color="inherit">
-                        <Link href="/" color="inherit" underline="none">
-                            <ArrowBackIcon />
-                        </Link>
-                    </IconButton>
-                    <Typography variant="h6" className={classes.title}>
-                        Login / Register
-                    </Typography>
-                </Toolbar>
-            </AppBar>
-        </div>
+        <Navbar sticky='top' collapseOnSelect expand='md' bg='primary' variant='dark' className='mb-5'>
+            <Container>
+                <Navbar.Brand href='/'>Login / Register</Navbar.Brand>
+                <Navbar.Toggle />
+                <Navbar.Collapse>
+                    <Nav className='mr-auto'></Nav>
+                </Navbar.Collapse>
+            </Container>
+        </Navbar>
     );
 }
