@@ -1,20 +1,21 @@
-const path = require("path");
-const fs = require("fs");
+const path = require('path');
+const fs = require('fs');
 
-const HtmlWebPackPlugin = require("html-webpack-plugin");
-const PAGE_DIR = path.join("src", "pages", path.sep);
+const HtmlWebPackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
+const PAGE_DIR = path.join('src', 'pages', path.sep);
 
-const htmlPlugins = getFilesFromDir(PAGE_DIR, [".html"]).map(filePath => {
-    const fileName = filePath.replace(PAGE_DIR, "");
+const htmlPlugins = getFilesFromDir(PAGE_DIR, ['.html']).map((filePath) => {
+    const fileName = filePath.replace(PAGE_DIR, '');
     return new HtmlWebPackPlugin({
-        chunks: [fileName.replace(path.extname(fileName), ""), "vendor"],
+        chunks: [fileName.replace(path.extname(fileName), ''), 'vendor'],
         template: filePath,
-        filename: fileName
+        filename: fileName,
     });
 });
 
-const entry = getFilesFromDir(PAGE_DIR, [".jsx"]).reduce((obj, filePath) => {
-    const entryChunkName = filePath.replace(path.extname(filePath), "").replace(PAGE_DIR, "");
+const entry = getFilesFromDir(PAGE_DIR, ['.jsx']).reduce((obj, filePath) => {
+    const entryChunkName = filePath.replace(path.extname(filePath), '').replace(PAGE_DIR, '');
     obj[entryChunkName] = `./${filePath}`;
     return obj;
 }, {});
@@ -22,13 +23,16 @@ const entry = getFilesFromDir(PAGE_DIR, [".jsx"]).reduce((obj, filePath) => {
 module.exports = {
     entry: entry,
     plugins: [
-        ...htmlPlugins
+        ...htmlPlugins,
+        new CopyPlugin({
+            patterns: [{ from: './src/favicon.ico' }],
+        }),
     ],
     resolve: {
         alias: {
-            src: path.resolve(__dirname, "src"),
-            components: path.resolve(__dirname, "src", "components")
-        }
+            src: path.resolve(__dirname, 'src'),
+            components: path.resolve(__dirname, 'src', 'components'),
+        },
     },
     module: {
         rules: [
@@ -36,33 +40,30 @@ module.exports = {
                 test: /\.(js)|(jsx)$/,
                 exclude: /node_modules/,
                 use: {
-                    loader: "babel-loader",
+                    loader: 'babel-loader',
                     options: {
-                        presets: [
-                            "@babel/preset-env",
-                            "@babel/preset-react"
-                        ],
-                    }
+                        presets: ['@babel/preset-env', '@babel/preset-react'],
+                    },
                 },
             },
             {
                 test: /\.css$/i,
                 use: ['style-loader', 'css-loader'],
             },
-        ]
+        ],
     },
     optimization: {
         splitChunks: {
             cacheGroups: {
                 vendor: {
                     test: /node_modules/,
-                    chunks: "initial",
-                    name: "vendor",
-                    enforce: true
-                }
-            }
-        }
-    }
+                    chunks: 'initial',
+                    name: 'vendor',
+                    enforce: true,
+                },
+            },
+        },
+    },
 };
 
 function getFilesFromDir(dir, fileTypes) {
@@ -77,7 +78,7 @@ function getFilesFromDir(dir, fileTypes) {
                 walkDir(curFile);
             }
         }
-    };
+    }
     walkDir(dir);
     return filesToReturn;
 }
