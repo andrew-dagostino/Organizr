@@ -3,29 +3,10 @@ import ReactDOM from 'react-dom';
 
 import axios from 'axios';
 
-import {
-    Button,
-    Container,
-    Card,
-    CardHeader,
-    CardBody,
-    CardText,
-    CardTitle,
-    Col,
-    Form,
-    FormControl,
-    FormGroup,
-    FormLabel,
-    FormText,
-    Nav,
-    NavItem,
-    NavLink,
-    Row,
-    Tab,
-    TabContainer,
-    TabContent,
-    Tabs,
-} from 'react-bootstrap';
+import Card from 'react-bootstrap/Card';
+import Form from 'react-bootstrap/Form';
+import Tab from 'react-bootstrap/Tab';
+import { Button, Container, Col, Nav, NavItem, NavLink, Row, Tabs } from 'react-bootstrap';
 
 import LoginAppBar from '../../components/LoginAppBar.jsx';
 
@@ -75,7 +56,7 @@ function LoginRegisterCard() {
             <Col xs={12} sm={8} md={6}>
                 <Card>
                     <Tab.Container defaultActiveKey='login'>
-                        <Card.Header as='h5'>
+                        <Card.Header as='h5' bg={'primary'}>
                             <Nav variant='pills' className='text-center'>
                                 <Nav.Item className='w-50'>
                                     <Nav.Link id='loginTabHeader' eventKey='login'>

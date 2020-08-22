@@ -1,6 +1,6 @@
 # Server Endpoints
 
-*All endpoints for API calls are prefixed with `/api`*
+_All endpoints for API calls are prefixed with `/api`_
 
 ## POST /register
 
