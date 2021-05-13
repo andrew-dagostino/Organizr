@@ -1,8 +1,8 @@
-# test-website
+# Organizr
 
 ## Description
 
-This project is for experimenting with creating a website using Go, React, and Postgresql.
+Building an organizational app to learn and experiment with Go and React.
 
 ## Installation
 
