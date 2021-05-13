@@ -14,7 +14,7 @@ This project is for experimenting with creating a website using Go, React, and P
     -   [echo](https://echo.labstack.com/)
     -   [pgx](https://github.com/jackc/pgx)
 -   ReactJS
-    -   [Fomantic UI](https://fomantic-ui.com/)
+    -   [Semantic UI](https://react.semantic-ui.com/)
 -   Postgresql 12.7
 
 ### Steps
@@ -23,13 +23,6 @@ This project is for experimenting with creating a website using Go, React, and P
 
     ```
     npm install
-    ```
-
-1.  Setup and build Fomantic UI components
-
-    ```
-    cd semantic/
-    npx gulp build
     ```
 
 1. Install the go modules
@@ -62,6 +55,12 @@ This project is for experimenting with creating a website using Go, React, and P
     npm run build
     ```
 
+-   Build Semantic UI components (_Needs to be done at least once and then anytime Semantic Themes are updated_)
+
+    ```
+    npm run build-semantic
+    ```
+
 -   Build website ui separately
 
     ```
@@ -78,7 +77,7 @@ This project is for experimenting with creating a website using Go, React, and P
 -   Run the server executable
 
     ```
-    npm run start
+    npm run start-server
     ```
 
 -   Run the website ui development server
