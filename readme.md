@@ -14,10 +14,8 @@ This project is for experimenting with creating a website using Go, React, and P
     -   [echo](https://echo.labstack.com/)
     -   [pgx](https://github.com/jackc/pgx)
 -   ReactJS
-    -   [React-Bootstrap](https://react-bootstrap.github.io/)
-    -   [Daemonite-Material](daemonite.github.io/material/) (CSS Only)
-    -   [toastr](www.toastrjs.com)
--   Postgresql 12.3
+    -   [Fomantic UI](https://fomantic-ui.com/)
+-   Postgresql 12.7
 
 ### Steps
 
@@ -25,6 +23,13 @@ This project is for experimenting with creating a website using Go, React, and P
 
     ```
     npm install
+    ```
+
+1.  Setup and build Fomantic UI components
+
+    ```
+    cd semantic/
+    npx gulp build
     ```
 
 1. Install the go modules
