@@ -15,4 +15,5 @@
 # vendor/
 node_modules
 dist
-semantic
+build
+src/semantic/dist
