@@ -29,8 +29,7 @@
         "eslint-config-airbnb": "^18.2.1",
         "eslint-config-prettier": "^8.3.0",
         "eslint-plugin-prettier": "^3.4.0",
-        "prettier": "^2.3.0",
-        "semantic-ui": "^2.4.2"
+        "prettier": "^2.3.0"
     },
     "dependencies": {
         "@popperjs/core": "^2.9.2",
