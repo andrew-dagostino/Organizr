@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Menu } from 'semantic-ui-react';
+import { Menu, Sticky } from 'semantic-ui-react';
 
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 
@@ -42,30 +42,25 @@ export default class Header extends Component {
 
         return (
             <Router>
-                <Menu>
-                    <Menu.Item header>Organizr</Menu.Item>
-                    <Link to="/about">
-                        <Menu.Item
-                            name="about"
-                            active={activeItem === 'about'}
-                            onClick={this.handleItemClick}
-                        />
-                    </Link>
-                    <Link to="/board">
-                        <Menu.Item
-                            name="boards"
-                            active={activeItem === 'boards'}
-                            onClick={this.handleItemClick}
-                        />
-                    </Link>
-                    <Link to="/board/new">
-                        <Menu.Item
-                            name="addBoard"
-                            active={activeItem === 'addBoard'}
-                            onClick={this.handleItemClick}
-                        />
-                    </Link>
-                </Menu>
+                <Sticky style={{ marginBottom: '2rem' }}>
+                    <Menu>
+                        <Menu.Item header>Organizr</Menu.Item>
+                        <Link to="/about">
+                            <Menu.Item
+                                name="about"
+                                active={activeItem === 'about'}
+                                onClick={this.handleItemClick}
+                            />
+                        </Link>
+                        <Link to="/board">
+                            <Menu.Item
+                                name="boards"
+                                active={activeItem === 'boards'}
+                                onClick={this.handleItemClick}
+                            />
+                        </Link>
+                    </Menu>
+                </Sticky>
 
                 <Switch>
                     {this.routes.map((route) => (

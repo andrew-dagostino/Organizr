@@ -1,5 +1,83 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { Card, Grid, Icon } from 'semantic-ui-react';
+import BoardCard from '../components/BoardCard';
 
-export default function ViewBoards() {
-    return <>ViewBoards</>;
+/**
+ * Card widget linking to the new board page
+ */
+function AddBoardWidget() {
+    return (
+        <Grid.Column>
+            <Link to="/board/new">
+                <Card
+                    style={{
+                        marginBottom: '2rem',
+                        backgroundColor: '#efefef',
+                        color: '#afafaf',
+                    }}
+                >
+                    <div
+                        style={{
+                            height: '15rem',
+                            width: '100%',
+                            display: 'flex',
+                        }}
+                    >
+                        <Icon
+                            name="add"
+                            style={{
+                                fontSize: '10rem',
+                                margin: 'auto auto',
+                            }}
+                        />
+                    </div>
+                    <Card.Content>
+                        <Card.Header
+                            textAlign="center"
+                            style={{
+                                color: '#afafaf',
+                            }}
+                        >
+                            Add Board
+                        </Card.Header>
+                    </Card.Content>
+                </Card>
+            </Link>
+        </Grid.Column>
+    );
+}
+
+/**
+ * Grid view of existing boards
+ */
+export default class ViewBoards extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            boards: [],
+        };
+    }
+
+    render() {
+        const { boards } = this.state;
+
+        return (
+            <Grid columns="4" container doubling stackable>
+                <Grid.Row>
+                    {boards.map((board) => (
+                        <Grid.Column key={board.id}>
+                            <BoardCard
+                                id={board.id}
+                                name={board.name}
+                                memberCount={board.memberCount}
+                            />
+                        </Grid.Column>
+                    ))}
+                    <AddBoardWidget />
+                </Grid.Row>
+            </Grid>
+        );
+    }
 }
