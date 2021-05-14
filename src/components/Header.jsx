@@ -3,6 +3,7 @@ import { Menu, Sticky } from 'semantic-ui-react';
 
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 
+import ViewBoard from '../pages/ViewBoard';
 import ViewBoards from '../pages/ViewBoards';
 import About from '../pages/About';
 import AddBoard from '../pages/AddBoard';
@@ -31,6 +32,11 @@ export default class Header extends Component {
                 id: 2,
                 path: '/board/new',
                 children: () => <AddBoard />,
+            },
+            {
+                id: 3,
+                path: '/board/:id',
+                children: ({ id }) => <ViewBoard id={id} />,
             },
         ];
     }
