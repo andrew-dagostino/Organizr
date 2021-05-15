@@ -2,6 +2,7 @@ import React from 'react';
 import { Button, Card, Grid, Icon, Input } from 'semantic-ui-react';
 import { v4 as uuidv4 } from 'uuid';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
+import PropTypes, { objectOf } from 'prop-types';
 import Task from './Task';
 
 const reorder = (list, startIndex, endIndex) => {
@@ -12,23 +13,17 @@ const reorder = (list, startIndex, endIndex) => {
     return result;
 };
 
-export default class Column extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            tasks: [],
-        };
-    }
-
+class Column extends React.Component {
     onDragEnd = (result) => {
         // dropped outside the list
         if (!result.destination) {
             return;
         }
 
-        const { tasks } = this.state;
-        this.setState({
+        const { id, title, tasks, updateColumn } = this.props;
+        updateColumn({
+            id,
+            title,
             tasks: reorder(
                 tasks,
                 result.source.index,
@@ -37,24 +32,33 @@ export default class Column extends React.Component {
         });
     };
 
-    addTask = (task) => {
-        const { tasks } = this.state;
+    addTask = () => {
+        const { id, title, tasks, updateColumn } = this.props;
+        updateColumn({
+            id,
+            title,
+            tasks: tasks.concat([
+                {
+                    id: uuidv4(),
+                },
+            ]),
+        });
+    };
 
-        if (!task) {
-            tasks.push({
-                id: uuidv4(),
-                title: '',
-                description: '',
-            });
-        } else {
-            tasks.push(task);
-        }
+    updateTask = (task) => {
+        const { id, title, tasks, updateColumn } = this.props;
+        const index = tasks.findIndex((t) => t.id === task.id);
+        tasks[index] = task;
+        updateColumn({ id, title, tasks });
+    };
 
-        this.setState({ tasks });
+    handleTitle = (val) => {
+        const { id, tasks, updateColumn } = this.props;
+        updateColumn({ id, title: val, tasks });
     };
 
     render() {
-        const { tasks } = this.state;
+        const { id, title, tasks } = this.props;
 
         return (
             <Grid.Column>
@@ -70,6 +74,10 @@ export default class Column extends React.Component {
                                 fluid
                                 size="small"
                                 transparent
+                                value={title}
+                                onChange={(e, data) =>
+                                    this.handleTitle(data.value)
+                                }
                             />
                         </Card.Header>
                         <hr />
@@ -88,7 +96,7 @@ export default class Column extends React.Component {
                         </Button>
                         <br />
                         <DragDropContext onDragEnd={this.onDragEnd}>
-                            <Droppable droppableId="droppable">
+                            <Droppable droppableId={id}>
                                 {(provided) => (
                                     <div
                                         // eslint-disable-next-line react/jsx-props-no-spreading
@@ -102,6 +110,7 @@ export default class Column extends React.Component {
                                                 title={task.title}
                                                 description={task.description}
                                                 index={index}
+                                                updateTask={this.updateTask}
                                             />
                                         ))}
                                         {provided.placeholder}
@@ -115,3 +124,23 @@ export default class Column extends React.Component {
         );
     }
 }
+
+Column.propTypes = {
+    id: PropTypes.string.isRequired,
+    title: PropTypes.string,
+    tasks: PropTypes.arrayOf(
+        objectOf({
+            id: PropTypes.string.isRequired,
+            title: PropTypes.string.isRequired,
+            description: PropTypes.string.isRequired,
+        })
+    ),
+    updateColumn: PropTypes.func.isRequired,
+};
+
+Column.defaultProps = {
+    title: '',
+    tasks: [],
+};
+
+export default Column;

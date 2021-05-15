@@ -4,19 +4,18 @@ import { Card, Form, Icon, Input } from 'semantic-ui-react';
 import { Draggable } from 'react-beautiful-dnd';
 
 class Task extends React.Component {
-    constructor(props) {
-        super(props);
+    handleTitle = (val) => {
+        const { id, description, updateTask } = this.props;
+        updateTask({ id, title: val, description });
+    };
 
-        this.state = {
-            id: props.id,
-            title: props.title,
-            description: props.description,
-        };
-    }
+    handleDescription = (val) => {
+        const { id, title, updateTask } = this.props;
+        updateTask({ id, title, description: val });
+    };
 
     render() {
-        const { id, title, description } = this.state;
-        const { index } = this.props;
+        const { id, title, description, index } = this.props;
 
         return (
             <div>
@@ -46,9 +45,7 @@ class Task extends React.Component {
                                             size="mini"
                                             value={title}
                                             onChange={(e, data) =>
-                                                this.setState({
-                                                    title: data.value,
-                                                })
+                                                this.handleTitle(data.value)
                                             }
                                         />
                                     </Card.Header>
@@ -60,11 +57,11 @@ class Task extends React.Component {
                                             rows="6"
                                             placeholder="Description..."
                                             value={description}
-                                            onChange={(e, data) => {
-                                                this.setState({
-                                                    description: data.value,
-                                                });
-                                            }}
+                                            onChange={(e, data) =>
+                                                this.handleDescription(
+                                                    data.value
+                                                )
+                                            }
                                         />
                                     </Form>
                                 </Card.Content>
@@ -80,9 +77,15 @@ class Task extends React.Component {
 
 Task.propTypes = {
     id: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired,
+    title: PropTypes.string,
+    description: PropTypes.string,
     index: PropTypes.number.isRequired,
+    updateTask: PropTypes.func.isRequired,
+};
+
+Task.defaultProps = {
+    title: '',
+    description: '',
 };
 
 export default Task;
