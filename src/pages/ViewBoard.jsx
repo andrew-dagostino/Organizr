@@ -157,7 +157,7 @@ export default class ViewBoard extends React.Component {
         const { columns } = this.state;
         return (
             <DragDropContext onDragEnd={this.onDragEnd}>
-                <Grid columns="4" container doubling stackable={false}>
+                <Grid columns="4" container doubling stackable>
                     <Grid.Row style={{ height: '100%' }}>
                         {columns.map((column) => (
                             <Column

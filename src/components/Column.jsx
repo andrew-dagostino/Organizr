@@ -35,7 +35,7 @@ class Column extends React.Component {
         const { id, title, tasks } = this.props;
 
         return (
-            <Grid.Column>
+            <Grid.Column style={{ marginBottom: '2rem' }}>
                 <Card>
                     <Card.Content
                         style={{
