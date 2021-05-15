@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
-import { Menu, Sticky } from 'semantic-ui-react';
+import { Input, Menu, Sticky } from 'semantic-ui-react';
 
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 
 import ViewBoard from '../pages/ViewBoard';
 import ViewBoards from '../pages/ViewBoards';
 import About from '../pages/About';
-import AddBoard from '../pages/AddBoard';
 
 export default class Header extends Component {
     constructor(props) {
@@ -30,11 +29,6 @@ export default class Header extends Component {
             },
             {
                 id: 2,
-                path: '/board/new',
-                children: () => <AddBoard />,
-            },
-            {
-                id: 3,
                 path: '/board/:id',
                 children: ({ id }) => <ViewBoard id={id} />,
             },
@@ -65,6 +59,17 @@ export default class Header extends Component {
                                 onClick={this.handleItemClick}
                             />
                         </Link>
+                        <Input
+                            type="text"
+                            transparent
+                            size="huge"
+                            placeholder="Board Name..."
+                            style={{
+                                position: 'absolute',
+                                left: '45%',
+                                height: '3rem',
+                            }}
+                        />
                     </Menu>
                 </Sticky>
 

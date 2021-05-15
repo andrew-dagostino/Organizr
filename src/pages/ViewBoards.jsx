@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, Grid, Icon } from 'semantic-ui-react';
+import { v4 as uuidv4 } from 'uuid';
 import BoardCard from '../components/BoardCard';
 
 /**
@@ -9,7 +10,7 @@ import BoardCard from '../components/BoardCard';
 function AddBoardWidget() {
     return (
         <Grid.Column>
-            <Link to="/board/new">
+            <Link to={`/board/${uuidv4()}`}>
                 <Card
                     style={{
                         marginBottom: '2rem',
