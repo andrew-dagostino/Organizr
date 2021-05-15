@@ -1,37 +1,11 @@
 import React from 'react';
 import { Button, Card, Grid, Icon, Input } from 'semantic-ui-react';
 import { v4 as uuidv4 } from 'uuid';
-import { DragDropContext, Droppable } from 'react-beautiful-dnd';
+import { Droppable } from 'react-beautiful-dnd';
 import PropTypes, { objectOf } from 'prop-types';
 import Task from './Task';
 
-const reorder = (list, startIndex, endIndex) => {
-    const result = Array.from(list);
-    const [removed] = result.splice(startIndex, 1);
-    result.splice(endIndex, 0, removed);
-
-    return result;
-};
-
 class Column extends React.Component {
-    onDragEnd = (result) => {
-        // dropped outside the list
-        if (!result.destination) {
-            return;
-        }
-
-        const { id, title, tasks, updateColumn } = this.props;
-        updateColumn({
-            id,
-            title,
-            tasks: reorder(
-                tasks,
-                result.source.index,
-                result.destination.index
-            ),
-        });
-    };
-
     addTask = () => {
         const { id, title, tasks, updateColumn } = this.props;
         updateColumn({
@@ -95,29 +69,27 @@ class Column extends React.Component {
                             </span>
                         </Button>
                         <br />
-                        <DragDropContext onDragEnd={this.onDragEnd}>
-                            <Droppable droppableId={id}>
-                                {(provided) => (
-                                    <div
-                                        // eslint-disable-next-line react/jsx-props-no-spreading
-                                        {...provided.droppableProps}
-                                        ref={provided.innerRef}
-                                    >
-                                        {tasks.map((task, index) => (
-                                            <Task
-                                                key={task.id}
-                                                id={task.id}
-                                                title={task.title}
-                                                description={task.description}
-                                                index={index}
-                                                updateTask={this.updateTask}
-                                            />
-                                        ))}
-                                        {provided.placeholder}
-                                    </div>
-                                )}
-                            </Droppable>
-                        </DragDropContext>
+                        <Droppable droppableId={id}>
+                            {(provided) => (
+                                <div
+                                    // eslint-disable-next-line react/jsx-props-no-spreading
+                                    {...provided.droppableProps}
+                                    ref={provided.innerRef}
+                                >
+                                    {tasks.map((task, index) => (
+                                        <Task
+                                            key={task.id}
+                                            id={task.id}
+                                            title={task.title}
+                                            description={task.description}
+                                            index={index}
+                                            updateTask={this.updateTask}
+                                        />
+                                    ))}
+                                    {provided.placeholder}
+                                </div>
+                            )}
+                        </Droppable>
                     </Card.Content>
                 </Card>
             </Grid.Column>
@@ -131,11 +103,12 @@ Column.propTypes = {
     tasks: PropTypes.arrayOf(
         objectOf({
             id: PropTypes.string.isRequired,
-            title: PropTypes.string.isRequired,
-            description: PropTypes.string.isRequired,
+            title: PropTypes.string,
+            description: PropTypes.string,
         })
     ),
     updateColumn: PropTypes.func.isRequired,
+    getColumn: PropTypes.func.isRequired,
 };
 
 Column.defaultProps = {

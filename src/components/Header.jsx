@@ -66,10 +66,12 @@ export default class Header extends Component {
                             placeholder="Board Name..."
                             style={{
                                 position: 'absolute',
-                                left: '45%',
+                                left: '40%',
                                 height: '3rem',
                             }}
-                        />
+                        >
+                            <input style={{ textAlign: 'center' }} />
+                        </Input>
                     </Menu>
                 </Sticky>
 
