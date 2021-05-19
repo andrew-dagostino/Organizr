@@ -297,7 +297,7 @@ func addBoard(memberId int, title string) (types.Board, error) {
 	ownerPermission := 1
 	_, err = tx.Exec(context.Background(),
 		`
-			INSERT INTO board_member(member_id, board_id, permission_id)
+			INSERT INTO board_member(member_id, board_id, board_permission_id)
 			VALUES ($1, $2, $3);
 		`,
 		memberId, boardId, ownerPermission,
