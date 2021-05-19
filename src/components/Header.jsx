@@ -66,7 +66,7 @@ export default class Header extends Component {
                             placeholder="Board Name..."
                             style={{
                                 position: 'absolute',
-                                left: '40%',
+                                left: '44%',
                                 height: '3rem',
                             }}
                         >
