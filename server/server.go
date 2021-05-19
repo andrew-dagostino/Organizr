@@ -1,8 +1,8 @@
 package main
 
 import (
+	"organizr/server/routes"
 	"os"
-	"test-website/server/routes"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -50,6 +50,40 @@ func main() {
 	e.DELETE("/api/board/:board_gid", func(c echo.Context) error {
 		return routes.DeleteBoard(c, logger)
 	}, authenticated())
+
+	// Task Column Routes
+	e.GET("/api/column/:board_gid", func(c echo.Context) error {
+		return routes.GetColumns(c, logger)
+	}, authenticated())
+	e.GET("/api/column/:board_gid/:column_gid", func(c echo.Context) error {
+		return routes.GetColumnById(c, logger)
+	}, authenticated())
+	e.PUT("/api/column/:board_gid/:column_gid", func(c echo.Context) error {
+		return routes.EditColumn(c, logger)
+	}, authenticated())
+	e.POST("/api/column/:board_gid", func(c echo.Context) error {
+		return routes.CreateColumn(c, logger)
+	}, authenticated())
+	e.DELETE("/api/column/:board_gid/:column_gid", func(c echo.Context) error {
+		return routes.DeleteColumn(c, logger)
+	}, authenticated())
+
+	// // Task Routes
+	// e.GET("/api/task/:column_id", func(c echo.Context) error {
+	// 	return routes.GetBoards(c, logger)
+	// }, authenticated())
+	// e.GET("/api/task/:column_id/:task_id", func(c echo.Context) error {
+	// 	return routes.GetBoardById(c, logger)
+	// }, authenticated())
+	// e.PUT("/api/task/:column_id/:task_id", func(c echo.Context) error {
+	// 	return routes.EditBoard(c, logger)
+	// }, authenticated())
+	// e.POST("/api/task/:board_gid", func(c echo.Context) error {
+	// 	return routes.CreateBoard(c, logger)
+	// }, authenticated())
+	// e.DELETE("/api/task/:column_id/:task_id", func(c echo.Context) error {
+	// 	return routes.DeleteBoard(c, logger)
+	// }, authenticated())
 
 	// Start server
 	e.Logger.Fatal(e.Start(":1323"))

@@ -3,9 +3,9 @@ package routes
 import (
 	"context"
 	"net/http"
+	"organizr/server/types"
 	"os"
 	"strings"
-	"test-website/server/types"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"

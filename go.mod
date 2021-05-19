@@ -1,4 +1,4 @@
-module test-website
+module organizr
 
 go 1.14
 

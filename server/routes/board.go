@@ -3,20 +3,15 @@ package routes
 import (
 	"context"
 	"net/http"
+	"organizr/server/auth"
+	"organizr/server/types"
 	"os"
 	"strings"
-	"test-website/server/types"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jackc/pgx/v4"
 	"github.com/labstack/echo"
 	"github.com/labstack/gommon/log"
-)
-
-const (
-	OWNER_PERM = iota + 1
-	EDIT_PERM
-	VIEW_PERM
 )
 
 func GetBoards(c echo.Context, log *log.Logger) error {
@@ -63,7 +58,7 @@ func EditBoard(c echo.Context, log *log.Logger) error {
 	title := strings.TrimSpace(c.FormValue("title"))
 	boardGid := c.Param("board_gid")
 
-	hasPermission, err := verifyBoardPermission(memberId, boardGid, EDIT_PERM)
+	hasPermission, err := verifyBoardPermission(memberId, boardGid, auth.EDIT_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
@@ -117,7 +112,7 @@ func DeleteBoard(c echo.Context, log *log.Logger) error {
 
 	boardGid := c.Param("board_gid")
 
-	hasPermission, err := verifyBoardPermission(memberId, boardGid, OWNER_PERM)
+	hasPermission, err := verifyBoardPermission(memberId, boardGid, auth.OWNER_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
