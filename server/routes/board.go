@@ -10,25 +10,27 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jackc/pgx/v4"
 	"github.com/labstack/echo"
+	"github.com/labstack/gommon/log"
 )
 
-func GetBoards(c echo.Context) error {
+func GetBoards(c echo.Context, log *log.Logger) error {
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
 	memberGid := claims["gid"].(string)
 
 	boards, err := retrieveAllBoards(memberGid)
 	if err != nil {
+		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "get_failed",
-			"error": "Failed to get posts",
+			"code":  "get_boards_failed",
+			"error": "Failed to retrieve boards",
 		})
 	}
 
 	return c.JSON(http.StatusOK, boards)
 }
 
-func GetBoardById(c echo.Context) error {
+func GetBoardById(c echo.Context, log *log.Logger) error {
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
 	memberGid := claims["gid"].(string)
@@ -37,16 +39,17 @@ func GetBoardById(c echo.Context) error {
 
 	board, err := retrieveBoardByGid(memberGid, boardGid)
 	if err != nil {
+		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "get_failed",
-			"error": "Failed to get user info",
+			"code":  "get_board_failed",
+			"error": "Failed to retrieve board",
 		})
 	}
 
 	return c.JSON(http.StatusOK, board)
 }
 
-func CreateBoard(c echo.Context) error {
+func CreateBoard(c echo.Context, log *log.Logger) error {
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
 	memberGid := claims["gid"].(string)
@@ -55,9 +58,10 @@ func CreateBoard(c echo.Context) error {
 
 	boardGid, err := addBoard(memberGid, title)
 	if err != nil {
+		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "post_create_failed",
-			"error": "Failed to create new post",
+			"code":  "add_board_failed",
+			"error": "Failed to create new board",
 		})
 	}
 

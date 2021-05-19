@@ -9,27 +9,30 @@ import (
 
 	"github.com/jackc/pgx/v4"
 	"github.com/labstack/echo"
+	"github.com/labstack/gommon/log"
 	"golang.org/x/crypto/bcrypt"
 )
 
 // Registers a new member using the POST's username and password
-func RegisterMember(c echo.Context) error {
-	username := strings.TrimSpace(c.FormValue("username"))
-	email := strings.TrimSpace(c.FormValue("email"))
+func RegisterMember(c echo.Context, log *log.Logger) error {
+	username := strings.ToLower(strings.TrimSpace(c.FormValue("username")))
+	email := strings.ToLower(strings.TrimSpace(c.FormValue("email")))
 	password := strings.TrimSpace(c.FormValue("password"))
 
 	err := validateRegisterData(username, email, password)
 	if err != nil {
+		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error_code": "create_failed",
-			"error":      err.Error(),
+			"error_code": "register_failed",
+			"error":      "Failed to create member",
 		})
 	}
 
 	err = createMember(username, email, password)
 	if err != nil {
+		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error_code": "create_failed",
+			"error_code": "register_failed",
 			"error":      "Failed to create member",
 		})
 	}

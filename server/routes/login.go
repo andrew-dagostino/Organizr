@@ -11,40 +11,44 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jackc/pgx/v4"
 	"github.com/labstack/echo"
+	"github.com/labstack/gommon/log"
 	"golang.org/x/crypto/bcrypt"
 )
 
 // Authenticates a member with their username and password from a POST, returning a new JWT session token
-func LoginMember(c echo.Context) error {
-	username := strings.TrimSpace(c.FormValue("username"))
+func LoginMember(c echo.Context, log *log.Logger) error {
+	username := strings.ToLower(strings.TrimSpace(c.FormValue("username")))
 	password := strings.TrimSpace(c.FormValue("password"))
 
 	member, err := getMember(username)
 	if err != nil {
+		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"code":  "login_failed",
-			"error": "Failed to log in member",
+			"error": "Username and/or password are incorrect",
 		})
 	}
 
 	success, err := verifyMember(member.Username, password)
 	if success == false || err != nil {
+		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusUnauthorized, map[string]string{
-			"code":  "verif_error",
+			"code":  "login_failed",
 			"error": "Username and/or password are incorrect",
 		})
 	}
 
 	token, err := generateJWT(member)
 	if err != nil {
+		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"code":  "login_failed",
-			"error": "Failed to log in member",
+			"error": "Username and/or password are incorrect",
 		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]string{
-		"token": token,
+		"jwt": token,
 	})
 }
 
@@ -60,12 +64,12 @@ func getMember(username string) (types.Member, error) {
 
 	err = conn.QueryRow(context.Background(),
 		`
-		SELECT
-			id,
-			gid,
-			username,
-		FROM member
-		WHERE username = $1;
+			SELECT
+				id,
+				gid,
+				username
+			FROM member
+			WHERE username = $1 OR email = $1;
 		`,
 		username,
 	).Scan(&member.Id, &member.Gid, &member.Username)

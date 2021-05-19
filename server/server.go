@@ -6,31 +6,42 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"github.com/labstack/gommon/log"
 )
 
 func main() {
 	// Echo instance
 	e := echo.New()
 
+	// Route logger
+	logger := log.New("ROUTE")
+	logger.SetHeader("[${time_rfc3339}] [${level}] ${short_file} L${line} ${message}")
+
 	// Middleware
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "${remote_ip} ${id} [${time_rfc3339}] \"${method} ${uri}\" ${status} ${method} ${bytes_out}\n",
+		Format: "[${time_rfc3339}] \"${method} ${uri}\" ${status}\n",
 	}))
 	e.Use(middleware.Recover())
 
 	// Unauthenticated Routes
 	e.Static("/", "dist")
 
-	e.POST("/api/register", routes.RegisterUser)
-	e.POST("/api/login", routes.LoginUser)
+	e.POST("/api/register", func(c echo.Context) error {
+		return routes.RegisterMember(c, logger)
+	})
+	e.POST("/api/login", func(c echo.Context) error {
+		return routes.LoginMember(c, logger)
+	})
 
-	e.GET("/api/post", routes.GetPosts)
-	e.GET("/api/post:id", routes.GetPostById)
-	e.POST("/api/post", routes.CreatePost, authenticated())
-
-	// Authenticated routes
-	r := e.Group("/api/restricted")
-	r.Use(authenticated())
+	e.GET("/api/board", func(c echo.Context) error {
+		return routes.GetBoards(c, logger)
+	}, authenticated())
+	e.GET("/api/board/:board_gid", func(c echo.Context) error {
+		return routes.GetBoardById(c, logger)
+	}, authenticated())
+	e.POST("/api/board", func(c echo.Context) error {
+		return routes.CreateBoard(c, logger)
+	}, authenticated())
 
 	// Start server
 	e.Logger.Fatal(e.Start(":1323"))
