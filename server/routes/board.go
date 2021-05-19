@@ -13,6 +13,12 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
+const (
+	OWNER_PERM = iota + 1
+	EDIT_PERM
+	VIEW_PERM
+)
+
 func GetBoards(c echo.Context, log *log.Logger) error {
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
@@ -49,14 +55,50 @@ func GetBoardById(c echo.Context, log *log.Logger) error {
 	return c.JSON(http.StatusOK, board)
 }
 
+func EditBoard(c echo.Context, log *log.Logger) error {
+	member := c.Get("user").(*jwt.Token)
+	claims := member.Claims.(jwt.MapClaims)
+	memberId := int(claims["id"].(float64))
+
+	title := strings.TrimSpace(c.FormValue("title"))
+	boardGid := c.Param("board_gid")
+
+	hasPermission, err := verifyBoardPermission(memberId, boardGid, EDIT_PERM)
+	if err != nil {
+		log.Error(strings.TrimSpace(err.Error()))
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"code":  "update_board_failed",
+			"error": "Failed to update board",
+		})
+	}
+
+	if !hasPermission {
+		return c.JSON(http.StatusForbidden, map[string]string{
+			"code":  "invalid_permission",
+			"error": "Invalid permissions to update board",
+		})
+	}
+
+	board, err := updateBoard(boardGid, title)
+	if err != nil {
+		log.Error(strings.TrimSpace(err.Error()))
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"code":  "update_board_failed",
+			"error": "Failed to update board",
+		})
+	}
+
+	return c.JSON(http.StatusOK, board)
+}
+
 func CreateBoard(c echo.Context, log *log.Logger) error {
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
-	memberGid := claims["gid"].(string)
+	memberId := int(claims["id"].(float64))
 
 	title := strings.TrimSpace(c.FormValue("title"))
 
-	boardGid, err := addBoard(memberGid, title)
+	board, err := addBoard(memberId, title)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
@@ -65,9 +107,42 @@ func CreateBoard(c echo.Context, log *log.Logger) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{
-		"id": string(boardGid),
-	})
+	return c.JSON(http.StatusCreated, board)
+}
+
+func DeleteBoard(c echo.Context, log *log.Logger) error {
+	member := c.Get("user").(*jwt.Token)
+	claims := member.Claims.(jwt.MapClaims)
+	memberId := int(claims["id"].(float64))
+
+	boardGid := c.Param("board_gid")
+
+	hasPermission, err := verifyBoardPermission(memberId, boardGid, OWNER_PERM)
+	if err != nil {
+		log.Error(strings.TrimSpace(err.Error()))
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"code":  "delete_board_failed",
+			"error": "Failed to delete board",
+		})
+	}
+
+	if !hasPermission {
+		return c.JSON(http.StatusForbidden, map[string]string{
+			"code":  "invalid_permission",
+			"error": "Invalid permissions to delete board",
+		})
+	}
+
+	err = removeBoard(boardGid)
+	if err != nil {
+		log.Error(strings.TrimSpace(err.Error()))
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"code":  "delete_board_failed",
+			"error": "Failed to delete board",
+		})
+	}
+
+	return c.JSON(http.StatusAccepted, nil)
 }
 
 func retrieveAllBoards(memberGid string) ([]types.Board, error) {
@@ -82,9 +157,9 @@ func retrieveAllBoards(memberGid string) ([]types.Board, error) {
 	rows, err := conn.Query(context.Background(),
 		`
 			SELECT
-				id,
-				gid,
-				title
+				board.id,
+				board.gid,
+				board.title
 			FROM board
 			JOIN board_member ON (board_member.board_id = board.id)
 			JOIN member ON (member.id = board_member.member_id)
@@ -122,9 +197,9 @@ func retrieveBoardByGid(memberGid string, boardGid string) (types.Board, error) 
 	err = conn.QueryRow(context.Background(),
 		`
 			SELECT
-				id,
-				gid,
-				title
+				board.id,
+				board.gid,
+				board.title
 			FROM board
 			JOIN board_member ON (board_member.board_id = board.id)
 			JOIN member ON (member.id = board_member.member_id)
@@ -139,55 +214,178 @@ func retrieveBoardByGid(memberGid string, boardGid string) (types.Board, error) 
 	return board, nil
 }
 
-func addBoard(memberGid string, title string) (string, error) {
-	boardGid := ""
+func updateBoard(boardGid string, title string) (types.Board, error) {
+	var board types.Board
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
-		return boardGid, err
+		return board, err
 	}
 	defer conn.Close(context.Background())
 
 	tx, err := conn.Begin(context.Background())
 	if err != nil {
-		return boardGid, err
+		return board, err
 	}
 	defer tx.Rollback(context.Background())
 
-	err = tx.QueryRow(context.Background(),
-		`
-			INSERT INTO board(title)
-			VALUES ($1)
-			RETURNING gid;
-		`,
-		title,
-	).Scan(&boardGid)
-	if err != nil {
-		return "", err
-	}
-
-	owner_permission := 1
 	_, err = tx.Exec(context.Background(),
 		`
-			WITH new_board AS (
-				SELECT id
-				FROM board
-				WHERE gid = $2
-			)
-
-			INSERT INTO board_member(member_id, board_id, permission_id)
-			VALUES ($1, SELECT id FROM new_board, $3);
+			UPDATE board
+			SET
+				title = $1,
+				updated = CURRENT_TIMESTAMP
+			WHERE gid = $2;
 		`,
-		title, boardGid, owner_permission,
+		title, boardGid,
 	)
 	if err != nil {
-		return "", err
+		return board, err
+	}
+
+	err = tx.QueryRow(context.Background(),
+		`
+			SELECT
+				id,
+				gid,
+				title
+			FROM board
+			WHERE gid = $1;
+		`,
+		boardGid,
+	).Scan(&board.Id, &board.Gid, &board.Title)
+	if err != nil {
+		return board, err
 	}
 
 	err = tx.Commit(context.Background())
 	if err != nil {
-		return "", err
+		return board, err
 	}
 
-	return boardGid, nil
+	return board, nil
+}
+
+func addBoard(memberId int, title string) (types.Board, error) {
+	var board types.Board
+
+	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
+	if err != nil {
+		return board, err
+	}
+	defer conn.Close(context.Background())
+
+	tx, err := conn.Begin(context.Background())
+	if err != nil {
+		return board, err
+	}
+	defer tx.Rollback(context.Background())
+
+	boardId := -1
+	err = tx.QueryRow(context.Background(),
+		`
+			INSERT INTO board(title)
+			VALUES ($1)
+			RETURNING id;
+		`,
+		title,
+	).Scan(&boardId)
+	if err != nil {
+		return board, err
+	}
+
+	ownerPermission := 1
+	_, err = tx.Exec(context.Background(),
+		`
+			INSERT INTO board_member(member_id, board_id, permission_id)
+			VALUES ($1, $2, $3);
+		`,
+		memberId, boardId, ownerPermission,
+	)
+	if err != nil {
+		return board, err
+	}
+
+	err = tx.QueryRow(context.Background(),
+		`
+			SELECT
+				id,
+				gid,
+				title
+			FROM board
+			WHERE id = $1;
+		`,
+		boardId,
+	).Scan(&board.Id, &board.Gid, &board.Title)
+	if err != nil {
+		return board, err
+	}
+
+	err = tx.Commit(context.Background())
+	if err != nil {
+		return board, err
+	}
+
+	return board, nil
+}
+
+func removeBoard(boardGid string) error {
+	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
+	if err != nil {
+		return err
+	}
+	defer conn.Close(context.Background())
+
+	tx, err := conn.Begin(context.Background())
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(context.Background())
+
+	_, err = tx.Exec(context.Background(),
+		`
+			DELETE FROM board
+			WHERE gid = $1;
+		`,
+		boardGid,
+	)
+	if err != nil {
+		return err
+	}
+
+	err = tx.Commit(context.Background())
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func verifyBoardPermission(memberId int, boardGid string, minPermission int) (bool, error) {
+	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
+	if err != nil {
+		return false, err
+	}
+	defer conn.Close(context.Background())
+
+	hasPermission := false
+	err = conn.QueryRow(context.Background(),
+		`
+			SELECT EXISTS(
+				SELECT id
+				FROM board_member
+				WHERE member_id = $1
+				AND board_id = (
+					SELECT id FROM board WHERE gid = $2
+				)
+				AND board_permission_id <= $3
+			) AS has_permission;
+		`,
+		memberId, boardGid, minPermission,
+	).Scan(&hasPermission)
+
+	if err != nil {
+		return false, err
+	}
+	return hasPermission, nil
 }

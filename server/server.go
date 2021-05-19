@@ -23,9 +23,10 @@ func main() {
 	}))
 	e.Use(middleware.Recover())
 
-	// Unauthenticated Routes
+	// Serve Static UI Files (could be separated to another server)
 	e.Static("/", "dist")
 
+	// Authentication Routes
 	e.POST("/api/register", func(c echo.Context) error {
 		return routes.RegisterMember(c, logger)
 	})
@@ -33,14 +34,21 @@ func main() {
 		return routes.LoginMember(c, logger)
 	})
 
+	// Board Routes
 	e.GET("/api/board", func(c echo.Context) error {
 		return routes.GetBoards(c, logger)
 	}, authenticated())
 	e.GET("/api/board/:board_gid", func(c echo.Context) error {
 		return routes.GetBoardById(c, logger)
 	}, authenticated())
+	e.PUT("/api/board/:board_gid", func(c echo.Context) error {
+		return routes.EditBoard(c, logger)
+	}, authenticated())
 	e.POST("/api/board", func(c echo.Context) error {
 		return routes.CreateBoard(c, logger)
+	}, authenticated())
+	e.DELETE("/api/board/:board_gid", func(c echo.Context) error {
+		return routes.DeleteBoard(c, logger)
 	}, authenticated())
 
 	// Start server

@@ -118,6 +118,7 @@ func generateJWT(member types.Member) (string, error) {
 	claims := token.Claims.(jwt.MapClaims)
 	claims["username"] = member.Username
 	claims["gid"] = member.Gid
+	claims["id"] = member.Id
 	claims["iat"] = time.Now().Unix()
 	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
 
