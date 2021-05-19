@@ -1,22 +1,28 @@
 package types
 
-import (
-	"time"
-
-	"github.com/jackc/pgtype"
-)
-
-type User struct {
-	Id         int        `json:"id"`
-	Username   string     `json:"username"`
-	Last_Login *time.Time `json:"last_login"`
+type Member struct {
+	Id       int    `json:"id"`
+	Gid      string `json:"gid"`
+	Username string `json:"username"`
 }
 
-type Post struct {
-	Id      int                `json:"id"`
-	Title   string             `json:"title"`
-	Text    string             `json:"text"`
-	Img     *pgtype.ByteaArray `json:"img"`
-	Created *time.Time         `json:"created"`
-	Updated *time.Time         `json:"updated"`
+type Board struct {
+	Id    int    `json:"id"`
+	Gid   string `json:"gid"`
+	Title string `json:"title"`
+}
+
+type TaskColumn struct {
+	Id      int    `json:"id"`
+	Gid     string `json:"gid"`
+	Title   string `json:"title"`
+	BoardId int    `json:"board_id"`
+}
+
+type Task struct {
+	Id           int    `json:"id"`
+	Gid          string `json:"gid"`
+	Title        string `json:"title"`
+	Description  string `json:"description"`
+	TaskColumnId int    `json:"task_column_id"`
 }
