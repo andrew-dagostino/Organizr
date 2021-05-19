@@ -14,21 +14,20 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// Authenticates a user with their username and password from a POST request
-// and returns a new JWT session token
-func LoginUser(c echo.Context) error {
+// Authenticates a member with their username and password from a POST, returning a new JWT session token
+func LoginMember(c echo.Context) error {
 	username := strings.TrimSpace(c.FormValue("username"))
 	password := strings.TrimSpace(c.FormValue("password"))
 
-	user, err := getUser(username)
+	member, err := getMember(username)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"code":  "login_failed",
-			"error": "Failed to log in user",
+			"error": "Failed to log in member",
 		})
 	}
 
-	success, err := verifyUser(user.Username, password)
+	success, err := verifyMember(member.Username, password)
 	if success == false || err != nil {
 		return c.JSON(http.StatusUnauthorized, map[string]string{
 			"code":  "verif_error",
@@ -36,46 +35,49 @@ func LoginUser(c echo.Context) error {
 		})
 	}
 
-	token, err := generateJWT(user)
+	token, err := generateJWT(member)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"code":  "login_failed",
-			"error": "Failed to log in user",
+			"error": "Failed to log in member",
 		})
 	}
-
-	err = updateLastLogin(user.Id)
 
 	return c.JSON(http.StatusOK, map[string]string{
 		"token": token,
 	})
 }
 
-// Creates a User struct from the username's assosciated user data
-func getUser(username string) (types.User, error) {
-	var u types.User
+// Creates a Member struct from the username's assosciated user data
+func getMember(username string) (types.Member, error) {
+	var member types.Member
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
-		return u, err
+		return member, err
 	}
 	defer conn.Close(context.Background())
 
 	err = conn.QueryRow(context.Background(),
-		`SELECT id, username, last_login
-		FROM site_user
-		WHERE username = $1;`,
+		`
+		SELECT
+			id,
+			gid,
+			username,
+		FROM member
+		WHERE username = $1;
+		`,
 		username,
-	).Scan(&u.Id, &u.Username, &u.Last_Login)
+	).Scan(&member.Id, &member.Gid, &member.Username)
 	if err != nil {
-		return u, err
+		return member, err
 	}
 
-	return u, nil
+	return member, nil
 }
 
 // Verifies that the username and password are correct
-func verifyUser(username string, password string) (bool, error) {
+func verifyMember(username string, password string) (bool, error) {
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
 		return false, err
@@ -85,8 +87,9 @@ func verifyUser(username string, password string) (bool, error) {
 	var hashed_password string
 	err = conn.QueryRow(context.Background(),
 		`
-			SELECT password
-			FROM site_user
+			SELECT
+				password
+			FROM member
 			WHERE username = $1;
 		`,
 		username,
@@ -105,48 +108,14 @@ func comparePasswords(hashedPwd string, plainPwd string) bool {
 }
 
 // Generates a new JWT using the user's information
-func generateJWT(user types.User) (string, error) {
+func generateJWT(member types.Member) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 
 	claims := token.Claims.(jwt.MapClaims)
-	claims["username"] = user.Username
-	claims["id"] = user.Id
+	claims["username"] = member.Username
+	claims["gid"] = member.Gid
 	claims["iat"] = time.Now().Unix()
 	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
 
 	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
-}
-
-// Updates the last login timestamp
-func updateLastLogin(id int) error {
-	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
-	if err != nil {
-		return err
-	}
-	defer conn.Close(context.Background())
-
-	tx, err := conn.Begin(context.Background())
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(context.Background())
-
-	_, err = tx.Exec(context.Background(),
-		`
-			UPDATE site_user
-			SET last_login = $1
-			WHERE id = $2;
-		`,
-		time.Now(), id,
-	)
-	if err != nil {
-		return err
-	}
-
-	err = tx.Commit(context.Background())
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
