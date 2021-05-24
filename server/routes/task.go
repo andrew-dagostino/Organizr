@@ -14,194 +14,196 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
-func GetColumns(c echo.Context, log *log.Logger) error {
+func GetTasks(c echo.Context, log *log.Logger) error {
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
-	boardGid := c.Param("board_gid")
-
-	hasPermission, err := auth.VerifyBoardPermission(memberId, boardGid, auth.VIEW_PERM)
-	if err != nil {
-		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "get_columns_failed",
-			"error": "Failed to retrieve columns",
-		})
-	}
-
-	if !hasPermission {
-		return c.JSON(http.StatusForbidden, map[string]string{
-			"code":  "invalid_permission",
-			"error": "Invalid permissions to retrieve columns",
-		})
-	}
-
-	columns, err := retrieveAllColumns(boardGid)
-	if err != nil {
-		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "get_columns_failed",
-			"error": "Failed to retrieve columns",
-		})
-	}
-
-	return c.JSON(http.StatusOK, columns)
-}
-
-func GetColumnById(c echo.Context, log *log.Logger) error {
-	member := c.Get("user").(*jwt.Token)
-	claims := member.Claims.(jwt.MapClaims)
-	memberId := int(claims["id"].(float64))
-
-	boardGid := c.Param("board_gid")
 	columnGid := c.Param("column_gid")
 
-	hasPermission, err := auth.VerifyBoardPermission(memberId, boardGid, auth.VIEW_PERM)
+	hasPermission, err := auth.VerifyColumnPermission(memberId, columnGid, auth.VIEW_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "get_column_failed",
-			"error": "Failed to retrieve column",
+			"code":  "get_tasks_failed",
+			"error": "Failed to retrieve tasks",
 		})
 	}
 
 	if !hasPermission {
 		return c.JSON(http.StatusForbidden, map[string]string{
 			"code":  "invalid_permission",
-			"error": "Invalid permissions to retrieve column",
+			"error": "Invalid permissions to retrieve tasks",
 		})
 	}
 
-	column, err := retrieveColumnByGid(boardGid, columnGid)
+	tasks, err := retrieveAllTasks(columnGid)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "get_column_failed",
-			"error": "Failed to retrieve column",
+			"code":  "get_tasks_failed",
+			"error": "Failed to retrieve tasks",
 		})
 	}
 
-	return c.JSON(http.StatusOK, column)
+	return c.JSON(http.StatusOK, tasks)
 }
 
-func EditColumn(c echo.Context, log *log.Logger) error {
+func GetTaskById(c echo.Context, log *log.Logger) error {
+	member := c.Get("user").(*jwt.Token)
+	claims := member.Claims.(jwt.MapClaims)
+	memberId := int(claims["id"].(float64))
+
+	columnGid := c.Param("column_gid")
+	taskGid := c.Param("task_gid")
+
+	hasPermission, err := auth.VerifyColumnPermission(memberId, columnGid, auth.VIEW_PERM)
+	if err != nil {
+		log.Error(strings.TrimSpace(err.Error()))
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"code":  "get_task_failed",
+			"error": "Failed to retrieve task",
+		})
+	}
+
+	if !hasPermission {
+		return c.JSON(http.StatusForbidden, map[string]string{
+			"code":  "invalid_permission",
+			"error": "Invalid permissions to retrieve task",
+		})
+	}
+
+	task, err := retrieveTaskByGid(columnGid, taskGid)
+	if err != nil {
+		log.Error(strings.TrimSpace(err.Error()))
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"code":  "get_task_failed",
+			"error": "Failed to retrieve task",
+		})
+	}
+
+	return c.JSON(http.StatusOK, task)
+}
+
+func EditTask(c echo.Context, log *log.Logger) error {
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
 	title := strings.TrimSpace(c.FormValue("title"))
+	description := strings.TrimSpace(c.FormValue("description"))
 
-	boardGid := c.Param("board_gid")
 	columnGid := c.Param("column_gid")
+	taskGid := c.Param("task_gid")
 
-	hasPermission, err := auth.VerifyBoardPermission(memberId, boardGid, auth.EDIT_PERM)
+	hasPermission, err := auth.VerifyColumnPermission(memberId, columnGid, auth.EDIT_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "update_column_failed",
-			"error": "Failed to update column",
+			"code":  "update_task_failed",
+			"error": "Failed to update task",
 		})
 	}
 
 	if !hasPermission {
 		return c.JSON(http.StatusForbidden, map[string]string{
 			"code":  "invalid_permission",
-			"error": "Invalid permissions to update column",
+			"error": "Invalid permissions to update task",
 		})
 	}
 
-	column, err := updateColumn(columnGid, title)
+	task, err := updateTask(columnGid, taskGid, title, description)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "update_column_failed",
-			"error": "Failed to update column",
+			"code":  "update_task_failed",
+			"error": "Failed to update task",
 		})
 	}
 
-	return c.JSON(http.StatusOK, column)
+	return c.JSON(http.StatusOK, task)
 }
 
-func CreateColumn(c echo.Context, log *log.Logger) error {
+func CreateTask(c echo.Context, log *log.Logger) error {
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
 	title := strings.TrimSpace(c.FormValue("title"))
+	description := strings.TrimSpace(c.FormValue("description"))
 
-	boardGid := c.Param("board_gid")
+	columnGid := c.Param("column_gid")
 
-	hasPermission, err := auth.VerifyBoardPermission(memberId, boardGid, auth.EDIT_PERM)
+	hasPermission, err := auth.VerifyColumnPermission(memberId, columnGid, auth.EDIT_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "update_column_failed",
-			"error": "Failed to update column",
+			"code":  "update_task_failed",
+			"error": "Failed to update task",
 		})
 	}
 
 	if !hasPermission {
 		return c.JSON(http.StatusForbidden, map[string]string{
 			"code":  "invalid_permission",
-			"error": "Invalid permissions to create column",
+			"error": "Invalid permissions to create task",
 		})
 	}
 
-	column, err := addColumn(boardGid, title)
+	task, err := addTask(columnGid, title, description)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "add_column_failed",
-			"error": "Failed to create new column",
+			"code":  "add_task_failed",
+			"error": "Failed to create new task",
 		})
 	}
 
-	return c.JSON(http.StatusCreated, column)
+	return c.JSON(http.StatusCreated, task)
 }
 
-func DeleteColumn(c echo.Context, log *log.Logger) error {
+func DeleteTask(c echo.Context, log *log.Logger) error {
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
+	taskGid := c.Param("task_gid")
 	columnGid := c.Param("column_gid")
-	boardGid := c.Param("board_gid")
 
-	hasPermission, err := auth.VerifyBoardPermission(memberId, boardGid, auth.EDIT_PERM)
+	hasPermission, err := auth.VerifyColumnPermission(memberId, columnGid, auth.EDIT_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "delete_column_failed",
-			"error": "Failed to delete column",
+			"code":  "delete_task_failed",
+			"error": "Failed to delete task",
 		})
 	}
 
 	if !hasPermission {
 		return c.JSON(http.StatusForbidden, map[string]string{
 			"code":  "invalid_permission",
-			"error": "Invalid permissions to delete column",
+			"error": "Invalid permissions to delete task",
 		})
 	}
 
-	err = removeColumn(columnGid)
+	err = removeTask(taskGid)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "delete_column_failed",
-			"error": "Failed to delete column",
+			"code":  "delete_task_failed",
+			"error": "Failed to delete task",
 		})
 	}
 
 	return c.JSON(http.StatusAccepted, nil)
 }
 
-func retrieveAllColumns(boardGid string) ([]types.TaskColumn, error) {
-	columns := []types.TaskColumn{}
+func retrieveAllTasks(columnGid string) ([]types.Task, error) {
+	tasks := []types.Task{}
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
-		return columns, err
+		return tasks, err
 	}
 	defer conn.Close(context.Background())
 
@@ -211,38 +213,39 @@ func retrieveAllColumns(boardGid string) ([]types.TaskColumn, error) {
 				id,
 				gid,
 				title,
-				board_id
-			FROM task_column
-			WHERE board_id = (
-				SELECT id FROM board WHERE gid = $1
+				description,
+				task_column_id
+			FROM task
+			WHERE task_column_id = (
+				SELECT id FROM task_column WHERE gid = $1
 			);
 		`,
-		boardGid,
+		columnGid,
 	)
 	if err != nil {
-		return columns, err
+		return tasks, err
 	}
 
 	defer rows.Close()
 
 	for rows.Next() {
-		var column types.TaskColumn
-		err = rows.Scan(&column.Id, &column.Gid, &column.Title, &column.BoardId)
+		var task types.Task
+		err = rows.Scan(&task.Id, &task.Gid, &task.Title, &task.Description, &task.TaskColumnId)
 		if err != nil {
-			return columns, err
+			return tasks, err
 		}
-		columns = append(columns, column)
+		tasks = append(tasks, task)
 	}
 
-	return columns, nil
+	return tasks, nil
 }
 
-func retrieveColumnByGid(boardGid string, columnGid string) (types.TaskColumn, error) {
-	column := types.TaskColumn{}
+func retrieveTaskByGid(columnGid string, taskGid string) (types.Task, error) {
+	task := types.Task{}
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
-		return column, err
+		return task, err
 	}
 	defer conn.Close(context.Background())
 
@@ -252,50 +255,52 @@ func retrieveColumnByGid(boardGid string, columnGid string) (types.TaskColumn, e
 				id,
 				gid,
 				title,
-				board_id
-			FROM task_column
+				description,
+				task_column_id
+			FROM task
 			WHERE gid = $2
-			AND board_id = (
-				SELECT id
-				FROM board WHERE gid = $1
+			AND task_column_id = (
+				SELECT id FROM task_column WHERE gid = $1
 			);
 		`,
-		boardGid, columnGid,
-	).Scan(&column.Id, &column.Gid, &column.Title, &column.BoardId)
+		columnGid, taskGid,
+	).Scan(&task.Id, &task.Gid, &task.Title, &task.Description, &task.TaskColumnId)
 
 	if err != nil {
-		return column, err
+		return task, err
 	}
-	return column, nil
+	return task, nil
 }
 
-func updateColumn(columnGid string, title string) (types.TaskColumn, error) {
-	var column types.TaskColumn
+func updateTask(columnGid string, taskGid string, title string, description string) (types.Task, error) {
+	var task types.Task
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
-		return column, err
+		return task, err
 	}
 	defer conn.Close(context.Background())
 
 	tx, err := conn.Begin(context.Background())
 	if err != nil {
-		return column, err
+		return task, err
 	}
 	defer tx.Rollback(context.Background())
 
 	_, err = tx.Exec(context.Background(),
 		`
-			UPDATE task_column
+			UPDATE task
 			SET
 				title = $1,
+				description = $2,
+				task_column_id = $4,
 				updated = CURRENT_TIMESTAMP
-			WHERE gid = $2;
+			WHERE gid = $3;
 		`,
-		title, columnGid,
+		title, description, taskGid, columnGid,
 	)
 	if err != nil {
-		return column, err
+		return task, err
 	}
 
 	err = tx.QueryRow(context.Background(),
@@ -304,50 +309,51 @@ func updateColumn(columnGid string, title string) (types.TaskColumn, error) {
 				id,
 				gid,
 				title,
-				board_id
-			FROM task_column
+				description,
+				task_column_id
+			FROM task
 			WHERE gid = $1;
 		`,
-		columnGid,
-	).Scan(&column.Id, &column.Gid, &column.Title, &column.BoardId)
+		taskGid,
+	).Scan(&task.Id, &task.Gid, &task.Title, &task.Description, &task.TaskColumnId)
 	if err != nil {
-		return column, err
+		return task, err
 	}
 
 	err = tx.Commit(context.Background())
 	if err != nil {
-		return column, err
+		return task, err
 	}
 
-	return column, nil
+	return task, nil
 }
 
-func addColumn(boardGid string, title string) (types.TaskColumn, error) {
-	var column types.TaskColumn
+func addTask(columnGid string, title string, description string) (types.Task, error) {
+	var task types.Task
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
-		return column, err
+		return task, err
 	}
 	defer conn.Close(context.Background())
 
 	tx, err := conn.Begin(context.Background())
 	if err != nil {
-		return column, err
+		return task, err
 	}
 	defer tx.Rollback(context.Background())
 
-	columnId := -1
+	taskId := -1
 	err = tx.QueryRow(context.Background(),
 		`
-			INSERT INTO task_column (title, board_id)
-			SELECT $2, id FROM board WHERE board.gid = $1
-			RETURNING task_column.id;
+			INSERT INTO task (title, description, task_column_id)
+			SELECT $2, $3, id FROM task_column WHERE task_column.gid = $1
+			RETURNING task.id;
 		`,
-		boardGid, title,
-	).Scan(&columnId)
+		columnGid, title, description,
+	).Scan(&taskId)
 	if err != nil {
-		return column, err
+		return task, err
 	}
 
 	err = tx.QueryRow(context.Background(),
@@ -356,25 +362,26 @@ func addColumn(boardGid string, title string) (types.TaskColumn, error) {
 				id,
 				gid,
 				title,
-				board_id
-			FROM task_column
+				description,
+				task_column_gid
+			FROM task
 			WHERE id = $1;
 		`,
-		columnId,
-	).Scan(&column.Id, &column.Gid, &column.Title, &column.BoardId)
+		taskId,
+	).Scan(&task.Id, &task.Gid, &task.Title, &task.Description, &task.TaskColumnId)
 	if err != nil {
-		return column, err
+		return task, err
 	}
 
 	err = tx.Commit(context.Background())
 	if err != nil {
-		return column, err
+		return task, err
 	}
 
-	return column, nil
+	return task, nil
 }
 
-func removeColumn(columnGid string) error {
+func removeTask(taskGid string) error {
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
 		return err
@@ -389,10 +396,10 @@ func removeColumn(columnGid string) error {
 
 	_, err = tx.Exec(context.Background(),
 		`
-			DELETE FROM task_column
+			DELETE FROM task
 			WHERE gid = $1;
 		`,
-		columnGid,
+		taskGid,
 	)
 	if err != nil {
 		return err

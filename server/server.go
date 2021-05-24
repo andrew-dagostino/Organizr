@@ -68,22 +68,22 @@ func main() {
 		return routes.DeleteColumn(c, logger)
 	}, authenticated())
 
-	// // Task Routes
-	// e.GET("/api/task/:column_id", func(c echo.Context) error {
-	// 	return routes.GetBoards(c, logger)
-	// }, authenticated())
-	// e.GET("/api/task/:column_id/:task_id", func(c echo.Context) error {
-	// 	return routes.GetBoardById(c, logger)
-	// }, authenticated())
-	// e.PUT("/api/task/:column_id/:task_id", func(c echo.Context) error {
-	// 	return routes.EditBoard(c, logger)
-	// }, authenticated())
-	// e.POST("/api/task/:board_gid", func(c echo.Context) error {
-	// 	return routes.CreateBoard(c, logger)
-	// }, authenticated())
-	// e.DELETE("/api/task/:column_id/:task_id", func(c echo.Context) error {
-	// 	return routes.DeleteBoard(c, logger)
-	// }, authenticated())
+	// Task Routes
+	e.GET("/api/task/:column_id", func(c echo.Context) error {
+		return routes.GetTasks(c, logger)
+	}, authenticated())
+	e.GET("/api/task/:column_id/:task_id", func(c echo.Context) error {
+		return routes.GetTaskById(c, logger)
+	}, authenticated())
+	e.PUT("/api/task/:column_id/:task_id", func(c echo.Context) error {
+		return routes.EditTask(c, logger)
+	}, authenticated())
+	e.POST("/api/task/:column_id", func(c echo.Context) error {
+		return routes.CreateTask(c, logger)
+	}, authenticated())
+	e.DELETE("/api/task/:column_id/:task_id", func(c echo.Context) error {
+		return routes.DeleteTask(c, logger)
+	}, authenticated())
 
 	// Start server
 	e.Logger.Fatal(e.Start(":1323"))

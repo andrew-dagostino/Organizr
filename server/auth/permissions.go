@@ -13,7 +13,7 @@ const (
 	VIEW_PERM
 )
 
-func verifyBoardPermission(memberId int, boardGid string, minPermission int) (bool, error) {
+func VerifyBoardPermission(memberId int, boardGid string, minPermission int) (bool, error) {
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
 		return false, err
@@ -34,6 +34,36 @@ func verifyBoardPermission(memberId int, boardGid string, minPermission int) (bo
 			) AS has_permission;
 		`,
 		memberId, boardGid, minPermission,
+	).Scan(&hasPermission)
+
+	if err != nil {
+		return false, err
+	}
+	return hasPermission, nil
+}
+
+func VerifyColumnPermission(memberId int, columnGid string, minPermission int) (bool, error) {
+	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
+	if err != nil {
+		return false, err
+	}
+	defer conn.Close(context.Background())
+
+	hasPermission := false
+	err = conn.QueryRow(context.Background(),
+		`
+			SELECT EXISTS(
+				SELECT id
+				FROM board_member
+				WHERE member_id = $1
+				AND board_id = (
+						SELECT board_id FROM task_column WHERE gid = $1
+					)
+				)
+				AND board_permission_id <= $3
+			) AS has_permission;
+		`,
+		memberId, columnGid, minPermission,
 	).Scan(&hasPermission)
 
 	if err != nil {

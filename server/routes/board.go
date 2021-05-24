@@ -34,9 +34,26 @@ func GetBoards(c echo.Context, log *log.Logger) error {
 func GetBoardById(c echo.Context, log *log.Logger) error {
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
+	memberId := int(claims["id"].(float64))
 	memberGid := claims["gid"].(string)
 
 	boardGid := c.Param("board_gid")
+
+	hasPermission, err := auth.VerifyBoardPermission(memberId, boardGid, auth.VIEW_PERM)
+	if err != nil {
+		log.Error(strings.TrimSpace(err.Error()))
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"code":  "update_board_failed",
+			"error": "Failed to update board",
+		})
+	}
+
+	if !hasPermission {
+		return c.JSON(http.StatusForbidden, map[string]string{
+			"code":  "invalid_permission",
+			"error": "Invalid permissions to update board",
+		})
+	}
 
 	board, err := retrieveBoardByGid(memberGid, boardGid)
 	if err != nil {
@@ -58,7 +75,7 @@ func EditBoard(c echo.Context, log *log.Logger) error {
 	title := strings.TrimSpace(c.FormValue("title"))
 	boardGid := c.Param("board_gid")
 
-	hasPermission, err := verifyBoardPermission(memberId, boardGid, auth.EDIT_PERM)
+	hasPermission, err := auth.VerifyBoardPermission(memberId, boardGid, auth.OWNER_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
@@ -112,7 +129,7 @@ func DeleteBoard(c echo.Context, log *log.Logger) error {
 
 	boardGid := c.Param("board_gid")
 
-	hasPermission, err := verifyBoardPermission(memberId, boardGid, auth.OWNER_PERM)
+	hasPermission, err := auth.VerifyBoardPermission(memberId, boardGid, auth.OWNER_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
@@ -354,33 +371,4 @@ func removeBoard(boardGid string) error {
 	}
 
 	return nil
-}
-
-func verifyBoardPermission(memberId int, boardGid string, minPermission int) (bool, error) {
-	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
-	if err != nil {
-		return false, err
-	}
-	defer conn.Close(context.Background())
-
-	hasPermission := false
-	err = conn.QueryRow(context.Background(),
-		`
-			SELECT EXISTS(
-				SELECT id
-				FROM board_member
-				WHERE member_id = $1
-				AND board_id = (
-					SELECT id FROM board WHERE gid = $2
-				)
-				AND board_permission_id <= $3
-			) AS has_permission;
-		`,
-		memberId, boardGid, minPermission,
-	).Scan(&hasPermission)
-
-	if err != nil {
-		return false, err
-	}
-	return hasPermission, nil
 }
