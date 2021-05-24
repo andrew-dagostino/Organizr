@@ -1,51 +1,69 @@
+import axios from 'axios';
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Card, Grid, Icon } from 'semantic-ui-react';
-import { v4 as uuidv4 } from 'uuid';
 import BoardCard from '../components/BoardCard';
 import Header from '../components/Header';
+
+import config from '../config.json';
+
+const JWT = window.localStorage.getItem('jwt');
 
 /**
  * Card widget linking to the new board page
  */
 function AddBoardWidget() {
+    function handleAddBoard() {
+        const formdata = new FormData();
+        formdata.append('title', '');
+
+        axios
+            .post(`${config.API_URL}/board`, formdata, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${JWT}`,
+                },
+            })
+            .then((response) => {
+                window.location.replace(`/board/${response.data.gid}`);
+            });
+    }
+
     return (
         <Grid.Column>
-            <Link to={`/board/${uuidv4()}`}>
-                <Card
+            <Card
+                onClick={handleAddBoard}
+                style={{
+                    marginBottom: '2rem',
+                    backgroundColor: '#efefef',
+                    color: '#afafaf',
+                }}
+            >
+                <div
                     style={{
-                        marginBottom: '2rem',
-                        backgroundColor: '#efefef',
-                        color: '#afafaf',
+                        height: '15rem',
+                        width: '100%',
+                        display: 'flex',
                     }}
                 >
-                    <div
+                    <Icon
+                        name="add"
                         style={{
-                            height: '15rem',
-                            width: '100%',
-                            display: 'flex',
+                            fontSize: '10rem',
+                            margin: 'auto auto',
+                        }}
+                    />
+                </div>
+                <Card.Content>
+                    <Card.Header
+                        textAlign="center"
+                        style={{
+                            color: '#afafaf',
                         }}
                     >
-                        <Icon
-                            name="add"
-                            style={{
-                                fontSize: '10rem',
-                                margin: 'auto auto',
-                            }}
-                        />
-                    </div>
-                    <Card.Content>
-                        <Card.Header
-                            textAlign="center"
-                            style={{
-                                color: '#afafaf',
-                            }}
-                        >
-                            Add Board
-                        </Card.Header>
-                    </Card.Content>
-                </Card>
-            </Link>
+                        Add Board
+                    </Card.Header>
+                </Card.Content>
+            </Card>
         </Grid.Column>
     );
 }
