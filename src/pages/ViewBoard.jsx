@@ -13,45 +13,42 @@ function AddColumnWidget(props) {
     const { onClick } = props;
 
     return (
-        <>
-            <Header />
-            <Grid.Column>
-                <Card
-                    onClick={onClick}
+        <Grid.Column>
+            <Card
+                onClick={onClick}
+                style={{
+                    marginBottom: '2rem',
+                    backgroundColor: '#efefef',
+                    color: '#afafaf',
+                }}
+            >
+                <div
                     style={{
-                        marginBottom: '2rem',
-                        backgroundColor: '#efefef',
-                        color: '#afafaf',
+                        height: '15rem',
+                        width: '100%',
+                        display: 'flex',
                     }}
                 >
-                    <div
+                    <Icon
+                        name="add"
                         style={{
-                            height: '15rem',
-                            width: '100%',
-                            display: 'flex',
+                            fontSize: '10rem',
+                            margin: 'auto auto',
+                        }}
+                    />
+                </div>
+                <Card.Content>
+                    <Card.Header
+                        textAlign="center"
+                        style={{
+                            color: '#afafaf',
                         }}
                     >
-                        <Icon
-                            name="add"
-                            style={{
-                                fontSize: '10rem',
-                                margin: 'auto auto',
-                            }}
-                        />
-                    </div>
-                    <Card.Content>
-                        <Card.Header
-                            textAlign="center"
-                            style={{
-                                color: '#afafaf',
-                            }}
-                        >
-                            Add Column
-                        </Card.Header>
-                    </Card.Content>
-                </Card>
-            </Grid.Column>
-        </>
+                        Add Column
+                    </Card.Header>
+                </Card.Content>
+            </Card>
+        </Grid.Column>
     );
 }
 
@@ -160,23 +157,26 @@ export default class ViewBoard extends React.Component {
     render() {
         const { columns } = this.state;
         return (
-            <DragDropContext onDragEnd={this.onDragEnd}>
-                <Grid columns="4" container doubling stackable>
-                    <Grid.Row style={{ height: '100%' }}>
-                        {columns.map((column) => (
-                            <Column
-                                key={column.id}
-                                id={column.id}
-                                title={column.title}
-                                tasks={column.tasks}
-                                updateColumn={this.updateColumn}
-                                getColumn={this.getColumn}
-                            />
-                        ))}
-                        <AddColumnWidget onClick={() => this.addColumn()} />
-                    </Grid.Row>
-                </Grid>
-            </DragDropContext>
+            <>
+                <Header />
+                <DragDropContext onDragEnd={this.onDragEnd}>
+                    <Grid columns="4" container doubling stackable>
+                        <Grid.Row style={{ height: '100%' }}>
+                            {columns.map((column) => (
+                                <Column
+                                    key={column.id}
+                                    id={column.id}
+                                    title={column.title}
+                                    tasks={column.tasks}
+                                    updateColumn={this.updateColumn}
+                                    getColumn={this.getColumn}
+                                />
+                            ))}
+                            <AddColumnWidget onClick={() => this.addColumn()} />
+                        </Grid.Row>
+                    </Grid>
+                </DragDropContext>
+            </>
         );
     }
 }
