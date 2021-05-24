@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 /**
  * Card overview of board
  */
-function BoardCard({ id, name, memberCount }) {
+function BoardCard({ id, title, memberCount }) {
     return (
         <Link to={`/board/${id}`}>
             <Card style={{ marginBottom: '2rem' }} color="black">
@@ -16,12 +16,12 @@ function BoardCard({ id, name, memberCount }) {
                     style={{ maxHeight: '15rem' }}
                 />
                 <Card.Content>
-                    <Card.Header>{name}</Card.Header>
+                    <Card.Header>{title || '...'}</Card.Header>
                 </Card.Content>
                 <Card.Content extra>
                     <Icon name="person" />
                     <span style={{ verticalAlign: 'top' }}>
-                        {memberCount} Member(s)
+                        {memberCount} Member{memberCount === 1 ? '' : 's'}
                     </span>
                 </Card.Content>
             </Card>
@@ -31,13 +31,13 @@ function BoardCard({ id, name, memberCount }) {
 
 BoardCard.propTypes = {
     id: PropTypes.string,
-    name: PropTypes.string,
+    title: PropTypes.string,
     memberCount: PropTypes.number,
 };
 
 BoardCard.defaultProps = {
     id: '',
-    name: '...',
+    title: '...',
     memberCount: 0,
 };
 

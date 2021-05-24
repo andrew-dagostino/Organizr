@@ -171,7 +171,8 @@ func retrieveAllBoards(memberGid string) ([]types.Board, error) {
 			SELECT
 				board.id,
 				board.gid,
-				board.title
+				board.title,
+				(SELECT COUNT(id) FROM board_member WHERE board_id = board.id) AS board_member_count
 			FROM board
 			JOIN board_member ON (board_member.board_id = board.id)
 			JOIN member ON (member.id = board_member.member_id)
@@ -187,7 +188,7 @@ func retrieveAllBoards(memberGid string) ([]types.Board, error) {
 
 	for rows.Next() {
 		var board types.Board
-		err = rows.Scan(&board.Id, &board.Gid, &board.Title)
+		err = rows.Scan(&board.Id, &board.Gid, &board.Title, &board.MemberCount)
 		if err != nil {
 			return boards, err
 		}
@@ -211,14 +212,15 @@ func retrieveBoardByGid(memberGid string, boardGid string) (types.Board, error) 
 			SELECT
 				board.id,
 				board.gid,
-				board.title
+				board.title,
+				(SELECT COUNT(id) FROM board_member WHERE board_id = board.id) AS board_member_count
 			FROM board
 			JOIN board_member ON (board_member.board_id = board.id)
 			JOIN member ON (member.id = board_member.member_id)
 			WHERE member.gid = $1 AND board.gid = $2;
 		`,
 		memberGid, boardGid,
-	).Scan(&board.Id, &board.Gid, &board.Title)
+	).Scan(&board.Id, &board.Gid, &board.Title, &board.MemberCount)
 
 	if err != nil {
 		return board, err
@@ -260,12 +262,13 @@ func updateBoard(boardGid string, title string) (types.Board, error) {
 			SELECT
 				id,
 				gid,
-				title
+				title,
+				(SELECT COUNT(id) FROM board_member) AS board_member_count
 			FROM board
 			WHERE gid = $1;
 		`,
 		boardGid,
-	).Scan(&board.Id, &board.Gid, &board.Title)
+	).Scan(&board.Id, &board.Gid, &board.Title, &board.MemberCount)
 	if err != nil {
 		return board, err
 	}
@@ -323,12 +326,13 @@ func addBoard(memberId int, title string) (types.Board, error) {
 			SELECT
 				id,
 				gid,
-				title
+				title,
+				(SELECT COUNT(id) FROM board_member) AS board_member_count
 			FROM board
 			WHERE id = $1;
 		`,
 		boardId,
-	).Scan(&board.Id, &board.Gid, &board.Title)
+	).Scan(&board.Id, &board.Gid, &board.Title, &board.MemberCount)
 	if err != nil {
 		return board, err
 	}

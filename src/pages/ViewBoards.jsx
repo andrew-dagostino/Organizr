@@ -80,6 +80,20 @@ export default class ViewBoards extends React.Component {
         };
     }
 
+    componentDidMount() {
+        this.retrieveBoards().then(({ data }) => {
+            this.setState({ boards: data });
+        });
+    }
+
+    retrieveBoards = () =>
+        axios.get(`${config.API_URL}/board`, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                Authorization: `Bearer ${JWT}`,
+            },
+        });
+
     render() {
         const { boards } = this.state;
 
@@ -92,8 +106,8 @@ export default class ViewBoards extends React.Component {
                             <Grid.Column key={board.id}>
                                 <BoardCard
                                     id={board.id}
-                                    name={board.name}
-                                    memberCount={board.memberCount}
+                                    title={board.title}
+                                    memberCount={board.board_member_count}
                                 />
                             </Grid.Column>
                         ))}

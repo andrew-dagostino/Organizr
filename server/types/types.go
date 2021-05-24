@@ -7,9 +7,10 @@ type Member struct {
 }
 
 type Board struct {
-	Id    int    `json:"id"`
-	Gid   string `json:"gid"`
-	Title string `json:"title"`
+	Id          int    `json:"id"`
+	Gid         string `json:"gid"`
+	Title       string `json:"title"`
+	MemberCount int    `json:"board_member_count"`
 }
 
 type TaskColumn struct {
