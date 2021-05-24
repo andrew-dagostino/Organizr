@@ -25,15 +25,15 @@ func GetColumns(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "get_columns_failed",
-			"error": "Failed to retrieve columns",
+			"code":    "get_columns_failed",
+			"message": "Failed to retrieve columns",
 		})
 	}
 
 	if !hasPermission {
 		return c.JSON(http.StatusForbidden, map[string]string{
-			"code":  "invalid_permission",
-			"error": "Invalid permissions to retrieve columns",
+			"code":    "invalid_permission",
+			"message": "Invalid permissions to retrieve columns",
 		})
 	}
 
@@ -41,8 +41,8 @@ func GetColumns(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "get_columns_failed",
-			"error": "Failed to retrieve columns",
+			"code":    "get_columns_failed",
+			"message": "Failed to retrieve columns",
 		})
 	}
 
@@ -61,15 +61,15 @@ func GetColumnById(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "get_column_failed",
-			"error": "Failed to retrieve column",
+			"code":    "get_column_failed",
+			"message": "Failed to retrieve column",
 		})
 	}
 
 	if !hasPermission {
 		return c.JSON(http.StatusForbidden, map[string]string{
-			"code":  "invalid_permission",
-			"error": "Invalid permissions to retrieve column",
+			"code":    "invalid_permission",
+			"message": "Invalid permissions to retrieve column",
 		})
 	}
 
@@ -77,8 +77,8 @@ func GetColumnById(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "get_column_failed",
-			"error": "Failed to retrieve column",
+			"code":    "get_column_failed",
+			"message": "Failed to retrieve column",
 		})
 	}
 
@@ -99,15 +99,15 @@ func EditColumn(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "update_column_failed",
-			"error": "Failed to update column",
+			"code":    "update_column_failed",
+			"message": "Failed to update column",
 		})
 	}
 
 	if !hasPermission {
 		return c.JSON(http.StatusForbidden, map[string]string{
-			"code":  "invalid_permission",
-			"error": "Invalid permissions to update column",
+			"code":    "invalid_permission",
+			"message": "Invalid permissions to update column",
 		})
 	}
 
@@ -115,8 +115,8 @@ func EditColumn(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "update_column_failed",
-			"error": "Failed to update column",
+			"code":    "update_column_failed",
+			"message": "Failed to update column",
 		})
 	}
 
@@ -136,15 +136,15 @@ func CreateColumn(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "update_column_failed",
-			"error": "Failed to update column",
+			"code":    "update_column_failed",
+			"message": "Failed to update column",
 		})
 	}
 
 	if !hasPermission {
 		return c.JSON(http.StatusForbidden, map[string]string{
-			"code":  "invalid_permission",
-			"error": "Invalid permissions to create column",
+			"code":    "invalid_permission",
+			"message": "Invalid permissions to create column",
 		})
 	}
 
@@ -152,8 +152,8 @@ func CreateColumn(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "add_column_failed",
-			"error": "Failed to create new column",
+			"code":    "add_column_failed",
+			"message": "Failed to create new column",
 		})
 	}
 
@@ -172,15 +172,15 @@ func DeleteColumn(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "delete_column_failed",
-			"error": "Failed to delete column",
+			"code":    "delete_column_failed",
+			"message": "Failed to delete column",
 		})
 	}
 
 	if !hasPermission {
 		return c.JSON(http.StatusForbidden, map[string]string{
-			"code":  "invalid_permission",
-			"error": "Invalid permissions to delete column",
+			"code":    "invalid_permission",
+			"message": "Invalid permissions to delete column",
 		})
 	}
 
@@ -188,8 +188,8 @@ func DeleteColumn(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "delete_column_failed",
-			"error": "Failed to delete column",
+			"code":    "delete_column_failed",
+			"message": "Failed to delete column",
 		})
 	}
 

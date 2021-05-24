@@ -23,8 +23,8 @@ func GetBoards(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "get_boards_failed",
-			"error": "Failed to retrieve boards",
+			"code":    "get_boards_failed",
+			"message": "Failed to retrieve boards",
 		})
 	}
 
@@ -43,15 +43,15 @@ func GetBoardById(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "update_board_failed",
-			"error": "Failed to update board",
+			"code":    "update_board_failed",
+			"message": "Failed to update board",
 		})
 	}
 
 	if !hasPermission {
 		return c.JSON(http.StatusForbidden, map[string]string{
-			"code":  "invalid_permission",
-			"error": "Invalid permissions to update board",
+			"code":    "invalid_permission",
+			"message": "Invalid permissions to update board",
 		})
 	}
 
@@ -59,8 +59,8 @@ func GetBoardById(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "get_board_failed",
-			"error": "Failed to retrieve board",
+			"code":    "get_board_failed",
+			"message": "Failed to retrieve board",
 		})
 	}
 
@@ -79,15 +79,15 @@ func EditBoard(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "update_board_failed",
-			"error": "Failed to update board",
+			"code":    "update_board_failed",
+			"message": "Failed to update board",
 		})
 	}
 
 	if !hasPermission {
 		return c.JSON(http.StatusForbidden, map[string]string{
-			"code":  "invalid_permission",
-			"error": "Invalid permissions to update board",
+			"code":    "invalid_permission",
+			"message": "Invalid permissions to update board",
 		})
 	}
 
@@ -95,8 +95,8 @@ func EditBoard(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "update_board_failed",
-			"error": "Failed to update board",
+			"code":    "update_board_failed",
+			"message": "Failed to update board",
 		})
 	}
 
@@ -114,8 +114,8 @@ func CreateBoard(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "add_board_failed",
-			"error": "Failed to create new board",
+			"code":    "add_board_failed",
+			"message": "Failed to create new board",
 		})
 	}
 
@@ -133,15 +133,15 @@ func DeleteBoard(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "delete_board_failed",
-			"error": "Failed to delete board",
+			"code":    "delete_board_failed",
+			"message": "Failed to delete board",
 		})
 	}
 
 	if !hasPermission {
 		return c.JSON(http.StatusForbidden, map[string]string{
-			"code":  "invalid_permission",
-			"error": "Invalid permissions to delete board",
+			"code":    "invalid_permission",
+			"message": "Invalid permissions to delete board",
 		})
 	}
 
@@ -149,8 +149,8 @@ func DeleteBoard(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "delete_board_failed",
-			"error": "Failed to delete board",
+			"code":    "delete_board_failed",
+			"message": "Failed to delete board",
 		})
 	}
 

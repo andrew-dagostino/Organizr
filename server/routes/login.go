@@ -24,17 +24,17 @@ func LoginMember(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "login_failed",
-			"error": "Username and/or password are incorrect",
+			"code":    "login_failed",
+			"message": "Username and/or password are incorrect",
 		})
 	}
 
 	success, err := verifyMember(member.Username, password)
 	if success == false || err != nil {
-		log.Error(strings.TrimSpace(err.Error()))
+		log.Info(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusUnauthorized, map[string]string{
-			"code":  "login_failed",
-			"error": "Username and/or password are incorrect",
+			"code":    "login_failed",
+			"message": "Username and/or password are incorrect",
 		})
 	}
 
@@ -42,8 +42,8 @@ func LoginMember(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"code":  "login_failed",
-			"error": "Username and/or password are incorrect",
+			"code":    "login_failed",
+			"message": "Username and/or password are incorrect",
 		})
 	}
 

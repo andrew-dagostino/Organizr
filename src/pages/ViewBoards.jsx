@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Card, Grid, Icon } from 'semantic-ui-react';
 import { v4 as uuidv4 } from 'uuid';
 import BoardCard from '../components/BoardCard';
+import Header from '../components/Header';
 
 /**
  * Card widget linking to the new board page
@@ -65,20 +66,23 @@ export default class ViewBoards extends React.Component {
         const { boards } = this.state;
 
         return (
-            <Grid columns="4" container doubling stackable>
-                <Grid.Row>
-                    {boards.map((board) => (
-                        <Grid.Column key={board.id}>
-                            <BoardCard
-                                id={board.id}
-                                name={board.name}
-                                memberCount={board.memberCount}
-                            />
-                        </Grid.Column>
-                    ))}
-                    <AddBoardWidget />
-                </Grid.Row>
-            </Grid>
+            <>
+                <Header />
+                <Grid columns="4" container doubling stackable>
+                    <Grid.Row>
+                        {boards.map((board) => (
+                            <Grid.Column key={board.id}>
+                                <BoardCard
+                                    id={board.id}
+                                    name={board.name}
+                                    memberCount={board.memberCount}
+                                />
+                            </Grid.Column>
+                        ))}
+                        <AddBoardWidget />
+                    </Grid.Row>
+                </Grid>
+            </>
         );
     }
 }

@@ -24,7 +24,7 @@ func RegisterMember(c echo.Context, log *log.Logger) error {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error_code": "register_failed",
-			"error":      "Failed to create member",
+			"message":    "Failed to create member",
 		})
 	}
 
@@ -33,7 +33,7 @@ func RegisterMember(c echo.Context, log *log.Logger) error {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error_code": "register_failed",
-			"error":      "Failed to create member",
+			"message":    "Failed to create member",
 		})
 	}
 

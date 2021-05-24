@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import PropTypes from 'prop-types';
 import { DragDropContext } from 'react-beautiful-dnd';
 import Column from '../components/Column';
+import Header from '../components/Header';
 
 /**
  * Card widget linking to the new board page
@@ -12,42 +13,45 @@ function AddColumnWidget(props) {
     const { onClick } = props;
 
     return (
-        <Grid.Column>
-            <Card
-                onClick={onClick}
-                style={{
-                    marginBottom: '2rem',
-                    backgroundColor: '#efefef',
-                    color: '#afafaf',
-                }}
-            >
-                <div
+        <>
+            <Header />
+            <Grid.Column>
+                <Card
+                    onClick={onClick}
                     style={{
-                        height: '15rem',
-                        width: '100%',
-                        display: 'flex',
+                        marginBottom: '2rem',
+                        backgroundColor: '#efefef',
+                        color: '#afafaf',
                     }}
                 >
-                    <Icon
-                        name="add"
+                    <div
                         style={{
-                            fontSize: '10rem',
-                            margin: 'auto auto',
-                        }}
-                    />
-                </div>
-                <Card.Content>
-                    <Card.Header
-                        textAlign="center"
-                        style={{
-                            color: '#afafaf',
+                            height: '15rem',
+                            width: '100%',
+                            display: 'flex',
                         }}
                     >
-                        Add Column
-                    </Card.Header>
-                </Card.Content>
-            </Card>
-        </Grid.Column>
+                        <Icon
+                            name="add"
+                            style={{
+                                fontSize: '10rem',
+                                margin: 'auto auto',
+                            }}
+                        />
+                    </div>
+                    <Card.Content>
+                        <Card.Header
+                            textAlign="center"
+                            style={{
+                                color: '#afafaf',
+                            }}
+                        >
+                            Add Column
+                        </Card.Header>
+                    </Card.Content>
+                </Card>
+            </Grid.Column>
+        </>
     );
 }
 

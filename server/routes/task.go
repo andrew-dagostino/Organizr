@@ -25,15 +25,15 @@ func GetTasks(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "get_tasks_failed",
-			"error": "Failed to retrieve tasks",
+			"code":    "get_tasks_failed",
+			"message": "Failed to retrieve tasks",
 		})
 	}
 
 	if !hasPermission {
 		return c.JSON(http.StatusForbidden, map[string]string{
-			"code":  "invalid_permission",
-			"error": "Invalid permissions to retrieve tasks",
+			"code":    "invalid_permission",
+			"message": "Invalid permissions to retrieve tasks",
 		})
 	}
 
@@ -41,8 +41,8 @@ func GetTasks(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "get_tasks_failed",
-			"error": "Failed to retrieve tasks",
+			"code":    "get_tasks_failed",
+			"message": "Failed to retrieve tasks",
 		})
 	}
 
@@ -61,15 +61,15 @@ func GetTaskById(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "get_task_failed",
-			"error": "Failed to retrieve task",
+			"code":    "get_task_failed",
+			"message": "Failed to retrieve task",
 		})
 	}
 
 	if !hasPermission {
 		return c.JSON(http.StatusForbidden, map[string]string{
-			"code":  "invalid_permission",
-			"error": "Invalid permissions to retrieve task",
+			"code":    "invalid_permission",
+			"message": "Invalid permissions to retrieve task",
 		})
 	}
 
@@ -77,8 +77,8 @@ func GetTaskById(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "get_task_failed",
-			"error": "Failed to retrieve task",
+			"code":    "get_task_failed",
+			"message": "Failed to retrieve task",
 		})
 	}
 
@@ -100,15 +100,15 @@ func EditTask(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "update_task_failed",
-			"error": "Failed to update task",
+			"code":    "update_task_failed",
+			"message": "Failed to update task",
 		})
 	}
 
 	if !hasPermission {
 		return c.JSON(http.StatusForbidden, map[string]string{
-			"code":  "invalid_permission",
-			"error": "Invalid permissions to update task",
+			"code":    "invalid_permission",
+			"message": "Invalid permissions to update task",
 		})
 	}
 
@@ -116,8 +116,8 @@ func EditTask(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "update_task_failed",
-			"error": "Failed to update task",
+			"code":    "update_task_failed",
+			"message": "Failed to update task",
 		})
 	}
 
@@ -138,15 +138,15 @@ func CreateTask(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "update_task_failed",
-			"error": "Failed to update task",
+			"code":    "update_task_failed",
+			"message": "Failed to update task",
 		})
 	}
 
 	if !hasPermission {
 		return c.JSON(http.StatusForbidden, map[string]string{
-			"code":  "invalid_permission",
-			"error": "Invalid permissions to create task",
+			"code":    "invalid_permission",
+			"message": "Invalid permissions to create task",
 		})
 	}
 
@@ -154,8 +154,8 @@ func CreateTask(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "add_task_failed",
-			"error": "Failed to create new task",
+			"code":    "add_task_failed",
+			"message": "Failed to create new task",
 		})
 	}
 
@@ -174,15 +174,15 @@ func DeleteTask(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "delete_task_failed",
-			"error": "Failed to delete task",
+			"code":    "delete_task_failed",
+			"message": "Failed to delete task",
 		})
 	}
 
 	if !hasPermission {
 		return c.JSON(http.StatusForbidden, map[string]string{
-			"code":  "invalid_permission",
-			"error": "Invalid permissions to delete task",
+			"code":    "invalid_permission",
+			"message": "Invalid permissions to delete task",
 		})
 	}
 
@@ -190,8 +190,8 @@ func DeleteTask(c echo.Context, log *log.Logger) error {
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":  "delete_task_failed",
-			"error": "Failed to delete task",
+			"code":    "delete_task_failed",
+			"message": "Failed to delete task",
 		})
 	}
 
