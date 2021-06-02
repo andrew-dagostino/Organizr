@@ -150,12 +150,13 @@ export default class ViewBoard extends React.Component {
             );
 
             const taskGid = result.draggableId;
-            const task = sColumn.tasks.filter((t) => t.gid === taskGid);
+            const task = sColumn.tasks.filter((t) => t.gid === taskGid)[0];
             task.task_column_id = dColumn.id;
 
             const formdata = new FormData();
             formdata.append('title', task.title || '');
             formdata.append('description', task.description || '');
+
             this.updateTask(dColumn.gid, taskGid, formdata).then(() => {
                 this.updateColumnUI({
                     gid: sColumn.gid,
@@ -212,7 +213,7 @@ export default class ViewBoard extends React.Component {
 
             columnTimers[column.gid] = setTimeout(
                 () => this.updateColumn(BOARD_GID, column.gid, formdata),
-                3000
+                500
             );
 
             this.setState({ columnTimers });
@@ -291,7 +292,7 @@ export default class ViewBoard extends React.Component {
                 title: value,
                 titleTimer: setTimeout(
                     () => this.updateBoard(BOARD_GID, formdata),
-                    3000
+                    500
                 ),
             });
         }

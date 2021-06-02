@@ -12,6 +12,14 @@ import Task from './Task';
 const JWT = window.localStorage.getItem('jwt');
 
 class Column extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            taskTimers: {},
+        };
+    }
+
     addTask = () => {
         const { gid, title, tasks, updateColumn } = this.props;
 
@@ -36,11 +44,47 @@ class Column extends React.Component {
             },
         });
 
-    updateTask = (task) => {
+    updateTaskUI = (task) => {
         const { gid, title, tasks, updateColumn } = this.props;
         const index = tasks.findIndex((t) => t.gid === task.gid);
         tasks[index] = task;
         updateColumn({ gid, title, tasks });
+    };
+
+    updateTask = (cGid, tGid, formdata) =>
+        axios.put(`${config.API_URL}/task/${cGid}/${tGid}`, formdata, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                Authorization: `Bearer ${JWT}`,
+            },
+        });
+
+    handleTaskChange = (task) => {
+        const { taskTimers } = this.state;
+        const { tasks, gid } = this.props;
+
+        const index = tasks.findIndex((t) => t.gid === task.gid);
+        const oldTask = tasks[index];
+
+        if (
+            task.title !== oldTask.title ||
+            task.description !== oldTask.description
+        ) {
+            clearTimeout(taskTimers[task.gid]);
+
+            const formdata = new FormData();
+            formdata.append('title', task.title);
+            formdata.append('description', task.description);
+
+            taskTimers[task.gid] = setTimeout(
+                () => this.updateTask(gid, task.gid, formdata),
+                500
+            );
+
+            this.setState({ taskTimers });
+        }
+
+        this.updateTaskUI(task); // Updates UI
     };
 
     handleTitle = (value) => {
@@ -96,11 +140,11 @@ class Column extends React.Component {
                                     {tasks.map((task, index) => (
                                         <Task
                                             key={task.gid}
-                                            id={task.gid}
+                                            gid={task.gid}
                                             title={task.title}
                                             description={task.description}
                                             index={index}
-                                            updateTask={this.updateTask}
+                                            updateTask={this.handleTaskChange}
                                         />
                                     ))}
                                     {provided.placeholder}

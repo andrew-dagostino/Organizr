@@ -5,21 +5,21 @@ import { Draggable } from 'react-beautiful-dnd';
 
 class Task extends React.Component {
     handleTitle = (val) => {
-        const { id, description, updateTask } = this.props;
-        updateTask({ id, title: val, description });
+        const { gid, description, updateTask } = this.props;
+        updateTask({ gid, title: val, description });
     };
 
     handleDescription = (val) => {
-        const { id, title, updateTask } = this.props;
-        updateTask({ id, title, description: val });
+        const { gid, title, updateTask } = this.props;
+        updateTask({ gid, title, description: val });
     };
 
     render() {
-        const { id, title, description, index } = this.props;
+        const { gid, title, description, index } = this.props;
 
         return (
             <div>
-                <Draggable draggableId={id} index={index}>
+                <Draggable draggableId={gid} index={index}>
                     {(provided) => (
                         <div
                             ref={provided.innerRef}
@@ -76,7 +76,7 @@ class Task extends React.Component {
 }
 
 Task.propTypes = {
-    id: PropTypes.string.isRequired,
+    gid: PropTypes.string.isRequired,
     title: PropTypes.string,
     description: PropTypes.string,
     index: PropTypes.number.isRequired,
