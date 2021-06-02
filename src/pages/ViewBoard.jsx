@@ -100,6 +100,7 @@ export default class ViewBoard extends React.Component {
             title: '',
             columns: [],
             titleTimer: undefined,
+            columnTimers: {},
         };
     }
 
@@ -177,11 +178,30 @@ export default class ViewBoard extends React.Component {
             });
     };
 
-    updateColumn = (column) => {
+    updateColumnUI = (column) => {
         const { columns } = this.state;
-        const index = columns.findIndex((col) => col.id === column.id);
+        const index = columns.findIndex((col) => col.gid === column.gid);
         columns[index] = column;
         this.setState({ columns });
+    };
+
+    handleColumnNameChange = (column, value) => {
+        const { columnTimers } = this.state;
+
+        this.updateColumnUI(column);
+
+        clearTimeout(columnTimers[column.gid]);
+        if (value) {
+            const formdata = new FormData();
+            formdata.append('title', value);
+
+            columnTimers[column.gid] = setTimeout(
+                () => this.updateColumn(BOARD_GID, column.gid, formdata),
+                3000
+            );
+
+            this.setState({ columnTimers });
+        }
     };
 
     getColumn = (id) => {
@@ -214,6 +234,18 @@ export default class ViewBoard extends React.Component {
                 Authorization: `Bearer ${JWT}`,
             },
         });
+
+    updateColumn = (bGid, cGid, formdata) =>
+        axios
+            .put(`${config.API_URL}/column/${bGid}/${cGid}`, formdata, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${JWT}`,
+                },
+            })
+            .then(({ data }) => {
+                this.updateColumnUI(data);
+            });
 
     handleBoardNameChange = (e, { value }) => {
         const { titleTimer } = this.state;
@@ -250,7 +282,7 @@ export default class ViewBoard extends React.Component {
                                     gid={column.gid}
                                     title={column.title}
                                     tasks={column.tasks}
-                                    updateColumn={this.updateColumn}
+                                    updateColumn={this.handleColumnNameChange}
                                     getColumn={this.getColumn}
                                 />
                             ))}

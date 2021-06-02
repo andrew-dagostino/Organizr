@@ -26,9 +26,9 @@ class Column extends React.Component {
         updateColumn({ gid, title, tasks });
     };
 
-    handleTitle = (val) => {
+    handleTitle = (value) => {
         const { gid, tasks, updateColumn } = this.props;
-        updateColumn({ gid, title: val, tasks });
+        updateColumn({ gid, title: value, tasks }, value);
     };
 
     render() {
@@ -49,8 +49,8 @@ class Column extends React.Component {
                                 size="small"
                                 transparent
                                 value={title}
-                                onChange={(e, data) =>
-                                    this.handleTitle(data.value)
+                                onChange={(e, { value }) =>
+                                    this.handleTitle(value)
                                 }
                             />
                         </Card.Header>
