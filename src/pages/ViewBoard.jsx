@@ -308,6 +308,7 @@ export default class ViewBoard extends React.Component {
                 <Header
                     title={title}
                     handleChange={this.handleBoardNameChange}
+                    showTextfield
                 />
                 <DragDropContext onDragEnd={this.onDragEnd}>
                     <Grid columns="4" container doubling stackable>

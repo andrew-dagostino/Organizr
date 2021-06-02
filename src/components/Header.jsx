@@ -24,7 +24,7 @@ export default class Header extends Component {
 
     render() {
         const { activeItem } = this.state;
-        const { title, handleChange } = this.props;
+        const { title, handleChange, showTextfield } = this.props;
 
         return (
             <Sticky style={{ marginBottom: '2rem' }}>
@@ -37,20 +37,27 @@ export default class Header extends Component {
                             onClick={this.handleItemClick}
                         />
                     </Link>
-                    <Input
-                        type="text"
-                        transparent
-                        size="huge"
-                        placeholder="Board Name..."
-                        style={{
-                            position: 'absolute',
-                            left: '44%',
-                            height: '3rem',
-                        }}
-                        onChange={handleChange}
-                    >
-                        <input style={{ textAlign: 'center' }} value={title} />
-                    </Input>
+                    {showTextfield ? (
+                        <Input
+                            type="text"
+                            transparent
+                            size="huge"
+                            placeholder="Board Name..."
+                            style={{
+                                position: 'absolute',
+                                left: '44%',
+                                height: '3rem',
+                            }}
+                            onChange={handleChange}
+                        >
+                            <input
+                                style={{ textAlign: 'center' }}
+                                value={title}
+                            />
+                        </Input>
+                    ) : (
+                        ''
+                    )}
                     <Menu.Item position="right" onClick={this.handleLogOut}>
                         Log out
                     </Menu.Item>
@@ -63,8 +70,10 @@ export default class Header extends Component {
 Header.propTypes = {
     title: PropTypes.string,
     handleChange: PropTypes.func.isRequired,
+    showTextfield: PropTypes.bool,
 };
 
 Header.defaultProps = {
     title: '',
+    showTextfield: false,
 };
