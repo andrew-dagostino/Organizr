@@ -121,6 +121,9 @@ export default class ViewBoard extends React.Component {
                     this.setState({ columns, loaded: true });
                 }
             });
+            if (!columns.length) {
+                this.setState({ loaded: true });
+            }
         });
     }
 
