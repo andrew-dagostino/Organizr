@@ -10,10 +10,6 @@ import Header from '../components/Header';
 import config from '../config.json';
 
 const JWT = window.localStorage.getItem('jwt');
-const BOARD_GID = (() => {
-    const pathVars = window.location.pathname.split('/');
-    return pathVars[pathVars.length - 1];
-})();
 
 /**
  * Card widget linking to the new board page
@@ -98,6 +94,7 @@ export default class ViewBoard extends React.Component {
 
         this.state = {
             title: '',
+            gid: '',
             columns: [],
             titleTimer: undefined,
             columnTimers: {},
@@ -105,10 +102,15 @@ export default class ViewBoard extends React.Component {
     }
 
     componentDidMount() {
-        this.retrieveBoard(BOARD_GID).then(({ data }) =>
+        const pathVars = window.location.pathname.split('/');
+        const boardGid = pathVars[pathVars.length - 1];
+
+        this.setState({ gid: boardGid });
+
+        this.retrieveBoard(boardGid).then(({ data }) =>
             this.setState({ title: data.title })
         );
-        this.retrieveColumns(BOARD_GID).then(({ data }) => {
+        this.retrieveColumns(boardGid).then(({ data }) => {
             const columns = data;
             columns.forEach(async (column, index) => {
                 const response = await this.retrieveTasks(column.gid);
@@ -173,9 +175,10 @@ export default class ViewBoard extends React.Component {
     };
 
     addColumn = () => {
+        const { gid } = this.state;
         const formdata = new FormData();
         formdata.append('title', '');
-        this.createColumn(BOARD_GID, formdata);
+        this.createColumn(gid, formdata);
     };
 
     createColumn = (gid, formdata) => {
@@ -200,7 +203,7 @@ export default class ViewBoard extends React.Component {
     };
 
     handleColumnChange = (column) => {
-        const { columns, columnTimers } = this.state;
+        const { gid, columns, columnTimers } = this.state;
 
         const index = columns.findIndex((col) => col.gid === column.gid);
         const oldColumn = columns[index];
@@ -212,7 +215,7 @@ export default class ViewBoard extends React.Component {
             formdata.append('title', column.title);
 
             columnTimers[column.gid] = setTimeout(
-                () => this.updateColumn(BOARD_GID, column.gid, formdata),
+                () => this.updateColumn(gid, column.gid, formdata),
                 500
             );
 
@@ -281,7 +284,7 @@ export default class ViewBoard extends React.Component {
         });
 
     handleBoardNameChange = (e, { value }) => {
-        const { titleTimer } = this.state;
+        const { gid, titleTimer } = this.state;
 
         clearTimeout(titleTimer);
         if (value) {
@@ -291,7 +294,7 @@ export default class ViewBoard extends React.Component {
             this.setState({
                 title: value,
                 titleTimer: setTimeout(
-                    () => this.updateBoard(BOARD_GID, formdata),
+                    () => this.updateBoard(gid, formdata),
                     500
                 ),
             });
