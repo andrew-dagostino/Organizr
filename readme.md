@@ -29,6 +29,7 @@ Building an organizational app to learn and experiment with Go and React.
 
     ```
     go get github.com/labstack/echo/v4
+    go get github.com/labstack/gommon/log@v0.3.0
     go get github.com/jackc/pgx/v4
     go get golang.org/x/crypto/bcrypt
     ```
