@@ -2,40 +2,46 @@ package routes
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"os"
 	"strings"
 
 	"github.com/jackc/pgx/v4"
 	"github.com/labstack/echo"
+	"github.com/labstack/gommon/log"
 	"golang.org/x/crypto/bcrypt"
 )
 
-// Registers a new user using the POST's username and password
-func RegisterUser(c echo.Context) error {
-	username := strings.TrimSpace(c.FormValue("username"))
+// Registers a new member using the POST's username and password
+func RegisterMember(c echo.Context, log *log.Logger) error {
+	username := strings.ToLower(strings.TrimSpace(c.FormValue("username")))
+	email := strings.ToLower(strings.TrimSpace(c.FormValue("email")))
 	password := strings.TrimSpace(c.FormValue("password"))
 
-	if len(username) < 1 || len(username) > 32 {
+	err := validateRegisterData(username, email, password)
+	if err != nil {
+		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error_code": "create_failed",
-			"error":      "Failed to create user",
+			"error_code": "register_failed",
+			"message":    "Failed to create member",
 		})
 	}
 
-	err := createUser(username, password)
+	err = createMember(username, email, password)
 	if err != nil {
+		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error_code": "create_failed",
-			"error":      "Failed to create user",
+			"error_code": "register_failed",
+			"message":    "Failed to create member",
 		})
 	}
 
 	return c.JSON(http.StatusOK, "")
 }
 
-// Saves new user into the database, first hashing their password
-func createUser(username string, password string) error {
+// Saves new member into the database, first hashing their password
+func createMember(username string, email string, password string) error {
 	hash, err := hashPassword(password)
 	if err != nil {
 		return err
@@ -55,9 +61,10 @@ func createUser(username string, password string) error {
 
 	_, err = tx.Exec(context.Background(),
 		`
-			INSERT INTO site_user (username, password) VALUES ($1, $2);
+			INSERT INTO member (username, email, password)
+			VALUES ($1, $2, $3);
 		`,
-		username, hash,
+		username, email, hash,
 	)
 	if err != nil {
 		return err
@@ -78,4 +85,18 @@ func hashPassword(password string) (string, error) {
 		return "", err
 	}
 	return string(hash), nil
+}
+
+// Validates user data before insert
+func validateRegisterData(username string, email string, password string) error {
+
+	if len(username) < 1 || len(username) > 32 {
+		return errors.New("Invalid Username")
+	}
+
+	if len(password) < 8 {
+		return errors.New("Invalid Password")
+	}
+
+	return nil
 }

@@ -1,5 +1,5 @@
 {
-    "name": "test-website",
+    "name": "organizr",
     "version": "1.0.0",
     "description": "",
     "main": "index.jsx",
@@ -16,31 +16,37 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/andrew-dagostino/test-website.git"
+        "url": "git+https://github.com/andrew-dagostino/organizr.git"
     },
     "author": "Andrew D'Agostino",
     "license": "UNLICENSED",
     "bugs": {
-        "url": "https://github.com/andrew-dagostino/test-website/issues"
+        "url": "https://github.com/andrew-dagostino/organizr/issues"
     },
     "homepage": "./",
     "devDependencies": {
+        "babel-eslint": "^10.1.0",
         "eslint": "^7.26.0",
         "eslint-config-airbnb": "^18.2.1",
         "eslint-config-prettier": "^8.3.0",
         "eslint-plugin-prettier": "^3.4.0",
+        "eslint-plugin-react": "^7.23.2",
+        "fomantic-ui": "^2.8.7",
         "prettier": "^2.3.0"
     },
     "dependencies": {
         "@popperjs/core": "^2.9.2",
         "axios": "^0.21.1",
         "jwt-decode": "^2.2.0",
+        "prop-types": "^15.7.2",
         "react": "^16.13.1",
+        "react-beautiful-dnd": "^13.1.0",
         "react-dom": "^16.13.1",
         "react-router-dom": "^5.2.0",
         "react-scripts": "^4.0.3",
         "semantic-ui-css": "^2.4.1",
-        "semantic-ui-react": "^2.0.3"
+        "semantic-ui-react": "^2.0.3",
+        "uuid": "^8.3.2"
     },
     "browserslist": {
         "production": [
