@@ -3,13 +3,10 @@ import PropTypes, { objectOf } from 'prop-types';
 
 import { Button, Card, Grid, Icon, Input } from 'semantic-ui-react';
 import { Droppable } from 'react-beautiful-dnd';
-import axios from 'axios';
-
-import config from '../config.json';
 
 import Task from './Task';
 
-const JWT = window.localStorage.getItem('jwt');
+import { updateTask, createTask } from '../util/board_functions';
 
 class Column extends React.Component {
     constructor(props) {
@@ -27,7 +24,7 @@ class Column extends React.Component {
         formdata.append('title', '');
         formdata.append('description', '');
 
-        this.createTask(gid, formdata).then((data) => {
+        createTask(gid, formdata).then((data) => {
             updateColumn({
                 gid,
                 title,
@@ -36,28 +33,12 @@ class Column extends React.Component {
         });
     };
 
-    createTask = (cGid, formdata) =>
-        axios.post(`${config.API_URL}/task/${cGid}`, formdata, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                Authorization: `Bearer ${JWT}`,
-            },
-        });
-
     updateTaskUI = (task) => {
         const { gid, title, tasks, updateColumn } = this.props;
         const index = tasks.findIndex((t) => t.gid === task.gid);
         tasks[index] = task;
         updateColumn({ gid, title, tasks });
     };
-
-    updateTask = (cGid, tGid, formdata) =>
-        axios.put(`${config.API_URL}/task/${cGid}/${tGid}`, formdata, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                Authorization: `Bearer ${JWT}`,
-            },
-        });
 
     handleTaskChange = (task) => {
         const { taskTimers } = this.state;
@@ -77,7 +58,7 @@ class Column extends React.Component {
             formdata.append('description', task.description);
 
             taskTimers[task.gid] = setTimeout(
-                () => this.updateTask(gid, task.gid, formdata),
+                () => updateTask(gid, task.gid, formdata),
                 500
             );
 

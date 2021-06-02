@@ -1,12 +1,9 @@
-import axios from 'axios';
 import React from 'react';
 import { Card, Grid, Icon, Loader } from 'semantic-ui-react';
 import BoardCard from '../components/BoardCard';
 import Header from '../components/Header';
 
-import config from '../config.json';
-
-const JWT = window.localStorage.getItem('jwt');
+import { createBoard, retrieveBoards } from '../util/board_functions';
 
 /**
  * Card widget linking to the new board page
@@ -16,16 +13,9 @@ function AddBoardWidget() {
         const formdata = new FormData();
         formdata.append('title', '');
 
-        axios
-            .post(`${config.API_URL}/board`, formdata, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${JWT}`,
-                },
-            })
-            .then(({ data }) => {
-                window.location.replace(`/board/${data.gid}`);
-            });
+        createBoard(formdata).then(({ data }) => {
+            window.location.replace(`/board/${data.gid}`);
+        });
     }
 
     return (
@@ -82,18 +72,10 @@ export default class ViewBoards extends React.Component {
     }
 
     componentDidMount() {
-        this.retrieveBoards().then(({ data }) => {
+        retrieveBoards().then(({ data }) => {
             this.setState({ boards: data, loaded: true });
         });
     }
-
-    retrieveBoards = () =>
-        axios.get(`${config.API_URL}/board`, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                Authorization: `Bearer ${JWT}`,
-            },
-        });
 
     render() {
         const { boards, loaded } = this.state;

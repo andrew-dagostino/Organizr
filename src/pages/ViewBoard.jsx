@@ -2,14 +2,19 @@ import React from 'react';
 import { Card, Grid, Icon, Loader } from 'semantic-ui-react';
 import PropTypes from 'prop-types';
 import { DragDropContext } from 'react-beautiful-dnd';
-import axios from 'axios';
 
 import Column from '../components/Column';
 import Header from '../components/Header';
 
-import config from '../config.json';
-
-const JWT = window.localStorage.getItem('jwt');
+import {
+    retrieveBoard,
+    updateBoard,
+    retrieveColumns,
+    updateColumn,
+    createColumn,
+    retrieveTasks,
+    updateTask,
+} from '../util/board_functions';
 
 /**
  * Card widget linking to the new board page
@@ -108,13 +113,13 @@ export default class ViewBoard extends React.Component {
 
         this.setState({ gid: boardGid });
 
-        this.retrieveBoard(boardGid).then(({ data }) =>
+        retrieveBoard(boardGid).then(({ data }) =>
             this.setState({ title: data.title })
         );
-        this.retrieveColumns(boardGid).then(({ data }) => {
+        retrieveColumns(boardGid).then(({ data }) => {
             const columns = data;
             columns.forEach(async (column, index, arr) => {
-                const response = await this.retrieveTasks(column.gid);
+                const response = await retrieveTasks(column.gid);
                 columns[index].tasks = [...response.data];
 
                 if (index === arr.length - 1) {
@@ -166,7 +171,7 @@ export default class ViewBoard extends React.Component {
             formdata.append('title', task.title || '');
             formdata.append('description', task.description || '');
 
-            this.updateTask(dColumn.gid, taskGid, formdata).then(() => {
+            updateTask(dColumn.gid, taskGid, formdata).then(() => {
                 this.updateColumnUI({
                     gid: sColumn.gid,
                     title: sColumn.title,
@@ -183,23 +188,14 @@ export default class ViewBoard extends React.Component {
 
     addColumn = () => {
         const { gid } = this.state;
+
         const formdata = new FormData();
         formdata.append('title', '');
-        this.createColumn(gid, formdata);
-    };
 
-    createColumn = (gid, formdata) => {
-        axios
-            .post(`${config.API_URL}/column/${gid}`, formdata, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${JWT}`,
-                },
-            })
-            .then(({ data }) => {
-                const { columns } = this.state;
-                this.setState({ columns: columns.concat([data]) });
-            });
+        createColumn(gid, formdata).then(({ data }) => {
+            const { columns } = this.state;
+            this.setState({ columns: columns.concat([data]) });
+        });
     };
 
     updateColumnUI = (column) => {
@@ -222,7 +218,10 @@ export default class ViewBoard extends React.Component {
             formdata.append('title', column.title);
 
             columnTimers[column.gid] = setTimeout(
-                () => this.updateColumn(gid, column.gid, formdata),
+                () =>
+                    updateColumn(gid, column.gid, formdata).then(({ data }) => {
+                        this.updateColumnUI(data);
+                    }),
                 500
             );
 
@@ -237,59 +236,6 @@ export default class ViewBoard extends React.Component {
         return columns.filter((column) => column.gid === gid)[0];
     };
 
-    retrieveBoard = (gid) =>
-        axios.get(`${config.API_URL}/board/${gid}`, {
-            headers: {
-                Authorization: `Bearer ${JWT}`,
-            },
-        });
-
-    updateBoard = (gid, formdata) =>
-        axios
-            .put(`${config.API_URL}/board/${gid}`, formdata, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${JWT}`,
-                },
-            })
-            .then(({ data }) => {
-                this.setState({ title: data.title });
-            });
-
-    retrieveColumns = (gid) =>
-        axios.get(`${config.API_URL}/column/${gid}`, {
-            headers: {
-                Authorization: `Bearer ${JWT}`,
-            },
-        });
-
-    updateColumn = (bGid, cGid, formdata) =>
-        axios
-            .put(`${config.API_URL}/column/${bGid}/${cGid}`, formdata, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${JWT}`,
-                },
-            })
-            .then(({ data }) => {
-                this.updateColumnUI(data);
-            });
-
-    retrieveTasks = (cGid) =>
-        axios.get(`${config.API_URL}/task/${cGid}`, {
-            headers: {
-                Authorization: `Bearer ${JWT}`,
-            },
-        });
-
-    updateTask = (cGid, tGid, formdata) =>
-        axios.put(`${config.API_URL}/task/${cGid}/${tGid}`, formdata, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                Authorization: `Bearer ${JWT}`,
-            },
-        });
-
     handleBoardNameChange = (e, { value }) => {
         const { gid, titleTimer } = this.state;
 
@@ -301,7 +247,10 @@ export default class ViewBoard extends React.Component {
             this.setState({
                 title: value,
                 titleTimer: setTimeout(
-                    () => this.updateBoard(gid, formdata),
+                    () =>
+                        updateBoard(gid, formdata).then(({ data }) => {
+                            this.setState({ title: data.title });
+                        }),
                     500
                 ),
             });
