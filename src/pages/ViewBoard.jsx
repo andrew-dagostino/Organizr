@@ -1,6 +1,5 @@
 import React from 'react';
 import { Card, Grid, Icon } from 'semantic-ui-react';
-import { v4 as uuidv4 } from 'uuid';
 import PropTypes from 'prop-types';
 import { DragDropContext } from 'react-beautiful-dnd';
 import axios from 'axios';
@@ -105,9 +104,12 @@ export default class ViewBoard extends React.Component {
     }
 
     componentDidMount() {
-        this.retrieveBoard(BOARD_GID).then(({ data }) => {
-            this.setState({ title: data.title });
-        });
+        this.retrieveBoard(BOARD_GID).then(({ data }) =>
+            this.setState({ title: data.title })
+        );
+        this.retrieveColumns(BOARD_GID).then(({ data }) =>
+            this.setState({ columns: data })
+        );
     }
 
     onDragEnd = (result) => {
@@ -156,8 +158,23 @@ export default class ViewBoard extends React.Component {
     };
 
     addColumn = () => {
-        const { columns } = this.state;
-        this.setState({ columns: columns.concat([{ id: uuidv4() }]) });
+        const formdata = new FormData();
+        formdata.append('title', '');
+        this.createColumn(BOARD_GID, formdata);
+    };
+
+    createColumn = (gid, formdata) => {
+        axios
+            .post(`${config.API_URL}/column/${gid}`, formdata, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${JWT}`,
+                },
+            })
+            .then(({ data }) => {
+                const { columns } = this.state;
+                this.setState({ columns: columns.concat([data]) });
+            });
     };
 
     updateColumn = (column) => {
@@ -191,6 +208,13 @@ export default class ViewBoard extends React.Component {
                 this.setState({ title: data.title });
             });
 
+    retrieveColumns = (gid) =>
+        axios.get(`${config.API_URL}/column/${gid}`, {
+            headers: {
+                Authorization: `Bearer ${JWT}`,
+            },
+        });
+
     handleBoardNameChange = (e, { value }) => {
         const { titleTimer } = this.state;
 
@@ -222,8 +246,8 @@ export default class ViewBoard extends React.Component {
                         <Grid.Row style={{ height: '100%' }}>
                             {columns.map((column) => (
                                 <Column
-                                    key={column.id}
-                                    id={column.id}
+                                    key={column.gid}
+                                    gid={column.gid}
                                     title={column.title}
                                     tasks={column.tasks}
                                     updateColumn={this.updateColumn}

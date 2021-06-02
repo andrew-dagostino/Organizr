@@ -7,32 +7,32 @@ import Task from './Task';
 
 class Column extends React.Component {
     addTask = () => {
-        const { id, title, tasks, updateColumn } = this.props;
+        const { gid, title, tasks, updateColumn } = this.props;
         updateColumn({
-            id,
+            gid,
             title,
             tasks: tasks.concat([
                 {
-                    id: uuidv4(),
+                    gid: uuidv4(),
                 },
             ]),
         });
     };
 
     updateTask = (task) => {
-        const { id, title, tasks, updateColumn } = this.props;
-        const index = tasks.findIndex((t) => t.id === task.id);
+        const { gid, title, tasks, updateColumn } = this.props;
+        const index = tasks.findIndex((t) => t.gid === task.gid);
         tasks[index] = task;
-        updateColumn({ id, title, tasks });
+        updateColumn({ gid, title, tasks });
     };
 
     handleTitle = (val) => {
-        const { id, tasks, updateColumn } = this.props;
-        updateColumn({ id, title: val, tasks });
+        const { gid, tasks, updateColumn } = this.props;
+        updateColumn({ gid, title: val, tasks });
     };
 
     render() {
-        const { id, title, tasks } = this.props;
+        const { gid, title, tasks } = this.props;
 
         return (
             <Grid.Column style={{ marginBottom: '2rem' }}>
@@ -69,7 +69,7 @@ class Column extends React.Component {
                             </span>
                         </Button>
                         <br />
-                        <Droppable droppableId={id}>
+                        <Droppable droppableId={gid}>
                             {(provided) => (
                                 <div
                                     // eslint-disable-next-line react/jsx-props-no-spreading
@@ -78,8 +78,8 @@ class Column extends React.Component {
                                 >
                                     {tasks.map((task, index) => (
                                         <Task
-                                            key={task.id}
-                                            id={task.id}
+                                            key={task.gid}
+                                            id={task.gid}
                                             title={task.title}
                                             description={task.description}
                                             index={index}
@@ -98,11 +98,11 @@ class Column extends React.Component {
 }
 
 Column.propTypes = {
-    id: PropTypes.string.isRequired,
+    gid: PropTypes.string.isRequired,
     title: PropTypes.string,
     tasks: PropTypes.arrayOf(
         objectOf({
-            id: PropTypes.string.isRequired,
+            gid: PropTypes.string.isRequired,
             title: PropTypes.string,
             description: PropTypes.string,
         })
