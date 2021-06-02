@@ -3,8 +3,18 @@ import { Card, Grid, Icon } from 'semantic-ui-react';
 import { v4 as uuidv4 } from 'uuid';
 import PropTypes from 'prop-types';
 import { DragDropContext } from 'react-beautiful-dnd';
+import axios from 'axios';
+
 import Column from '../components/Column';
 import Header from '../components/Header';
+
+import config from '../config.json';
+
+const JWT = window.localStorage.getItem('jwt');
+const BOARD_GID = (() => {
+    const pathVars = window.location.pathname.split('/');
+    return pathVars[pathVars.length - 1];
+})();
 
 /**
  * Card widget linking to the new board page
@@ -88,8 +98,16 @@ export default class ViewBoard extends React.Component {
         super(props);
 
         this.state = {
+            title: '',
             columns: [],
+            titleTimer: undefined,
         };
+    }
+
+    componentDidMount() {
+        this.retrieveBoard(BOARD_GID).then(({ data }) => {
+            this.setState({ title: data.title });
+        });
     }
 
     onDragEnd = (result) => {
@@ -154,11 +172,51 @@ export default class ViewBoard extends React.Component {
         return columns.filter((column) => column.id === id)[0];
     };
 
+    retrieveBoard = (gid) =>
+        axios.get(`${config.API_URL}/board/${gid}`, {
+            headers: {
+                Authorization: `Bearer ${JWT}`,
+            },
+        });
+
+    updateBoard = (gid, formdata) =>
+        axios
+            .put(`${config.API_URL}/board/${gid}`, formdata, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${JWT}`,
+                },
+            })
+            .then(({ data }) => {
+                this.setState({ title: data.title });
+            });
+
+    handleBoardNameChange = (e, { value }) => {
+        const { titleTimer } = this.state;
+
+        clearTimeout(titleTimer);
+        if (value) {
+            const formdata = new FormData();
+            formdata.append('title', value);
+
+            this.setState({
+                title: value,
+                titleTimer: setTimeout(
+                    () => this.updateBoard(BOARD_GID, formdata),
+                    3000
+                ),
+            });
+        }
+    };
+
     render() {
-        const { columns } = this.state;
+        const { title, columns } = this.state;
         return (
             <>
-                <Header />
+                <Header
+                    title={title}
+                    handleChange={this.handleBoardNameChange}
+                />
                 <DragDropContext onDragEnd={this.onDragEnd}>
                     <Grid columns="4" container doubling stackable>
                         <Grid.Row style={{ height: '100%' }}>

@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { Input, Menu, Sticky } from 'semantic-ui-react';
 
 import { Link } from 'react-router-dom';
@@ -23,6 +24,7 @@ export default class Header extends Component {
 
     render() {
         const { activeItem } = this.state;
+        const { title, handleChange } = this.props;
 
         return (
             <Sticky style={{ marginBottom: '2rem' }}>
@@ -45,8 +47,9 @@ export default class Header extends Component {
                             left: '44%',
                             height: '3rem',
                         }}
+                        onChange={handleChange}
                     >
-                        <input style={{ textAlign: 'center' }} />
+                        <input style={{ textAlign: 'center' }} value={title} />
                     </Input>
                     <Menu.Item position="right" onClick={this.handleLogOut}>
                         Log out
@@ -56,3 +59,12 @@ export default class Header extends Component {
         );
     }
 }
+
+Header.propTypes = {
+    title: PropTypes.string,
+    handleChange: PropTypes.func.isRequired,
+};
+
+Header.defaultProps = {
+    title: '',
+};

@@ -23,8 +23,8 @@ function AddBoardWidget() {
                     Authorization: `Bearer ${JWT}`,
                 },
             })
-            .then((response) => {
-                window.location.replace(`/board/${response.data.gid}`);
+            .then(({ data }) => {
+                window.location.replace(`/board/${data.gid}`);
             });
     }
 
@@ -103,9 +103,9 @@ export default class ViewBoards extends React.Component {
                 <Grid columns="4" container doubling stackable>
                     <Grid.Row>
                         {boards.map((board) => (
-                            <Grid.Column key={board.id}>
+                            <Grid.Column key={board.gid}>
                                 <BoardCard
-                                    id={board.id}
+                                    id={board.gid}
                                     title={board.title}
                                     memberCount={board.board_member_count}
                                 />
