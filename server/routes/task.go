@@ -293,7 +293,7 @@ func updateTask(columnGid string, taskGid string, title string, description stri
 			SET
 				title = $1,
 				description = $2,
-				task_column_id = $4,
+				task_column_id = (SELECT id FROM task_column WHERE gid = $4),
 				updated = CURRENT_TIMESTAMP
 			WHERE gid = $3;
 		`,
@@ -363,7 +363,7 @@ func addTask(columnGid string, title string, description string) (types.Task, er
 				gid,
 				title,
 				description,
-				task_column_gid
+				task_column_id
 			FROM task
 			WHERE id = $1;
 		`,

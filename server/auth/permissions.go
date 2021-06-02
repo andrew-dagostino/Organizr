@@ -52,13 +52,12 @@ func VerifyColumnPermission(memberId int, columnGid string, minPermission int) (
 	hasPermission := false
 	err = conn.QueryRow(context.Background(),
 		`
-			SELECT EXISTS(
+			SELECT EXISTS (
 				SELECT id
 				FROM board_member
 				WHERE member_id = $1
 				AND board_id = (
-						SELECT board_id FROM task_column WHERE gid = $1
-					)
+					SELECT board_id FROM task_column WHERE gid = $2
 				)
 				AND board_permission_id <= $3
 			) AS has_permission;

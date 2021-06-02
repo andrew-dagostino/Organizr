@@ -73,19 +73,19 @@ func main() {
 	}, authenticated())
 
 	// Task Routes
-	e.GET("/api/task/:column_id", func(c echo.Context) error {
+	e.GET("/api/task/:column_gid", func(c echo.Context) error {
 		return routes.GetTasks(c, logger)
 	}, authenticated())
-	e.GET("/api/task/:column_id/:task_id", func(c echo.Context) error {
+	e.GET("/api/task/:column_gid/:task_gid", func(c echo.Context) error {
 		return routes.GetTaskById(c, logger)
 	}, authenticated())
-	e.PUT("/api/task/:column_id/:task_id", func(c echo.Context) error {
+	e.PUT("/api/task/:column_gid/:task_gid", func(c echo.Context) error {
 		return routes.EditTask(c, logger)
 	}, authenticated())
-	e.POST("/api/task/:column_id", func(c echo.Context) error {
+	e.POST("/api/task/:column_gid", func(c echo.Context) error {
 		return routes.CreateTask(c, logger)
 	}, authenticated())
-	e.DELETE("/api/task/:column_id/:task_id", func(c echo.Context) error {
+	e.DELETE("/api/task/:column_gid/:task_gid", func(c echo.Context) error {
 		return routes.DeleteTask(c, logger)
 	}, authenticated())
 

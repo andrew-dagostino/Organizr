@@ -108,9 +108,14 @@ export default class ViewBoard extends React.Component {
         this.retrieveBoard(BOARD_GID).then(({ data }) =>
             this.setState({ title: data.title })
         );
-        this.retrieveColumns(BOARD_GID).then(({ data }) =>
-            this.setState({ columns: data })
-        );
+        this.retrieveColumns(BOARD_GID).then(({ data }) => {
+            const columns = data;
+            columns.forEach(async (column, index) => {
+                const response = await this.retrieveTasks(column.gid);
+                columns[index].tasks = [...response.data];
+                this.setState({ columns });
+            });
+        });
     }
 
     onDragEnd = (result) => {
@@ -127,8 +132,8 @@ export default class ViewBoard extends React.Component {
         const dColumn = this.getColumn(dId);
 
         if (sId === dId) {
-            this.updateColumn({
-                id: sColumn.id,
+            this.updateColumnUI({
+                gid: sColumn.gid,
                 title: sColumn.title,
                 tasks: reorder(
                     sColumn.tasks,
@@ -144,16 +149,24 @@ export default class ViewBoard extends React.Component {
                 destination
             );
 
-            this.updateColumn({
-                id: sColumn.id,
-                title: sColumn.title,
-                tasks: newResult[sId],
-            });
+            const taskGid = result.draggableId;
+            const task = sColumn.tasks.filter((t) => t.gid === taskGid);
+            task.task_column_id = dColumn.id;
 
-            this.updateColumn({
-                id: dColumn.id,
-                title: dColumn.title,
-                tasks: newResult[dId],
+            const formdata = new FormData();
+            formdata.append('title', task.title || '');
+            formdata.append('description', task.description || '');
+            this.updateTask(dColumn.gid, taskGid, formdata).then(() => {
+                this.updateColumnUI({
+                    gid: sColumn.gid,
+                    title: sColumn.title,
+                    tasks: newResult[sId],
+                });
+                this.updateColumnUI({
+                    gid: dColumn.gid,
+                    title: dColumn.title,
+                    tasks: newResult[dId],
+                });
             });
         }
     };
@@ -185,15 +198,17 @@ export default class ViewBoard extends React.Component {
         this.setState({ columns });
     };
 
-    handleColumnNameChange = (column, value) => {
-        const { columnTimers } = this.state;
+    handleColumnChange = (column) => {
+        const { columns, columnTimers } = this.state;
 
-        this.updateColumnUI(column);
+        const index = columns.findIndex((col) => col.gid === column.gid);
+        const oldColumn = columns[index];
 
-        clearTimeout(columnTimers[column.gid]);
-        if (value) {
+        if (column.title !== oldColumn.title) {
+            clearTimeout(columnTimers[column.gid]);
+
             const formdata = new FormData();
-            formdata.append('title', value);
+            formdata.append('title', column.title);
 
             columnTimers[column.gid] = setTimeout(
                 () => this.updateColumn(BOARD_GID, column.gid, formdata),
@@ -202,11 +217,13 @@ export default class ViewBoard extends React.Component {
 
             this.setState({ columnTimers });
         }
+
+        this.updateColumnUI(column);
     };
 
-    getColumn = (id) => {
+    getColumn = (gid) => {
         const { columns } = this.state;
-        return columns.filter((column) => column.id === id)[0];
+        return columns.filter((column) => column.gid === gid)[0];
     };
 
     retrieveBoard = (gid) =>
@@ -247,6 +264,21 @@ export default class ViewBoard extends React.Component {
                 this.updateColumnUI(data);
             });
 
+    retrieveTasks = (cGid) =>
+        axios.get(`${config.API_URL}/task/${cGid}`, {
+            headers: {
+                Authorization: `Bearer ${JWT}`,
+            },
+        });
+
+    updateTask = (cGid, tGid, formdata) =>
+        axios.put(`${config.API_URL}/task/${cGid}/${tGid}`, formdata, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                Authorization: `Bearer ${JWT}`,
+            },
+        });
+
     handleBoardNameChange = (e, { value }) => {
         const { titleTimer } = this.state;
 
@@ -282,7 +314,7 @@ export default class ViewBoard extends React.Component {
                                     gid={column.gid}
                                     title={column.title}
                                     tasks={column.tasks}
-                                    updateColumn={this.handleColumnNameChange}
+                                    updateColumn={this.handleColumnChange}
                                     getColumn={this.getColumn}
                                 />
                             ))}

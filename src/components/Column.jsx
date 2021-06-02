@@ -1,23 +1,40 @@
 import React from 'react';
-import { Button, Card, Grid, Icon, Input } from 'semantic-ui-react';
-import { v4 as uuidv4 } from 'uuid';
-import { Droppable } from 'react-beautiful-dnd';
 import PropTypes, { objectOf } from 'prop-types';
+
+import { Button, Card, Grid, Icon, Input } from 'semantic-ui-react';
+import { Droppable } from 'react-beautiful-dnd';
+import axios from 'axios';
+
+import config from '../config.json';
+
 import Task from './Task';
+
+const JWT = window.localStorage.getItem('jwt');
 
 class Column extends React.Component {
     addTask = () => {
         const { gid, title, tasks, updateColumn } = this.props;
-        updateColumn({
-            gid,
-            title,
-            tasks: tasks.concat([
-                {
-                    gid: uuidv4(),
-                },
-            ]),
+
+        const formdata = new FormData();
+        formdata.append('title', '');
+        formdata.append('description', '');
+
+        this.createTask(gid, formdata).then((data) => {
+            updateColumn({
+                gid,
+                title,
+                tasks: tasks.concat([data]),
+            });
         });
     };
+
+    createTask = (cGid, formdata) =>
+        axios.post(`${config.API_URL}/task/${cGid}`, formdata, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                Authorization: `Bearer ${JWT}`,
+            },
+        });
 
     updateTask = (task) => {
         const { gid, title, tasks, updateColumn } = this.props;
@@ -28,7 +45,7 @@ class Column extends React.Component {
 
     handleTitle = (value) => {
         const { gid, tasks, updateColumn } = this.props;
-        updateColumn({ gid, title: value, tasks }, value);
+        updateColumn({ gid, title: value, tasks });
     };
 
     render() {
