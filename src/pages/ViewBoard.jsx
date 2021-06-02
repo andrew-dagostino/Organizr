@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Grid, Icon } from 'semantic-ui-react';
+import { Card, Grid, Icon, Loader } from 'semantic-ui-react';
 import PropTypes from 'prop-types';
 import { DragDropContext } from 'react-beautiful-dnd';
 import axios from 'axios';
@@ -96,6 +96,7 @@ export default class ViewBoard extends React.Component {
             title: '',
             gid: '',
             columns: [],
+            loaded: false,
             titleTimer: undefined,
             columnTimers: {},
         };
@@ -112,10 +113,13 @@ export default class ViewBoard extends React.Component {
         );
         this.retrieveColumns(boardGid).then(({ data }) => {
             const columns = data;
-            columns.forEach(async (column, index) => {
+            columns.forEach(async (column, index, arr) => {
                 const response = await this.retrieveTasks(column.gid);
                 columns[index].tasks = [...response.data];
-                this.setState({ columns });
+
+                if (index === arr.length - 1) {
+                    this.setState({ columns, loaded: true });
+                }
             });
         });
     }
@@ -302,7 +306,7 @@ export default class ViewBoard extends React.Component {
     };
 
     render() {
-        const { title, columns } = this.state;
+        const { title, columns, loaded } = this.state;
         return (
             <>
                 <Header
@@ -310,23 +314,29 @@ export default class ViewBoard extends React.Component {
                     handleChange={this.handleBoardNameChange}
                     showTextfield
                 />
-                <DragDropContext onDragEnd={this.onDragEnd}>
-                    <Grid columns="4" container doubling stackable>
-                        <Grid.Row style={{ height: '100%' }}>
-                            {columns.map((column) => (
-                                <Column
-                                    key={column.gid}
-                                    gid={column.gid}
-                                    title={column.title}
-                                    tasks={column.tasks}
-                                    updateColumn={this.handleColumnChange}
-                                    getColumn={this.getColumn}
+                {loaded ? (
+                    <DragDropContext onDragEnd={this.onDragEnd}>
+                        <Grid columns="4" container doubling stackable>
+                            <Grid.Row style={{ height: '100%' }}>
+                                {columns.map((column) => (
+                                    <Column
+                                        key={column.gid}
+                                        gid={column.gid}
+                                        title={column.title}
+                                        tasks={column.tasks}
+                                        updateColumn={this.handleColumnChange}
+                                        getColumn={this.getColumn}
+                                    />
+                                ))}
+                                <AddColumnWidget
+                                    onClick={() => this.addColumn()}
                                 />
-                            ))}
-                            <AddColumnWidget onClick={() => this.addColumn()} />
-                        </Grid.Row>
-                    </Grid>
-                </DragDropContext>
+                            </Grid.Row>
+                        </Grid>
+                    </DragDropContext>
+                ) : (
+                    <Loader active>Loading</Loader>
+                )}
             </>
         );
     }

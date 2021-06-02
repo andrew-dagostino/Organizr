@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React from 'react';
-import { Card, Grid, Icon } from 'semantic-ui-react';
+import { Card, Grid, Icon, Loader } from 'semantic-ui-react';
 import BoardCard from '../components/BoardCard';
 import Header from '../components/Header';
 
@@ -77,12 +77,13 @@ export default class ViewBoards extends React.Component {
 
         this.state = {
             boards: [],
+            loaded: false,
         };
     }
 
     componentDidMount() {
         this.retrieveBoards().then(({ data }) => {
-            this.setState({ boards: data });
+            this.setState({ boards: data, loaded: true });
         });
     }
 
@@ -95,25 +96,29 @@ export default class ViewBoards extends React.Component {
         });
 
     render() {
-        const { boards } = this.state;
+        const { boards, loaded } = this.state;
 
         return (
             <>
                 <Header />
-                <Grid columns="4" container doubling stackable>
-                    <Grid.Row>
-                        {boards.map((board) => (
-                            <Grid.Column key={board.gid}>
-                                <BoardCard
-                                    id={board.gid}
-                                    title={board.title}
-                                    memberCount={board.board_member_count}
-                                />
-                            </Grid.Column>
-                        ))}
-                        <AddBoardWidget />
-                    </Grid.Row>
-                </Grid>
+                {loaded ? (
+                    <Grid columns="4" container doubling stackable>
+                        <Grid.Row>
+                            {boards.map((board) => (
+                                <Grid.Column key={board.gid}>
+                                    <BoardCard
+                                        id={board.gid}
+                                        title={board.title}
+                                        memberCount={board.board_member_count}
+                                    />
+                                </Grid.Column>
+                            ))}
+                            <AddBoardWidget />
+                        </Grid.Row>
+                    </Grid>
+                ) : (
+                    <Loader active>Loading</Loader>
+                )}
             </>
         );
     }
