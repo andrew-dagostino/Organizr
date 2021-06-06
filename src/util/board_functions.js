@@ -63,6 +63,15 @@ function createColumn(cGid, formdata) {
     });
 }
 
+function deleteColumn(bGid, cGid) {
+    return axios.delete(`${config.API_URL}/column/${bGid}/${cGid}`, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${JWT}`,
+        },
+    });
+}
+
 function retrieveTasks(cGid) {
     return axios.get(`${config.API_URL}/task/${cGid}`, {
         headers: {
@@ -106,6 +115,7 @@ export {
     retrieveColumns,
     updateColumn,
     createColumn,
+    deleteColumn,
     retrieveTasks,
     updateTask,
     createTask,

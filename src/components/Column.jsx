@@ -1,12 +1,32 @@
 import React from 'react';
 import PropTypes, { objectOf } from 'prop-types';
 
-import { Button, Card, Grid, Icon, Input } from 'semantic-ui-react';
+import { Button, Card, Dropdown, Grid, Icon, Input } from 'semantic-ui-react';
 import { Droppable } from 'react-beautiful-dnd';
 
 import Task from './Task';
 
 import { updateTask, createTask, deleteTask } from '../util/board_functions';
+
+function OptionsMenu(props) {
+    const { deleteColumn } = props;
+
+    return (
+        <Dropdown compact icon="vertical ellipsis" className="icon">
+            <Dropdown.Menu>
+                <Dropdown.Header content="Actions" />
+                <Dropdown.Divider />
+                <Dropdown.Item icon="trash" onClick={deleteColumn}>
+                    Delete
+                </Dropdown.Item>
+            </Dropdown.Menu>
+        </Dropdown>
+    );
+}
+
+OptionsMenu.propTypes = {
+    deleteColumn: PropTypes.func.isRequired,
+};
 
 class Column extends React.Component {
     constructor(props) {
@@ -96,7 +116,7 @@ class Column extends React.Component {
     };
 
     render() {
-        const { gid, title, tasks } = this.props;
+        const { gid, title, tasks, deleteColumn } = this.props;
 
         return (
             <Grid.Column style={{ marginBottom: '2rem' }}>
@@ -107,16 +127,29 @@ class Column extends React.Component {
                         }}
                     >
                         <Card.Header>
-                            <Input
-                                placeholder="Column Name..."
-                                fluid
-                                size="small"
-                                transparent
-                                value={title}
-                                onChange={(e, { value }) =>
-                                    this.handleTitle(value)
-                                }
-                            />
+                            <Grid columns="2">
+                                <Grid.Row>
+                                    <Grid.Column width="13">
+                                        <Input
+                                            placeholder="Column Name..."
+                                            fluid
+                                            size="small"
+                                            transparent
+                                            value={title}
+                                            onChange={(e, { value }) =>
+                                                this.handleTitle(value)
+                                            }
+                                        />
+                                    </Grid.Column>
+                                    <Grid.Column width="3" textAlign="center">
+                                        <OptionsMenu
+                                            deleteColumn={() =>
+                                                deleteColumn({ gid })
+                                            }
+                                        />
+                                    </Grid.Column>
+                                </Grid.Row>
+                            </Grid>
                         </Card.Header>
                         <hr />
                         <Button
@@ -172,6 +205,7 @@ Column.propTypes = {
     ),
     updateColumn: PropTypes.func.isRequired,
     getColumn: PropTypes.func.isRequired,
+    deleteColumn: PropTypes.func.isRequired,
 };
 
 Column.defaultProps = {

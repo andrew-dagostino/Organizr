@@ -7,15 +7,13 @@ function OptionsMenu(props) {
     const { deleteTask } = props;
 
     return (
-        <Dropdown icon="vertical ellipsis" className="icon">
+        <Dropdown compact icon="vertical ellipsis" className="icon">
             <Dropdown.Menu>
-                <Dropdown.Header content="Filter by tag" />
+                <Dropdown.Header content="Actions" style={{ margin: 0 }} />
                 <Dropdown.Divider />
                 <Dropdown.Item icon="trash" onClick={deleteTask}>
                     Delete
                 </Dropdown.Item>
-                <Dropdown.Item>Announcement</Dropdown.Item>
-                <Dropdown.Item>Discussion</Dropdown.Item>
             </Dropdown.Menu>
         </Dropdown>
     );
