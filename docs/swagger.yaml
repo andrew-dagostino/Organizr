@@ -1,0 +1,53 @@
+basePath: /
+consumes:
+- application/form-data
+host: localhost
+info:
+  description: API Documentation.
+  title: Organizr
+  version: 1.0.0
+paths:
+  /api/login:
+    post:
+      description: Authenticates a member with their username and password from a
+        POST, returning a new JWT session token
+      operationId: login
+      parameters:
+      - description: Account's username or email
+        example: user@email.com
+        in: body
+        name: Username
+        required: true
+        schema:
+          type: string
+      - description: Account's password
+        example: password1234
+        in: body
+        name: Password
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          $ref: '#/responses/login-response'
+        "400":
+          $ref: '#/responses/error-response'
+        "500":
+          $ref: '#/responses/error-response'
+        default:
+          $ref: '#/responses/login-response'
+      tags:
+      - authentication
+produces:
+- application/json
+responses:
+  error-response:
+    description: Error Response
+  login-response:
+    description: Authentication Response
+schemes:
+- http
+securityDefinitions:
+  basic:
+    type: basic
+swagger: "2.0"

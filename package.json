@@ -10,6 +10,8 @@
         "build": "npm run build-ui && npm run build-server",
         "build-ui": "react-scripts build",
         "build-server": "go build server/server.go",
+        "build-docs": "swagger generate spec -o ./docs/swagger.yaml",
+        "serve-docs": "swagger serve -F=swagger ./docs/swagger.yaml",
         "test": "react-scripts test --env=jsdom",
         "eject": "react-scripts eject"
     },
