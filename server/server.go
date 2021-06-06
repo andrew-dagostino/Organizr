@@ -22,7 +22,7 @@ func main() {
 		Format: "[${time_rfc3339}] \"${method} ${uri}\" ${status}\n",
 	}))
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"http://127.0.0.1:3000", "http://localhost:3000"},
+		AllowOrigins: []string{"*"},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
 	}))
 	e.Use(middleware.Recover())

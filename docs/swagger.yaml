@@ -1,7 +1,7 @@
 basePath: /
 consumes:
-- application/form-data
-host: localhost
+- application/x-www-form-urlencoded
+host: localhost:1323
 info:
   description: API Documentation.
   title: Organizr
@@ -13,29 +13,49 @@ paths:
         POST, returning a new JWT session token
       operationId: login
       parameters:
-      - description: Account's username or email
-        example: user@email.com
-        in: body
+      - example: user@email.com
+        in: formData
         name: Username
         required: true
-        schema:
-          type: string
-      - description: Account's password
-        example: password1234
-        in: body
+        type: string
+      - example: password1234
+        in: formData
         name: Password
         required: true
-        schema:
-          type: string
+        type: string
       responses:
         "200":
           $ref: '#/responses/login-response'
         "400":
           $ref: '#/responses/error-response'
-        "500":
+      tags:
+      - authentication
+  /api/register:
+    post:
+      description: Registers a new member using the supplied username, email, and
+        password
+      operationId: register
+      parameters:
+      - example: andrew
+        in: formData
+        name: Username
+        required: true
+        type: string
+      - example: user@email.com
+        in: formData
+        name: Email
+        required: true
+        type: string
+      - example: password1234
+        in: formData
+        name: Password
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+        "400":
           $ref: '#/responses/error-response'
-        default:
-          $ref: '#/responses/login-response'
       tags:
       - authentication
 produces:

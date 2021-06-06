@@ -19,14 +19,12 @@ import (
 //
 // swagger:parameters authentication login
 type LoginBodyParams struct {
-	// Account's username or email
-	// in: body
+	// in: formData
 	// required: true
 	// example: user@email.com
 	Username string `form:"username"`
 
-	// Account's password
-	// in: body
+	// in: formData
 	// required: true
 	// example: password1234
 	Password string `form:"password"`
@@ -36,7 +34,6 @@ type LoginBodyParams struct {
 //
 // swagger:response login-response
 type LoginBodyResponse struct {
-	// JWT session token
 	// in: body
 	// example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
 	JWT string `json:"jwt"`
@@ -46,12 +43,10 @@ type LoginBodyResponse struct {
 //
 // swagger:response error-response
 type Error struct {
-	// Error Code
 	// in: body
 	// example: login_failed
 	Code string `json:"code"`
 
-	// JWT session token
 	// in: body
 	// example: Username and/or password are incorrect
 	Message string `json:"message"`
@@ -62,10 +57,8 @@ type Error struct {
 // Authenticates a member with their username and password from a POST, returning a new JWT session token
 //
 // Responses:
-//   default: login-response
 //   200: login-response
 //   400: error-response
-//   500: error-response
 func LoginMember(c echo.Context, log *log.Logger) error {
 	e := new(Error)
 	e.Code = "login_failed"
@@ -73,7 +66,7 @@ func LoginMember(c echo.Context, log *log.Logger) error {
 
 	params := new(LoginBodyParams)
 	if err := c.Bind(params); err != nil {
-		return c.JSON(http.StatusInternalServerError, e)
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
 	member, err := getMember(strings.ToLower(params.Username))
@@ -91,7 +84,7 @@ func LoginMember(c echo.Context, log *log.Logger) error {
 	token, err := generateJWT(member)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusInternalServerError, e)
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
 	res := new(LoginBodyResponse)
