@@ -12,6 +12,7 @@ import {
     retrieveColumns,
     updateColumn,
     createColumn,
+    deleteColumn,
     retrieveTasks,
     updateTask,
 } from '../util/board_functions';
@@ -40,9 +41,9 @@ function AddColumnWidget(props) {
                     }}
                 >
                     <Icon
-                        name="add"
+                        name="plus"
                         style={{
-                            fontSize: '10rem',
+                            fontSize: '5rem',
                             margin: 'auto auto',
                         }}
                     />
@@ -113,9 +114,9 @@ export default class ViewBoard extends React.Component {
 
         this.setState({ gid: boardGid });
 
-        retrieveBoard(boardGid).then(({ data }) =>
-            this.setState({ title: data.title })
-        );
+        retrieveBoard(boardGid)
+            .then(({ data }) => this.setState({ title: data.title }))
+            .catch(() => window.location.replace('/board'));
         retrieveColumns(boardGid).then(({ data }) => {
             const columns = data;
             columns.forEach(async (column, index, arr) => {
@@ -198,6 +199,15 @@ export default class ViewBoard extends React.Component {
         });
     };
 
+    removeColumn = (cGid) => {
+        const { columns } = this.state;
+        columns.splice(
+            columns.findIndex((c) => c.gid === cGid),
+            1
+        );
+        this.setState({ columns });
+    };
+
     updateColumnUI = (column) => {
         const { columns } = this.state;
         const index = columns.findIndex((col) => col.gid === column.gid);
@@ -229,6 +239,14 @@ export default class ViewBoard extends React.Component {
         }
 
         this.updateColumnUI(column);
+    };
+
+    handleColumnRemove = (column) => {
+        const { gid } = this.state;
+
+        deleteColumn(gid, column.gid).then(() => {
+            this.removeColumn(column.gid);
+        });
     };
 
     getColumn = (gid) => {
@@ -278,6 +296,7 @@ export default class ViewBoard extends React.Component {
                                         tasks={column.tasks}
                                         updateColumn={this.handleColumnChange}
                                         getColumn={this.getColumn}
+                                        deleteColumn={this.handleColumnRemove}
                                     />
                                 ))}
                                 <AddColumnWidget

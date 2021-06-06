@@ -8,7 +8,6 @@
         "start-ui": "react-scripts start",
         "start-server": "server",
         "build": "npm run build-ui && npm run build-server",
-        "build-semantic": "cd src/semantic && npx gulp build",
         "build-ui": "react-scripts build",
         "build-server": "go build server/server.go",
         "test": "react-scripts test --env=jsdom",
@@ -31,7 +30,6 @@
         "eslint-config-prettier": "^8.3.0",
         "eslint-plugin-prettier": "^3.4.0",
         "eslint-plugin-react": "^7.23.2",
-        "fomantic-ui": "^2.8.7",
         "prettier": "^2.3.0"
     },
     "dependencies": {

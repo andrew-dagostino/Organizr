@@ -3,7 +3,11 @@ import { Card, Grid, Icon, Loader } from 'semantic-ui-react';
 import BoardCard from '../components/BoardCard';
 import Header from '../components/Header';
 
-import { createBoard, retrieveBoards } from '../util/board_functions';
+import {
+    createBoard,
+    retrieveBoards,
+    deleteBoard,
+} from '../util/board_functions';
 
 /**
  * Card widget linking to the new board page
@@ -13,9 +17,9 @@ function AddBoardWidget() {
         const formdata = new FormData();
         formdata.append('title', '');
 
-        createBoard(formdata).then(({ data }) => {
-            window.location.replace(`/board/${data.gid}`);
-        });
+        createBoard(formdata).then(({ data }) =>
+            window.location.replace(`/board/${data.gid}`)
+        );
     }
 
     return (
@@ -36,9 +40,9 @@ function AddBoardWidget() {
                     }}
                 >
                     <Icon
-                        name="add"
+                        name="plus"
                         style={{
-                            fontSize: '10rem',
+                            fontSize: '5rem',
                             margin: 'auto auto',
                         }}
                     />
@@ -77,6 +81,21 @@ export default class ViewBoards extends React.Component {
         });
     }
 
+    removeBoard = (bGid) => {
+        const { boards } = this.state;
+        boards.splice(
+            boards.findIndex((b) => b.gid === bGid),
+            1
+        );
+        this.setState({ boards });
+    };
+
+    handleBoardRemove = (board) => {
+        deleteBoard(board.gid).then(() => {
+            this.removeBoard(board.gid);
+        });
+    };
+
     render() {
         const { boards, loaded } = this.state;
 
@@ -89,9 +108,10 @@ export default class ViewBoards extends React.Component {
                             {boards.map((board) => (
                                 <Grid.Column key={board.gid}>
                                     <BoardCard
-                                        id={board.gid}
+                                        gid={board.gid}
                                         title={board.title}
                                         memberCount={board.board_member_count}
+                                        deleteBoard={this.handleBoardRemove}
                                     />
                                 </Grid.Column>
                             ))}
