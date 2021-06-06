@@ -89,6 +89,15 @@ function createTask(cGid, formdata) {
     });
 }
 
+function deleteTask(cGid, tGid) {
+    return axios.delete(`${config.API_URL}/task/${cGid}/${tGid}`, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${JWT}`,
+        },
+    });
+}
+
 export {
     retrieveBoard,
     retrieveBoards,
@@ -100,4 +109,5 @@ export {
     retrieveTasks,
     updateTask,
     createTask,
+    deleteTask,
 };

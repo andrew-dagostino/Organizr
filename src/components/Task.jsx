@@ -3,19 +3,27 @@ import PropTypes from 'prop-types';
 import { Card, Dropdown, Form, Grid, Icon, Input } from 'semantic-ui-react';
 import { Draggable } from 'react-beautiful-dnd';
 
-function OptionsMenu() {
+function OptionsMenu(props) {
+    const { deleteTask } = props;
+
     return (
         <Dropdown icon="vertical ellipsis" className="icon">
             <Dropdown.Menu>
                 <Dropdown.Header content="Filter by tag" />
                 <Dropdown.Divider />
-                <Dropdown.Item>Important</Dropdown.Item>
+                <Dropdown.Item icon="trash" onClick={deleteTask}>
+                    Delete
+                </Dropdown.Item>
                 <Dropdown.Item>Announcement</Dropdown.Item>
                 <Dropdown.Item>Discussion</Dropdown.Item>
             </Dropdown.Menu>
         </Dropdown>
     );
 }
+
+OptionsMenu.propTypes = {
+    deleteTask: PropTypes.func.isRequired,
+};
 
 class Task extends React.Component {
     handleTitle = (val) => {
@@ -29,7 +37,7 @@ class Task extends React.Component {
     };
 
     render() {
-        const { gid, title, description, index } = this.props;
+        const { gid, title, description, index, deleteTask } = this.props;
 
         return (
             <div>
@@ -72,7 +80,11 @@ class Task extends React.Component {
                                                     width="3"
                                                     textAlign="center"
                                                 >
-                                                    <OptionsMenu />
+                                                    <OptionsMenu
+                                                        deleteTask={() =>
+                                                            deleteTask({ gid })
+                                                        }
+                                                    />
                                                 </Grid.Column>
                                             </Grid.Row>
                                         </Grid>
@@ -109,6 +121,7 @@ Task.propTypes = {
     description: PropTypes.string,
     index: PropTypes.number.isRequired,
     updateTask: PropTypes.func.isRequired,
+    deleteTask: PropTypes.func.isRequired,
 };
 
 Task.defaultProps = {

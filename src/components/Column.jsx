@@ -6,7 +6,7 @@ import { Droppable } from 'react-beautiful-dnd';
 
 import Task from './Task';
 
-import { updateTask, createTask } from '../util/board_functions';
+import { updateTask, createTask, deleteTask } from '../util/board_functions';
 
 class Column extends React.Component {
     constructor(props) {
@@ -40,6 +40,20 @@ class Column extends React.Component {
         updateColumn({ gid, title, tasks });
     };
 
+    removeTask = (tGid) => {
+        const { gid, title, tasks, updateColumn } = this.props;
+        tasks.splice(
+            tasks.findIndex((t) => t.gid === tGid),
+            1
+        );
+
+        updateColumn({
+            gid,
+            title,
+            tasks,
+        });
+    };
+
     handleTaskChange = (task) => {
         const { taskTimers } = this.state;
         const { tasks, gid } = this.props;
@@ -66,6 +80,14 @@ class Column extends React.Component {
         }
 
         this.updateTaskUI(task); // Updates UI
+    };
+
+    handleTaskRemove = (task) => {
+        const { gid } = this.props;
+
+        deleteTask(gid, task.gid).then(() => {
+            this.removeTask(task.gid);
+        });
     };
 
     handleTitle = (value) => {
@@ -124,6 +146,7 @@ class Column extends React.Component {
                                             description={task.description}
                                             index={index}
                                             updateTask={this.handleTaskChange}
+                                            deleteTask={this.handleTaskRemove}
                                         />
                                     ))}
                                     {provided.placeholder}
