@@ -114,9 +114,9 @@ export default class ViewBoard extends React.Component {
 
         this.setState({ gid: boardGid });
 
-        retrieveBoard(boardGid).then(({ data }) =>
-            this.setState({ title: data.title })
-        );
+        retrieveBoard(boardGid)
+            .then(({ data }) => this.setState({ title: data.title }))
+            .catch(() => window.location.replace('/board'));
         retrieveColumns(boardGid).then(({ data }) => {
             const columns = data;
             columns.forEach(async (column, index, arr) => {
