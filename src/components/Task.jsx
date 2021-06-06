@@ -1,7 +1,27 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Card, Form, Icon, Input } from 'semantic-ui-react';
+import { Card, Dropdown, Form, Grid, Icon, Input } from 'semantic-ui-react';
 import { Draggable } from 'react-beautiful-dnd';
+
+function OptionsMenu(props) {
+    const { deleteTask } = props;
+
+    return (
+        <Dropdown compact icon="vertical ellipsis" className="icon">
+            <Dropdown.Menu>
+                <Dropdown.Header content="Actions" style={{ margin: 0 }} />
+                <Dropdown.Divider />
+                <Dropdown.Item icon="trash" onClick={deleteTask}>
+                    Delete
+                </Dropdown.Item>
+            </Dropdown.Menu>
+        </Dropdown>
+    );
+}
+
+OptionsMenu.propTypes = {
+    deleteTask: PropTypes.func.isRequired,
+};
 
 class Task extends React.Component {
     handleTitle = (val) => {
@@ -15,7 +35,7 @@ class Task extends React.Component {
     };
 
     render() {
-        const { gid, title, description, index } = this.props;
+        const { gid, title, description, index, deleteTask } = this.props;
 
         return (
             <div>
@@ -32,22 +52,40 @@ class Task extends React.Component {
                                 <Card.Content>
                                     <Card.Header>
                                         <Icon
-                                            name="drag handle"
+                                            name="grip lines"
                                             style={{
                                                 width: '100%',
                                                 cursor: 'pointer',
                                             }}
                                         />
-                                        <Input
-                                            placeholder="Task Name..."
-                                            fluid
-                                            transparent
-                                            size="mini"
-                                            value={title}
-                                            onChange={(e, data) =>
-                                                this.handleTitle(data.value)
-                                            }
-                                        />
+                                        <Grid columns="2">
+                                            <Grid.Row>
+                                                <Grid.Column width="13">
+                                                    <Input
+                                                        placeholder="Task Name..."
+                                                        fluid
+                                                        transparent
+                                                        size="mini"
+                                                        value={title}
+                                                        onChange={(e, data) =>
+                                                            this.handleTitle(
+                                                                data.value
+                                                            )
+                                                        }
+                                                    />
+                                                </Grid.Column>
+                                                <Grid.Column
+                                                    width="3"
+                                                    textAlign="center"
+                                                >
+                                                    <OptionsMenu
+                                                        deleteTask={() =>
+                                                            deleteTask({ gid })
+                                                        }
+                                                    />
+                                                </Grid.Column>
+                                            </Grid.Row>
+                                        </Grid>
                                     </Card.Header>
                                     <hr />
                                     <Form>
@@ -81,6 +119,7 @@ Task.propTypes = {
     description: PropTypes.string,
     index: PropTypes.number.isRequired,
     updateTask: PropTypes.func.isRequired,
+    deleteTask: PropTypes.func.isRequired,
 };
 
 Task.defaultProps = {

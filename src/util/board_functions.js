@@ -29,7 +29,16 @@ function updateBoard(gid, formdata) {
 }
 
 function createBoard(formdata) {
-    axios.post(`${config.API_URL}/board`, formdata, {
+    return axios.post(`${config.API_URL}/board`, formdata, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${JWT}`,
+        },
+    });
+}
+
+function deleteBoard(bGid) {
+    return axios.delete(`${config.API_URL}/board/${bGid}`, {
         headers: {
             'Content-Type': 'multipart/form-data',
             Authorization: `Bearer ${JWT}`,
@@ -63,6 +72,15 @@ function createColumn(cGid, formdata) {
     });
 }
 
+function deleteColumn(bGid, cGid) {
+    return axios.delete(`${config.API_URL}/column/${bGid}/${cGid}`, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${JWT}`,
+        },
+    });
+}
+
 function retrieveTasks(cGid) {
     return axios.get(`${config.API_URL}/task/${cGid}`, {
         headers: {
@@ -89,15 +107,27 @@ function createTask(cGid, formdata) {
     });
 }
 
+function deleteTask(cGid, tGid) {
+    return axios.delete(`${config.API_URL}/task/${cGid}/${tGid}`, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${JWT}`,
+        },
+    });
+}
+
 export {
     retrieveBoard,
     retrieveBoards,
     updateBoard,
     createBoard,
+    deleteBoard,
     retrieveColumns,
     updateColumn,
     createColumn,
+    deleteColumn,
     retrieveTasks,
     updateTask,
     createTask,
+    deleteTask,
 };
