@@ -40,9 +40,9 @@ function AddColumnWidget(props) {
                     }}
                 >
                     <Icon
-                        name="add"
+                        name="plus"
                         style={{
-                            fontSize: '10rem',
+                            fontSize: '5rem',
                             margin: 'auto auto',
                         }}
                     />

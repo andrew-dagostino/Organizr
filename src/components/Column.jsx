@@ -105,10 +105,8 @@ class Column extends React.Component {
                             color="grey"
                             onClick={() => this.addTask()}
                         >
-                            <Icon name="add" />
-                            <span style={{ verticalAlign: 'text-top' }}>
-                                Add Task
-                            </span>
+                            <Icon name="small plus" />
+                            <span>Add Task</span>
                         </Button>
                         <br />
                         <Droppable droppableId={gid}>

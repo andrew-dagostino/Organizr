@@ -19,8 +19,10 @@ function BoardCard({ id, title, memberCount }) {
                     <Card.Header>{title || '...'}</Card.Header>
                 </Card.Content>
                 <Card.Content extra>
-                    <Icon name="person" />
-                    <span style={{ verticalAlign: 'top' }}>
+                    <Icon name="small user friends" />
+                    <span
+                        style={{ verticalAlign: 'top', marginLeft: '0.5rem' }}
+                    >
                         {memberCount} Member{memberCount === 1 ? '' : 's'}
                     </span>
                 </Card.Content>

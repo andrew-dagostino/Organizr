@@ -1,7 +1,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Card, Form, Icon, Input } from 'semantic-ui-react';
+import { Card, Dropdown, Form, Grid, Icon, Input } from 'semantic-ui-react';
 import { Draggable } from 'react-beautiful-dnd';
+
+function OptionsMenu() {
+    return (
+        <Dropdown icon="vertical ellipsis" className="icon">
+            <Dropdown.Menu>
+                <Dropdown.Header content="Filter by tag" />
+                <Dropdown.Divider />
+                <Dropdown.Item>Important</Dropdown.Item>
+                <Dropdown.Item>Announcement</Dropdown.Item>
+                <Dropdown.Item>Discussion</Dropdown.Item>
+            </Dropdown.Menu>
+        </Dropdown>
+    );
+}
 
 class Task extends React.Component {
     handleTitle = (val) => {
@@ -32,22 +46,36 @@ class Task extends React.Component {
                                 <Card.Content>
                                     <Card.Header>
                                         <Icon
-                                            name="drag handle"
+                                            name="grip lines"
                                             style={{
                                                 width: '100%',
                                                 cursor: 'pointer',
                                             }}
                                         />
-                                        <Input
-                                            placeholder="Task Name..."
-                                            fluid
-                                            transparent
-                                            size="mini"
-                                            value={title}
-                                            onChange={(e, data) =>
-                                                this.handleTitle(data.value)
-                                            }
-                                        />
+                                        <Grid columns="2">
+                                            <Grid.Row>
+                                                <Grid.Column width="13">
+                                                    <Input
+                                                        placeholder="Task Name..."
+                                                        fluid
+                                                        transparent
+                                                        size="mini"
+                                                        value={title}
+                                                        onChange={(e, data) =>
+                                                            this.handleTitle(
+                                                                data.value
+                                                            )
+                                                        }
+                                                    />
+                                                </Grid.Column>
+                                                <Grid.Column
+                                                    width="3"
+                                                    textAlign="center"
+                                                >
+                                                    <OptionsMenu />
+                                                </Grid.Column>
+                                            </Grid.Row>
+                                        </Grid>
                                     </Card.Header>
                                     <hr />
                                     <Form>
