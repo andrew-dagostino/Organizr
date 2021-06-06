@@ -13,36 +13,62 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// Registers a new member using the POST's username and password
-func RegisterMember(c echo.Context, log *log.Logger) error {
-	username := strings.ToLower(strings.TrimSpace(c.FormValue("username")))
-	email := strings.ToLower(strings.TrimSpace(c.FormValue("email")))
-	password := strings.TrimSpace(c.FormValue("password"))
+// User's Registration Information
+//
+// swagger:parameters authentication register
+type RegisterBodyParams struct {
+	// in: formData
+	// required: true
+	// example: andrew
+	Username string `form:"username"`
 
-	err := validateRegisterData(username, email, password)
+	// in: formData
+	// required: true
+	// example: user@email.com
+	Email string `form:"email"`
+
+	// in: formData
+	// required: true
+	// example: password1234
+	Password string `form:"password"`
+}
+
+// swagger:route POST /api/register authentication register
+//
+// Registers a new member using the supplied username, email, and password
+//
+// Responses:
+//   200:
+//   400: error-response
+func RegisterMember(c echo.Context, log *log.Logger) error {
+	e := new(Error)
+	e.Code = "register_failed"
+	e.Message = "Failed to create member"
+
+	params := new(RegisterBodyParams)
+	if err := c.Bind(params); err != nil {
+		return c.JSON(http.StatusInternalServerError, e)
+	}
+	cleanRegisterData(params)
+
+	err := validateRegisterData(params)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error_code": "register_failed",
-			"message":    "Failed to create member",
-		})
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
-	err = createMember(username, email, password)
+	err = createMember(params)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error_code": "register_failed",
-			"message":    "Failed to create member",
-		})
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
 	return c.JSON(http.StatusOK, "")
 }
 
 // Saves new member into the database, first hashing their password
-func createMember(username string, email string, password string) error {
-	hash, err := hashPassword(password)
+func createMember(params *RegisterBodyParams) error {
+	hash, err := hashPassword(params.Password)
 	if err != nil {
 		return err
 	}
@@ -64,7 +90,7 @@ func createMember(username string, email string, password string) error {
 			INSERT INTO member (username, email, password)
 			VALUES ($1, $2, $3);
 		`,
-		username, email, hash,
+		params.Username, params.Email, hash,
 	)
 	if err != nil {
 		return err
@@ -88,15 +114,22 @@ func hashPassword(password string) (string, error) {
 }
 
 // Validates user data before insert
-func validateRegisterData(username string, email string, password string) error {
+func validateRegisterData(params *RegisterBodyParams) error {
 
-	if len(username) < 1 || len(username) > 32 {
+	if len(params.Username) < 1 || len(params.Username) > 32 {
 		return errors.New("Invalid Username")
 	}
 
-	if len(password) < 8 {
+	if len(params.Password) < 8 {
 		return errors.New("Invalid Password")
 	}
 
 	return nil
+}
+
+// Removes whitespace and lowers username, email
+func cleanRegisterData(params *RegisterBodyParams) {
+	params.Username = strings.ToLower(strings.TrimSpace(params.Username))
+	params.Email = strings.ToLower(strings.TrimSpace(params.Email))
+	params.Password = strings.TrimSpace(params.Password)
 }
