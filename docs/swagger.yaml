@@ -2,6 +2,13 @@ basePath: /
 consumes:
 - application/x-www-form-urlencoded
 definitions:
+  AuthDetail:
+    properties:
+      jwt:
+        type: string
+        x-go-name: JWT
+    type: object
+    x-go-package: organizr/server/types
   Board:
     properties:
       board_member_count:
@@ -18,6 +25,16 @@ definitions:
       title:
         type: string
         x-go-name: Title
+    type: object
+    x-go-package: organizr/server/types
+  Error:
+    properties:
+      code:
+        type: string
+        x-go-name: Code
+      message:
+        type: string
+        x-go-name: Message
     type: object
     x-go-package: organizr/server/types
   Task:
@@ -437,34 +454,13 @@ produces:
 - application/json
 responses:
   error-response:
-    description: Error Response
-    headers:
-      Body: {}
+    description: ""
     schema:
-      properties:
-        code:
-          description: 'in: body'
-          example: login_failed
-          type: string
-          x-go-name: Code
-        message:
-          description: 'in: body'
-          example: Username and/or password are incorrect
-          type: string
-          x-go-name: Message
-      type: object
+      $ref: '#/definitions/Error'
   login-response:
-    description: Authentication Response
-    headers:
-      Data: {}
+    description: ""
     schema:
-      properties:
-        jwt:
-          description: 'in: body'
-          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
-          type: string
-          x-go-name: JWT
-      type: object
+      $ref: '#/definitions/AuthDetail'
   multi-board-response:
     description: ""
     schema:
@@ -485,6 +481,8 @@ responses:
       type: array
   single-board-response:
     description: ""
+    schema:
+      $ref: '#/definitions/Board'
   single-column-response:
     description: ""
     schema:

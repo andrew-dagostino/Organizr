@@ -96,9 +96,9 @@ type DeleteColumnRequest struct {
 //   200: multi-column-response
 //   400: error-response
 func GetColumns(c echo.Context, log *log.Logger) error {
-	e := new(Error)
-	e.Body.Code = "get_columns_failed"
-	e.Body.Message = "Failed to retrieve columns"
+	e := new(types.Error)
+	e.Code = "get_columns_failed"
+	e.Message = "Failed to retrieve columns"
 
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
@@ -116,8 +116,8 @@ func GetColumns(c echo.Context, log *log.Logger) error {
 	}
 
 	if !hasPermission {
-		e.Body.Code = "invalid_permission"
-		e.Body.Message = "Invalid permissions to retrieve columns"
+		e.Code = "invalid_permission"
+		e.Message = "Invalid permissions to retrieve columns"
 		return c.JSON(http.StatusForbidden, e)
 	}
 
@@ -141,9 +141,9 @@ func GetColumns(c echo.Context, log *log.Logger) error {
 //   200: single-column-response
 //   400: error-response
 func GetColumnById(c echo.Context, log *log.Logger) error {
-	e := new(Error)
-	e.Body.Code = "get_column_failed"
-	e.Body.Message = "Failed to retrieve column"
+	e := new(types.Error)
+	e.Code = "get_column_failed"
+	e.Message = "Failed to retrieve column"
 
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
@@ -161,8 +161,8 @@ func GetColumnById(c echo.Context, log *log.Logger) error {
 	}
 
 	if !hasPermission {
-		e.Body.Code = "invalid_permission"
-		e.Body.Message = "Invalid permissions to retrieve column"
+		e.Code = "invalid_permission"
+		e.Message = "Invalid permissions to retrieve column"
 		return c.JSON(http.StatusForbidden, e)
 	}
 
@@ -186,9 +186,9 @@ func GetColumnById(c echo.Context, log *log.Logger) error {
 //   200: single-column-response
 //   400: error-response
 func EditColumn(c echo.Context, log *log.Logger) error {
-	e := new(Error)
-	e.Body.Code = "update_task_failed"
-	e.Body.Message = "Failed to update column"
+	e := new(types.Error)
+	e.Code = "update_task_failed"
+	e.Message = "Failed to update column"
 
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
@@ -207,8 +207,8 @@ func EditColumn(c echo.Context, log *log.Logger) error {
 	}
 
 	if !hasPermission {
-		e.Body.Code = "invalid_permission"
-		e.Body.Message = "Invalid permissions to update column"
+		e.Code = "invalid_permission"
+		e.Message = "Invalid permissions to update column"
 		return c.JSON(http.StatusForbidden, e)
 	}
 
@@ -232,9 +232,9 @@ func EditColumn(c echo.Context, log *log.Logger) error {
 //   200: single-column-response
 //   400: error-response
 func CreateColumn(c echo.Context, log *log.Logger) error {
-	e := new(Error)
-	e.Body.Code = "add_column_failed"
-	e.Body.Message = "Failed to create new column"
+	e := new(types.Error)
+	e.Code = "add_column_failed"
+	e.Message = "Failed to create new column"
 
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
@@ -253,8 +253,8 @@ func CreateColumn(c echo.Context, log *log.Logger) error {
 	}
 
 	if !hasPermission {
-		e.Body.Code = "invalid_permission"
-		e.Body.Message = "Invalid permissions to create column"
+		e.Code = "invalid_permission"
+		e.Message = "Invalid permissions to create column"
 		return c.JSON(http.StatusForbidden, e)
 	}
 
@@ -278,9 +278,9 @@ func CreateColumn(c echo.Context, log *log.Logger) error {
 //   200:
 //   400: error-response
 func DeleteColumn(c echo.Context, log *log.Logger) error {
-	e := new(Error)
-	e.Body.Code = "delete_column_failed"
-	e.Body.Message = "Failed to delete column"
+	e := new(types.Error)
+	e.Code = "delete_column_failed"
+	e.Message = "Failed to delete column"
 
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
@@ -298,8 +298,8 @@ func DeleteColumn(c echo.Context, log *log.Logger) error {
 	}
 
 	if !hasPermission {
-		e.Body.Code = "invalid_permission"
-		e.Body.Message = "Invalid permissions to delete column"
+		e.Code = "invalid_permission"
+		e.Message = "Invalid permissions to delete column"
 		return c.JSON(http.StatusForbidden, e)
 	}
 

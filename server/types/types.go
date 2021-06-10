@@ -27,3 +27,12 @@ type Task struct {
 	Description  string `json:"description"`
 	TaskColumnId int    `json:"task_column_id"`
 }
+
+type Error struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
+type AuthDetail struct {
+	JWT string `json:"jwt"`
+}

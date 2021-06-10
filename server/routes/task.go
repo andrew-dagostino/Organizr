@@ -101,9 +101,9 @@ type DeleteTaskRequest struct {
 //   200: multi-task-response
 //   400: error-response
 func GetTasks(c echo.Context, log *log.Logger) error {
-	e := new(Error)
-	e.Body.Code = "get_tasks_failed"
-	e.Body.Message = "Failed to retrieve tasks"
+	e := new(types.Error)
+	e.Code = "get_tasks_failed"
+	e.Message = "Failed to retrieve tasks"
 
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
@@ -121,8 +121,8 @@ func GetTasks(c echo.Context, log *log.Logger) error {
 	}
 
 	if !hasPermission {
-		e.Body.Code = "invalid_permission"
-		e.Body.Message = "Invalid permissions to retrieve tasks"
+		e.Code = "invalid_permission"
+		e.Message = "Invalid permissions to retrieve tasks"
 		return c.JSON(http.StatusForbidden, e)
 	}
 
@@ -146,9 +146,9 @@ func GetTasks(c echo.Context, log *log.Logger) error {
 //   200: single-task-response
 //   400: error-response
 func GetTaskById(c echo.Context, log *log.Logger) error {
-	e := new(Error)
-	e.Body.Code = "get_task_failed"
-	e.Body.Message = "Failed to retrieve task"
+	e := new(types.Error)
+	e.Code = "get_task_failed"
+	e.Message = "Failed to retrieve task"
 
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
@@ -166,8 +166,8 @@ func GetTaskById(c echo.Context, log *log.Logger) error {
 	}
 
 	if !hasPermission {
-		e.Body.Code = "invalid_permission"
-		e.Body.Message = "Invalid permissions to retrieve task"
+		e.Code = "invalid_permission"
+		e.Message = "Invalid permissions to retrieve task"
 		return c.JSON(http.StatusForbidden, e)
 	}
 
@@ -191,9 +191,9 @@ func GetTaskById(c echo.Context, log *log.Logger) error {
 //   200: single-task-response
 //   400: error-response
 func EditTask(c echo.Context, log *log.Logger) error {
-	e := new(Error)
-	e.Body.Code = "update_task_failed"
-	e.Body.Message = "Failed to update task"
+	e := new(types.Error)
+	e.Code = "update_task_failed"
+	e.Message = "Failed to update task"
 
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
@@ -212,8 +212,8 @@ func EditTask(c echo.Context, log *log.Logger) error {
 	}
 
 	if !hasPermission {
-		e.Body.Code = "invalid_permission"
-		e.Body.Message = "Invalid permissions to update task"
+		e.Code = "invalid_permission"
+		e.Message = "Invalid permissions to update task"
 		return c.JSON(http.StatusForbidden, e)
 	}
 
@@ -237,9 +237,9 @@ func EditTask(c echo.Context, log *log.Logger) error {
 //   200: single-task-response
 //   400: error-response
 func CreateTask(c echo.Context, log *log.Logger) error {
-	e := new(Error)
-	e.Body.Code = "add_task_failed"
-	e.Body.Message = "Failed to create new task"
+	e := new(types.Error)
+	e.Code = "add_task_failed"
+	e.Message = "Failed to create new task"
 
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
@@ -258,8 +258,8 @@ func CreateTask(c echo.Context, log *log.Logger) error {
 	}
 
 	if !hasPermission {
-		e.Body.Code = "invalid_permission"
-		e.Body.Message = "Invalid permissions to create task"
+		e.Code = "invalid_permission"
+		e.Message = "Invalid permissions to create task"
 		return c.JSON(http.StatusForbidden, e)
 	}
 
@@ -283,9 +283,9 @@ func CreateTask(c echo.Context, log *log.Logger) error {
 //   200:
 //   400: error-response
 func DeleteTask(c echo.Context, log *log.Logger) error {
-	e := new(Error)
-	e.Body.Code = "delete_task_failed"
-	e.Body.Message = "Failed to delete task"
+	e := new(types.Error)
+	e.Code = "delete_task_failed"
+	e.Message = "Failed to delete task"
 
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
@@ -303,8 +303,8 @@ func DeleteTask(c echo.Context, log *log.Logger) error {
 	}
 
 	if !hasPermission {
-		e.Body.Code = "invalid_permission"
-		e.Body.Message = "Invalid permissions to delete task"
+		e.Code = "invalid_permission"
+		e.Message = "Invalid permissions to delete task"
 		return c.JSON(http.StatusForbidden, e)
 	}
 

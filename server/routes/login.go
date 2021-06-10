@@ -15,8 +15,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// User's Authentication Information
-//
 // swagger:parameters authentication login
 type LoginBodyParams struct {
 	// in: formData
@@ -30,30 +28,16 @@ type LoginBodyParams struct {
 	Password string `form:"password"`
 }
 
-// Authentication Response
-//
 // swagger:response login-response
 type LoginBodyResponse struct {
-	Data struct {
-		// in: body
-		// example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
-		JWT string `json:"jwt"`
-	}
+	// in: body
+	Body types.AuthDetail
 }
 
-// Error Response
-//
 // swagger:response error-response
-type Error struct {
-	Body struct {
-		// in: body
-		// example: login_failed
-		Code string `json:"code"`
-
-		// in: body
-		// example: Username and/or password are incorrect
-		Message string `json:"message"`
-	}
+type ErrorResponse struct {
+	// in: body
+	Body types.Error
 }
 
 // swagger:route POST /api/login authentication login
@@ -64,9 +48,9 @@ type Error struct {
 //   200: login-response
 //   400: error-response
 func LoginMember(c echo.Context, log *log.Logger) error {
-	e := new(Error)
-	e.Body.Code = "login_failed"
-	e.Body.Message = "Username and/or password are incorrect"
+	e := new(types.Error)
+	e.Code = "login_failed"
+	e.Message = "Username and/or password are incorrect"
 
 	params := new(LoginBodyParams)
 	if err := c.Bind(params); err != nil {
@@ -91,8 +75,8 @@ func LoginMember(c echo.Context, log *log.Logger) error {
 		return c.JSON(http.StatusBadRequest, e)
 	}
 
-	res := new(LoginBodyResponse)
-	res.Data.JWT = token
+	res := new(types.AuthDetail)
+	res.JWT = token
 	return c.JSON(http.StatusOK, res)
 }
 

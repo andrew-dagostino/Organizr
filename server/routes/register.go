@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"organizr/server/types"
 	"os"
 	"strings"
 
@@ -13,8 +14,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// User's Registration Information
-//
 // swagger:parameters authentication register
 type RegisterBodyParams struct {
 	// in: formData
@@ -41,9 +40,9 @@ type RegisterBodyParams struct {
 //   200:
 //   400: error-response
 func RegisterMember(c echo.Context, log *log.Logger) error {
-	e := new(Error)
-	e.Body.Code = "register_failed"
-	e.Body.Message = "Failed to create member"
+	e := new(types.Error)
+	e.Code = "register_failed"
+	e.Message = "Failed to create member"
 
 	params := new(RegisterBodyParams)
 	if err := c.Bind(params); err != nil {

@@ -15,7 +15,10 @@ import (
 )
 
 // swagger:response multi-board-response
-type GetBoardsResponse []types.Board
+type GetBoardsResponse struct {
+	// in: body
+	Body []types.Board
+}
 
 // swagger:parameters board board-retrieve-one
 type GetBoardRequest struct {
@@ -27,7 +30,10 @@ type GetBoardRequest struct {
 }
 
 // swagger:response single-board-response
-type GetBoardResponse types.Board
+type GetBoardResponse struct {
+	// in: body
+	Body types.Board
+}
 
 // swagger:parameters board board-update
 type UpdateBoardRequest struct {
@@ -63,9 +69,9 @@ type DeleteBoardRequest struct {
 //   200: multi-board-response
 //   400: error-response
 func GetBoards(c echo.Context, log *log.Logger) error {
-	e := new(Error)
-	e.Body.Code = "get_boards_failed"
-	e.Body.Message = "Failed to retrieve boards"
+	e := new(types.Error)
+	e.Code = "get_boards_failed"
+	e.Message = "Failed to retrieve boards"
 
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
@@ -91,9 +97,9 @@ func GetBoards(c echo.Context, log *log.Logger) error {
 //   200: single-board-response
 //   400: error-response
 func GetBoardById(c echo.Context, log *log.Logger) error {
-	e := new(Error)
-	e.Body.Code = "get_board_failed"
-	e.Body.Message = "Failed to retrieve board"
+	e := new(types.Error)
+	e.Code = "get_board_failed"
+	e.Message = "Failed to retrieve board"
 
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
@@ -111,8 +117,8 @@ func GetBoardById(c echo.Context, log *log.Logger) error {
 	}
 
 	if !hasPermission {
-		e.Body.Code = "invalid_permission"
-		e.Body.Message = "Invalid permissions to retrieve board"
+		e.Code = "invalid_permission"
+		e.Message = "Invalid permissions to retrieve board"
 		return c.JSON(http.StatusForbidden, e)
 	}
 
@@ -136,9 +142,9 @@ func GetBoardById(c echo.Context, log *log.Logger) error {
 //   200: single-board-response
 //   400: error-response
 func EditBoard(c echo.Context, log *log.Logger) error {
-	e := new(Error)
-	e.Body.Code = "update_board_failed"
-	e.Body.Message = "Failed to update board"
+	e := new(types.Error)
+	e.Code = "update_board_failed"
+	e.Message = "Failed to update board"
 
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
@@ -157,8 +163,8 @@ func EditBoard(c echo.Context, log *log.Logger) error {
 	}
 
 	if !hasPermission {
-		e.Body.Code = "invalid_permission"
-		e.Body.Message = "Invalid permissions to update board"
+		e.Code = "invalid_permission"
+		e.Message = "Invalid permissions to update board"
 		return c.JSON(http.StatusForbidden, e)
 	}
 
@@ -182,9 +188,9 @@ func EditBoard(c echo.Context, log *log.Logger) error {
 //   200: single-board-response
 //   400: error-response
 func CreateBoard(c echo.Context, log *log.Logger) error {
-	e := new(Error)
-	e.Body.Code = "add_board_failed"
-	e.Body.Message = "Failed to create new board"
+	e := new(types.Error)
+	e.Code = "add_board_failed"
+	e.Message = "Failed to create new board"
 
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
