@@ -95,8 +95,6 @@ func main() {
 
 func authenticated() echo.MiddlewareFunc {
 	return middleware.JWTWithConfig(middleware.JWTConfig{
-		SigningKey:  []byte(os.Getenv("JWT_SECRET")),
-		TokenLookup: "header:" + echo.HeaderAuthorization,
-		AuthScheme:  "Bearer",
+		SigningKey: []byte(os.Getenv("JWT_SECRET")),
 	})
 }

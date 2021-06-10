@@ -109,8 +109,6 @@ func GetColumns(c echo.Context, log *log.Logger) error {
 		return c.JSON(http.StatusBadRequest, e)
 	}
 
-	println(params.Board_GID)
-
 	hasPermission, err := auth.VerifyBoardPermission(memberId, params.Board_GID, auth.VIEW_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
