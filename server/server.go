@@ -4,8 +4,8 @@ import (
 	"organizr/server/routes"
 	"os"
 
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
 )
 
@@ -22,7 +22,7 @@ func main() {
 		Format: "[${time_rfc3339}] \"${method} ${uri}\" ${status}\n",
 	}))
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"http://127.0.0.1:3000", "http://localhost:3000"},
+		AllowOrigins: []string{"*"},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
 	}))
 	e.Use(middleware.Recover())
@@ -95,8 +95,6 @@ func main() {
 
 func authenticated() echo.MiddlewareFunc {
 	return middleware.JWTWithConfig(middleware.JWTConfig{
-		SigningKey:  []byte(os.Getenv("JWT_SECRET")),
-		TokenLookup: "header:" + echo.HeaderAuthorization,
-		AuthScheme:  "Bearer",
+		SigningKey: []byte(os.Getenv("JWT_SECRET")),
 	})
 }

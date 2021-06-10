@@ -3,58 +3,61 @@ package routes
 import (
 	"context"
 	"net/http"
-	"organizr/server/types"
+	"organizr/server/models"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jackc/pgx/v4"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 	"golang.org/x/crypto/bcrypt"
 )
 
+// swagger:route POST /api/login authentication login
+//
 // Authenticates a member with their username and password from a POST, returning a new JWT session token
+//
+// Responses:
+//   200: login-response
+//   400: error-response
 func LoginMember(c echo.Context, log *log.Logger) error {
-	username := strings.ToLower(strings.TrimSpace(c.FormValue("username")))
-	password := strings.TrimSpace(c.FormValue("password"))
+	e := new(models.Error)
+	e.Code = "login_failed"
+	e.Message = "Username and/or password are incorrect"
 
-	member, err := getMember(username)
-	if err != nil {
-		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":    "login_failed",
-			"message": "Username and/or password are incorrect",
-		})
+	params := new(models.LoginRequest)
+	if err := c.Bind(params); err != nil {
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
-	success, err := verifyMember(member.Username, password)
+	member, err := getMember(strings.ToLower(params.Username))
+	if err != nil {
+		log.Error(strings.TrimSpace(err.Error()))
+		return c.JSON(http.StatusBadRequest, e)
+	}
+
+	success, err := verifyMember(member.Username, params.Password)
 	if success == false || err != nil {
 		log.Info(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "login_failed",
-			"message": "Username and/or password are incorrect",
-		})
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
 	token, err := generateJWT(member)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"code":    "login_failed",
-			"message": "Username and/or password are incorrect",
-		})
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{
-		"jwt": token,
-	})
+	res := new(models.AuthDetail)
+	res.JWT = token
+	return c.JSON(http.StatusOK, res)
 }
 
 // Creates a Member struct from the username's assosciated user data
-func getMember(username string) (types.Member, error) {
-	var member types.Member
+func getMember(username string) (models.Member, error) {
+	var member models.Member
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
@@ -112,7 +115,7 @@ func comparePasswords(hashedPwd string, plainPwd string) bool {
 }
 
 // Generates a new JWT using the user's information
-func generateJWT(member types.Member) (string, error) {
+func generateJWT(member models.Member) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 
 	claims := token.Claims.(jwt.MapClaims)

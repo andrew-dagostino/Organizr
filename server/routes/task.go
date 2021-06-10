@@ -4,202 +4,245 @@ import (
 	"context"
 	"net/http"
 	"organizr/server/auth"
-	"organizr/server/types"
+	"organizr/server/models"
 	"os"
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jackc/pgx/v4"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 )
 
+// swagger:route GET /api/task/{Column_GID} task task-retrieve-all
+//
+// Retrieves all tasks by parent column UUID
+//
+// Security:
+// - Bearer: []
+//
+// Responses:
+//   200: multi-task-response
+//   400: error-response
 func GetTasks(c echo.Context, log *log.Logger) error {
+	e := new(models.Error)
+	e.Code = "get_tasks_failed"
+	e.Message = "Failed to retrieve tasks"
+
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
-	columnGid := c.Param("column_gid")
+	params := new(models.GetTasksRequest)
+	if err := c.Bind(params); err != nil {
+		return c.JSON(http.StatusBadRequest, e)
+	}
 
-	hasPermission, err := auth.VerifyColumnPermission(memberId, columnGid, auth.VIEW_PERM)
+	hasPermission, err := auth.VerifyColumnPermission(memberId, params.Column_GID, auth.VIEW_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":    "get_tasks_failed",
-			"message": "Failed to retrieve tasks",
-		})
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
 	if !hasPermission {
-		return c.JSON(http.StatusForbidden, map[string]string{
-			"code":    "invalid_permission",
-			"message": "Invalid permissions to retrieve tasks",
-		})
+		e.Code = "invalid_permission"
+		e.Message = "Invalid permissions to retrieve tasks"
+		return c.JSON(http.StatusForbidden, e)
 	}
 
-	tasks, err := retrieveAllTasks(columnGid)
+	tasks, err := retrieveAllTasks(params.Column_GID)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":    "get_tasks_failed",
-			"message": "Failed to retrieve tasks",
-		})
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
 	return c.JSON(http.StatusOK, tasks)
 }
 
+// swagger:route GET /api/task/{Column_GID}/{Task_GID} task task-retrieve-one
+//
+// Retrieves task by parent column and task UUIDs
+//
+// Security:
+// - Bearer: []
+//
+// Responses:
+//   200: single-task-response
+//   400: error-response
 func GetTaskById(c echo.Context, log *log.Logger) error {
+	e := new(models.Error)
+	e.Code = "get_task_failed"
+	e.Message = "Failed to retrieve task"
+
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
-	columnGid := c.Param("column_gid")
-	taskGid := c.Param("task_gid")
+	params := new(models.GetTaskRequest)
+	if err := c.Bind(params); err != nil {
+		return c.JSON(http.StatusBadRequest, e)
+	}
 
-	hasPermission, err := auth.VerifyColumnPermission(memberId, columnGid, auth.VIEW_PERM)
+	hasPermission, err := auth.VerifyColumnPermission(memberId, params.Column_GID, auth.VIEW_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":    "get_task_failed",
-			"message": "Failed to retrieve task",
-		})
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
 	if !hasPermission {
-		return c.JSON(http.StatusForbidden, map[string]string{
-			"code":    "invalid_permission",
-			"message": "Invalid permissions to retrieve task",
-		})
+		e.Code = "invalid_permission"
+		e.Message = "Invalid permissions to retrieve task"
+		return c.JSON(http.StatusForbidden, e)
 	}
 
-	task, err := retrieveTaskByGid(columnGid, taskGid)
+	task, err := retrieveTaskByGid(params.Column_GID, params.Task_GID)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":    "get_task_failed",
-			"message": "Failed to retrieve task",
-		})
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
 	return c.JSON(http.StatusOK, task)
 }
 
+// swagger:route PUT /api/task/{Column_GID}/{Task_GID} task task-update
+//
+// Updates task by parent column and task UUIDs
+//
+// Security:
+// - Bearer: []
+//
+// Responses:
+//   200: single-task-response
+//   400: error-response
 func EditTask(c echo.Context, log *log.Logger) error {
+	e := new(models.Error)
+	e.Code = "update_task_failed"
+	e.Message = "Failed to update task"
+
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
-	title := strings.TrimSpace(c.FormValue("title"))
-	description := strings.TrimSpace(c.FormValue("description"))
+	params := new(models.UpdateTaskRequest)
+	if err := c.Bind(params); err != nil {
+		return c.JSON(http.StatusBadRequest, e)
+	}
+	cleanTaskData(params)
 
-	columnGid := c.Param("column_gid")
-	taskGid := c.Param("task_gid")
-
-	hasPermission, err := auth.VerifyColumnPermission(memberId, columnGid, auth.EDIT_PERM)
+	hasPermission, err := auth.VerifyColumnPermission(memberId, params.Column_GID, auth.EDIT_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":    "update_task_failed",
-			"message": "Failed to update task",
-		})
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
 	if !hasPermission {
-		return c.JSON(http.StatusForbidden, map[string]string{
-			"code":    "invalid_permission",
-			"message": "Invalid permissions to update task",
-		})
+		e.Code = "invalid_permission"
+		e.Message = "Invalid permissions to update task"
+		return c.JSON(http.StatusForbidden, e)
 	}
 
-	task, err := updateTask(columnGid, taskGid, title, description)
+	task, err := updateTask(params)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":    "update_task_failed",
-			"message": "Failed to update task",
-		})
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
 	return c.JSON(http.StatusOK, task)
 }
 
+// swagger:route POST /api/task/{Column_GID} task task-create
+//
+// Creates a task in the column specified by UUID
+//
+// Security:
+// - Bearer: []
+//
+// Responses:
+//   200: single-task-response
+//   400: error-response
 func CreateTask(c echo.Context, log *log.Logger) error {
+	e := new(models.Error)
+	e.Code = "add_task_failed"
+	e.Message = "Failed to create new task"
+
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
-	title := strings.TrimSpace(c.FormValue("title"))
-	description := strings.TrimSpace(c.FormValue("description"))
+	params := new(models.UpdateTaskRequest)
+	if err := c.Bind(params); err != nil {
+		return c.JSON(http.StatusBadRequest, e)
+	}
+	cleanTaskData(params)
 
-	columnGid := c.Param("column_gid")
-
-	hasPermission, err := auth.VerifyColumnPermission(memberId, columnGid, auth.EDIT_PERM)
+	hasPermission, err := auth.VerifyColumnPermission(memberId, params.Column_GID, auth.EDIT_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":    "update_task_failed",
-			"message": "Failed to update task",
-		})
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
 	if !hasPermission {
-		return c.JSON(http.StatusForbidden, map[string]string{
-			"code":    "invalid_permission",
-			"message": "Invalid permissions to create task",
-		})
+		e.Code = "invalid_permission"
+		e.Message = "Invalid permissions to create task"
+		return c.JSON(http.StatusForbidden, e)
 	}
 
-	task, err := addTask(columnGid, title, description)
+	task, err := addTask(params)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":    "add_task_failed",
-			"message": "Failed to create new task",
-		})
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
 	return c.JSON(http.StatusCreated, task)
 }
 
+// swagger:route DELETE /api/task/{Column_GID}/{Task_GID} task task-delete
+//
+// Deletes task by parent column and task UUIDs
+//
+// Security:
+// - Bearer: []
+//
+// Responses:
+//   200:
+//   400: error-response
 func DeleteTask(c echo.Context, log *log.Logger) error {
+	e := new(models.Error)
+	e.Code = "delete_task_failed"
+	e.Message = "Failed to delete task"
+
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
-	taskGid := c.Param("task_gid")
-	columnGid := c.Param("column_gid")
+	params := new(models.DeleteTaskRequest)
+	if err := c.Bind(params); err != nil {
+		return c.JSON(http.StatusBadRequest, e)
+	}
 
-	hasPermission, err := auth.VerifyColumnPermission(memberId, columnGid, auth.EDIT_PERM)
+	hasPermission, err := auth.VerifyColumnPermission(memberId, params.Column_GID, auth.EDIT_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":    "delete_task_failed",
-			"message": "Failed to delete task",
-		})
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
 	if !hasPermission {
-		return c.JSON(http.StatusForbidden, map[string]string{
-			"code":    "invalid_permission",
-			"message": "Invalid permissions to delete task",
-		})
+		e.Code = "invalid_permission"
+		e.Message = "Invalid permissions to delete task"
+		return c.JSON(http.StatusForbidden, e)
 	}
 
-	err = removeTask(taskGid)
+	err = removeTask(params.Task_GID)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":    "delete_task_failed",
-			"message": "Failed to delete task",
-		})
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
 	return c.JSON(http.StatusAccepted, nil)
 }
 
-func retrieveAllTasks(columnGid string) ([]types.Task, error) {
-	tasks := []types.Task{}
+func retrieveAllTasks(columnGid string) ([]models.Task, error) {
+	tasks := []models.Task{}
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
@@ -229,7 +272,7 @@ func retrieveAllTasks(columnGid string) ([]types.Task, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var task types.Task
+		var task models.Task
 		err = rows.Scan(&task.Id, &task.Gid, &task.Title, &task.Description, &task.TaskColumnId)
 		if err != nil {
 			return tasks, err
@@ -240,8 +283,8 @@ func retrieveAllTasks(columnGid string) ([]types.Task, error) {
 	return tasks, nil
 }
 
-func retrieveTaskByGid(columnGid string, taskGid string) (types.Task, error) {
-	task := types.Task{}
+func retrieveTaskByGid(columnGid string, taskGid string) (models.Task, error) {
+	task := models.Task{}
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
@@ -272,8 +315,8 @@ func retrieveTaskByGid(columnGid string, taskGid string) (types.Task, error) {
 	return task, nil
 }
 
-func updateTask(columnGid string, taskGid string, title string, description string) (types.Task, error) {
-	var task types.Task
+func updateTask(params *models.UpdateTaskRequest) (models.Task, error) {
+	var task models.Task
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
@@ -297,7 +340,7 @@ func updateTask(columnGid string, taskGid string, title string, description stri
 				updated = CURRENT_TIMESTAMP
 			WHERE gid = $3;
 		`,
-		title, description, taskGid, columnGid,
+		params.Title, params.Description, params.Task_GID, params.Column_GID,
 	)
 	if err != nil {
 		return task, err
@@ -314,7 +357,7 @@ func updateTask(columnGid string, taskGid string, title string, description stri
 			FROM task
 			WHERE gid = $1;
 		`,
-		taskGid,
+		params.Task_GID,
 	).Scan(&task.Id, &task.Gid, &task.Title, &task.Description, &task.TaskColumnId)
 	if err != nil {
 		return task, err
@@ -328,8 +371,8 @@ func updateTask(columnGid string, taskGid string, title string, description stri
 	return task, nil
 }
 
-func addTask(columnGid string, title string, description string) (types.Task, error) {
-	var task types.Task
+func addTask(params *models.UpdateTaskRequest) (models.Task, error) {
+	var task models.Task
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
@@ -350,7 +393,7 @@ func addTask(columnGid string, title string, description string) (types.Task, er
 			SELECT $2, $3, id FROM task_column WHERE task_column.gid = $1
 			RETURNING task.id;
 		`,
-		columnGid, title, description,
+		params.Column_GID, params.Title, params.Description,
 	).Scan(&taskId)
 	if err != nil {
 		return task, err
@@ -411,4 +454,10 @@ func removeTask(taskGid string) error {
 	}
 
 	return nil
+}
+
+// Removes whitespace from title, description
+func cleanTaskData(params *models.UpdateTaskRequest) {
+	params.Title = strings.TrimSpace(params.Title)
+	params.Description = strings.TrimSpace(params.Description)
 }

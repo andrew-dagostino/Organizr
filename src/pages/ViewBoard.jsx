@@ -24,7 +24,7 @@ function AddColumnWidget(props) {
     const { onClick } = props;
 
     return (
-        <Grid.Column>
+        <Grid.Column style={{ minWidth: '275px' }}>
             <Card
                 onClick={onClick}
                 style={{
@@ -228,10 +228,7 @@ export default class ViewBoard extends React.Component {
             formdata.append('title', column.title);
 
             columnTimers[column.gid] = setTimeout(
-                () =>
-                    updateColumn(gid, column.gid, formdata).then(({ data }) => {
-                        this.updateColumnUI(data);
-                    }),
+                () => updateColumn(gid, column.gid, formdata),
                 500
             );
 
@@ -286,8 +283,27 @@ export default class ViewBoard extends React.Component {
                 />
                 {loaded ? (
                     <DragDropContext onDragEnd={this.onDragEnd}>
-                        <Grid columns="4" container doubling stackable>
-                            <Grid.Row style={{ height: '100%' }}>
+                        <Grid
+                            columns={Math.max(
+                                Math.min(columns.length - 1, 16),
+                                5
+                            )}
+                            container
+                            doubling
+                            fluid
+                            stackable={false}
+                            style={{
+                                overflowX: 'auto',
+                                width: '100%',
+                                height: 'calc(100% - 62px)',
+                            }}
+                        >
+                            <Grid.Row
+                                style={{
+                                    height: '100%',
+                                    flexWrap: 'nowrap',
+                                }}
+                            >
                                 {columns.map((column) => (
                                     <Column
                                         key={column.gid}

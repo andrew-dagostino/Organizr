@@ -119,7 +119,7 @@ class Column extends React.Component {
         const { gid, title, tasks, deleteColumn } = this.props;
 
         return (
-            <Grid.Column style={{ marginBottom: '2rem' }}>
+            <Grid.Column style={{ marginBottom: '2rem', minWidth: '275px' }}>
                 <Card>
                     <Card.Content
                         style={{
