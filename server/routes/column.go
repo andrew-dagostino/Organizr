@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 	"organizr/server/auth"
-	"organizr/server/types"
+	"organizr/server/models"
 	"os"
 	"strings"
 
@@ -13,77 +13,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 )
-
-// swagger:parameters column column-retrieve-all
-type GetColumnsRequest struct {
-	// UUID of parent board
-	//
-	// in: path
-	// required: true
-	Board_GID string `param:"board_gid"`
-}
-
-// swagger:response multi-column-response
-type GetColumnsResponse struct {
-	// in: body
-	Body []types.TaskColumn
-}
-
-// swagger:parameters column column-retrieve-one
-type GetColumnRequest struct {
-	// UUID of parent board
-	//
-	// in: path
-	// required: true
-	Board_GID string `param:"board_gid"`
-
-	// UUID of column
-	//
-	// in: path
-	// required: true
-	Column_GID string `param:"column_gid"`
-}
-
-// swagger:response single-column-response
-type GetColumnResponse struct {
-	// in: body
-	Body types.TaskColumn
-}
-
-// swagger:parameters column column-update
-type UpdateColumnRequest struct {
-	// UUID of parent board
-	//
-	// in: path
-	// required: true
-	Board_GID string `param:"board_gid"`
-
-	// UUID of column
-	//
-	// in: path
-	// required: true
-	Column_GID string `param:"column_gid"`
-
-	// Title of column
-	//
-	// in: body
-	Title string `form:"title"`
-}
-
-// swagger:parameters column column-delete
-type DeleteColumnRequest struct {
-	// UUID of parent board
-	//
-	// in: path
-	// required: true
-	Board_GID string `param:"board_gid"`
-
-	// UUID of column
-	//
-	// in: path
-	// required: true
-	Column_GID string `param:"column_gid"`
-}
 
 // swagger:route GET /api/column/{Board_GID} column column-retrieve-all
 //
@@ -96,7 +25,7 @@ type DeleteColumnRequest struct {
 //   200: multi-column-response
 //   400: error-response
 func GetColumns(c echo.Context, log *log.Logger) error {
-	e := new(types.Error)
+	e := new(models.Error)
 	e.Code = "get_columns_failed"
 	e.Message = "Failed to retrieve columns"
 
@@ -104,7 +33,7 @@ func GetColumns(c echo.Context, log *log.Logger) error {
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
-	params := new(GetColumnsRequest)
+	params := new(models.GetColumnsRequest)
 	if err := c.Bind(params); err != nil {
 		return c.JSON(http.StatusBadRequest, e)
 	}
@@ -141,7 +70,7 @@ func GetColumns(c echo.Context, log *log.Logger) error {
 //   200: single-column-response
 //   400: error-response
 func GetColumnById(c echo.Context, log *log.Logger) error {
-	e := new(types.Error)
+	e := new(models.Error)
 	e.Code = "get_column_failed"
 	e.Message = "Failed to retrieve column"
 
@@ -149,7 +78,7 @@ func GetColumnById(c echo.Context, log *log.Logger) error {
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
-	params := new(GetColumnRequest)
+	params := new(models.GetColumnRequest)
 	if err := c.Bind(params); err != nil {
 		return c.JSON(http.StatusBadRequest, e)
 	}
@@ -186,7 +115,7 @@ func GetColumnById(c echo.Context, log *log.Logger) error {
 //   200: single-column-response
 //   400: error-response
 func EditColumn(c echo.Context, log *log.Logger) error {
-	e := new(types.Error)
+	e := new(models.Error)
 	e.Code = "update_task_failed"
 	e.Message = "Failed to update column"
 
@@ -194,7 +123,7 @@ func EditColumn(c echo.Context, log *log.Logger) error {
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
-	params := new(UpdateColumnRequest)
+	params := new(models.UpdateColumnRequest)
 	if err := c.Bind(params); err != nil {
 		return c.JSON(http.StatusBadRequest, e)
 	}
@@ -232,7 +161,7 @@ func EditColumn(c echo.Context, log *log.Logger) error {
 //   200: single-column-response
 //   400: error-response
 func CreateColumn(c echo.Context, log *log.Logger) error {
-	e := new(types.Error)
+	e := new(models.Error)
 	e.Code = "add_column_failed"
 	e.Message = "Failed to create new column"
 
@@ -240,7 +169,7 @@ func CreateColumn(c echo.Context, log *log.Logger) error {
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
-	params := new(UpdateColumnRequest)
+	params := new(models.UpdateColumnRequest)
 	if err := c.Bind(params); err != nil {
 		return c.JSON(http.StatusBadRequest, e)
 	}
@@ -278,7 +207,7 @@ func CreateColumn(c echo.Context, log *log.Logger) error {
 //   200:
 //   400: error-response
 func DeleteColumn(c echo.Context, log *log.Logger) error {
-	e := new(types.Error)
+	e := new(models.Error)
 	e.Code = "delete_column_failed"
 	e.Message = "Failed to delete column"
 
@@ -286,7 +215,7 @@ func DeleteColumn(c echo.Context, log *log.Logger) error {
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
-	params := new(DeleteColumnRequest)
+	params := new(models.DeleteColumnRequest)
 	if err := c.Bind(params); err != nil {
 		return c.JSON(http.StatusBadRequest, e)
 	}
@@ -312,8 +241,8 @@ func DeleteColumn(c echo.Context, log *log.Logger) error {
 	return c.JSON(http.StatusAccepted, nil)
 }
 
-func retrieveAllColumns(boardGid string) ([]types.TaskColumn, error) {
-	columns := []types.TaskColumn{}
+func retrieveAllColumns(boardGid string) ([]models.TaskColumn, error) {
+	columns := []models.TaskColumn{}
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
@@ -342,7 +271,7 @@ func retrieveAllColumns(boardGid string) ([]types.TaskColumn, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var column types.TaskColumn
+		var column models.TaskColumn
 		err = rows.Scan(&column.Id, &column.Gid, &column.Title, &column.BoardId)
 		if err != nil {
 			return columns, err
@@ -353,8 +282,8 @@ func retrieveAllColumns(boardGid string) ([]types.TaskColumn, error) {
 	return columns, nil
 }
 
-func retrieveColumnByGid(boardGid string, columnGid string) (types.TaskColumn, error) {
-	column := types.TaskColumn{}
+func retrieveColumnByGid(boardGid string, columnGid string) (models.TaskColumn, error) {
+	column := models.TaskColumn{}
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
@@ -385,8 +314,8 @@ func retrieveColumnByGid(boardGid string, columnGid string) (types.TaskColumn, e
 	return column, nil
 }
 
-func updateColumn(params *UpdateColumnRequest) (types.TaskColumn, error) {
-	var column types.TaskColumn
+func updateColumn(params *models.UpdateColumnRequest) (models.TaskColumn, error) {
+	var column models.TaskColumn
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
@@ -438,8 +367,8 @@ func updateColumn(params *UpdateColumnRequest) (types.TaskColumn, error) {
 	return column, nil
 }
 
-func addColumn(params *UpdateColumnRequest) (types.TaskColumn, error) {
-	var column types.TaskColumn
+func addColumn(params *models.UpdateColumnRequest) (models.TaskColumn, error) {
+	var column models.TaskColumn
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
@@ -523,6 +452,6 @@ func removeColumn(columnGid string) error {
 }
 
 // Removes whitespace from title
-func cleanColumnData(params *UpdateColumnRequest) {
+func cleanColumnData(params *models.UpdateColumnRequest) {
 	params.Title = strings.TrimSpace(params.Title)
 }

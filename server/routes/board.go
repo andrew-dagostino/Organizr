@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 	"organizr/server/auth"
-	"organizr/server/types"
+	"organizr/server/models"
 	"os"
 	"strings"
 
@@ -13,50 +13,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 )
-
-// swagger:response multi-board-response
-type GetBoardsResponse struct {
-	// in: body
-	Body []types.Board
-}
-
-// swagger:parameters board board-retrieve-one
-type GetBoardRequest struct {
-	// UUID of board
-	//
-	// in: path
-	// required: true
-	Board_GID string `param:"board_gid"`
-}
-
-// swagger:response single-board-response
-type GetBoardResponse struct {
-	// in: body
-	Body types.Board
-}
-
-// swagger:parameters board board-update
-type UpdateBoardRequest struct {
-	// UUID of board
-	//
-	// in: path
-	// required: true
-	Board_GID string `param:"board_gid"`
-
-	// Title of board
-	//
-	// in: body
-	Title string `form:"title"`
-}
-
-// swagger:parameters board board-delete
-type DeleteBoardRequest struct {
-	// UUID of board
-	//
-	// in: path
-	// required: true
-	Board_GID string `param:"board_gid"`
-}
 
 // swagger:route GET /api/board board board-retrieve-all
 //
@@ -69,7 +25,7 @@ type DeleteBoardRequest struct {
 //   200: multi-board-response
 //   400: error-response
 func GetBoards(c echo.Context, log *log.Logger) error {
-	e := new(types.Error)
+	e := new(models.Error)
 	e.Code = "get_boards_failed"
 	e.Message = "Failed to retrieve boards"
 
@@ -97,7 +53,7 @@ func GetBoards(c echo.Context, log *log.Logger) error {
 //   200: single-board-response
 //   400: error-response
 func GetBoardById(c echo.Context, log *log.Logger) error {
-	e := new(types.Error)
+	e := new(models.Error)
 	e.Code = "get_board_failed"
 	e.Message = "Failed to retrieve board"
 
@@ -105,7 +61,7 @@ func GetBoardById(c echo.Context, log *log.Logger) error {
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
-	params := new(GetBoardRequest)
+	params := new(models.GetBoardRequest)
 	if err := c.Bind(params); err != nil {
 		return c.JSON(http.StatusBadRequest, e)
 	}
@@ -142,7 +98,7 @@ func GetBoardById(c echo.Context, log *log.Logger) error {
 //   200: single-board-response
 //   400: error-response
 func EditBoard(c echo.Context, log *log.Logger) error {
-	e := new(types.Error)
+	e := new(models.Error)
 	e.Code = "update_board_failed"
 	e.Message = "Failed to update board"
 
@@ -150,7 +106,7 @@ func EditBoard(c echo.Context, log *log.Logger) error {
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
-	params := new(UpdateBoardRequest)
+	params := new(models.UpdateBoardRequest)
 	if err := c.Bind(params); err != nil {
 		return c.JSON(http.StatusBadRequest, e)
 	}
@@ -188,7 +144,7 @@ func EditBoard(c echo.Context, log *log.Logger) error {
 //   200: single-board-response
 //   400: error-response
 func CreateBoard(c echo.Context, log *log.Logger) error {
-	e := new(types.Error)
+	e := new(models.Error)
 	e.Code = "add_board_failed"
 	e.Message = "Failed to create new board"
 
@@ -196,7 +152,7 @@ func CreateBoard(c echo.Context, log *log.Logger) error {
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
-	params := new(UpdateBoardRequest)
+	params := new(models.UpdateBoardRequest)
 	if err := c.Bind(params); err != nil {
 		return c.JSON(http.StatusBadRequest, e)
 	}
@@ -256,8 +212,8 @@ func DeleteBoard(c echo.Context, log *log.Logger) error {
 	return c.JSON(http.StatusAccepted, nil)
 }
 
-func retrieveAllBoards(memberGid string) ([]types.Board, error) {
-	boards := []types.Board{}
+func retrieveAllBoards(memberGid string) ([]models.Board, error) {
+	boards := []models.Board{}
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
@@ -286,7 +242,7 @@ func retrieveAllBoards(memberGid string) ([]types.Board, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var board types.Board
+		var board models.Board
 		err = rows.Scan(&board.Id, &board.Gid, &board.Title, &board.MemberCount)
 		if err != nil {
 			return boards, err
@@ -297,8 +253,8 @@ func retrieveAllBoards(memberGid string) ([]types.Board, error) {
 	return boards, nil
 }
 
-func retrieveBoardByGid(boardGid string) (types.Board, error) {
-	board := types.Board{}
+func retrieveBoardByGid(boardGid string) (models.Board, error) {
+	board := models.Board{}
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
@@ -326,8 +282,8 @@ func retrieveBoardByGid(boardGid string) (types.Board, error) {
 	return board, nil
 }
 
-func updateBoard(params *UpdateBoardRequest) (types.Board, error) {
-	var board types.Board
+func updateBoard(params *models.UpdateBoardRequest) (models.Board, error) {
+	var board models.Board
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
@@ -379,8 +335,8 @@ func updateBoard(params *UpdateBoardRequest) (types.Board, error) {
 	return board, nil
 }
 
-func addBoard(memberId int, params *UpdateBoardRequest) (types.Board, error) {
-	var board types.Board
+func addBoard(memberId int, params *models.UpdateBoardRequest) (models.Board, error) {
+	var board models.Board
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
@@ -476,6 +432,6 @@ func removeBoard(boardGid string) error {
 }
 
 // Removes whitespace from title
-func cleanBoardData(params *UpdateBoardRequest) {
+func cleanBoardData(params *models.UpdateBoardRequest) {
 	params.Title = strings.TrimSpace(params.Title)
 }

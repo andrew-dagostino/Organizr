@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 	"organizr/server/auth"
-	"organizr/server/types"
+	"organizr/server/models"
 	"os"
 	"strings"
 
@@ -13,82 +13,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 )
-
-// swagger:parameters task task-retrieve-all
-type GetTasksRequest struct {
-	// UUID of parent column
-	//
-	// in: path
-	// required: true
-	Column_GID string `param:"column_gid"`
-}
-
-// swagger:response multi-task-response
-type GetTasksResponse struct {
-	// in: body
-	Body []types.Task
-}
-
-// swagger:parameters task task-retrieve-one
-type GetTaskRequest struct {
-	// UUID of parent column
-	//
-	// in: path
-	// required: true
-	Column_GID string `param:"column_gid"`
-
-	// UUID of task
-	//
-	// in: path
-	// required: true
-	Task_GID string `param:"task_gid"`
-}
-
-// swagger:response single-task-response
-type GetTaskResponse struct {
-	// in: body
-	Body types.Task
-}
-
-// swagger:parameters task task-update
-type UpdateTaskRequest struct {
-	// UUID of parent column
-	//
-	// in: path
-	// required: true
-	Column_GID string `param:"column_gid"`
-
-	// UUID of task
-	//
-	// in: path
-	// required: true
-	Task_GID string `param:"task_gid"`
-
-	// Title of task
-	//
-	// in: body
-	Title string `form:"title"`
-
-	// Description of task
-	//
-	// in: body
-	Description string `form:"description"`
-}
-
-// swagger:parameters task task-delete
-type DeleteTaskRequest struct {
-	// UUID of parent column
-	//
-	// in: path
-	// required: true
-	Column_GID string `param:"column_gid"`
-
-	// UUID of task
-	//
-	// in: path
-	// required: true
-	Task_GID string `param:"task_gid"`
-}
 
 // swagger:route GET /api/task/{Column_GID} task task-retrieve-all
 //
@@ -101,7 +25,7 @@ type DeleteTaskRequest struct {
 //   200: multi-task-response
 //   400: error-response
 func GetTasks(c echo.Context, log *log.Logger) error {
-	e := new(types.Error)
+	e := new(models.Error)
 	e.Code = "get_tasks_failed"
 	e.Message = "Failed to retrieve tasks"
 
@@ -109,7 +33,7 @@ func GetTasks(c echo.Context, log *log.Logger) error {
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
-	params := new(GetTasksRequest)
+	params := new(models.GetTasksRequest)
 	if err := c.Bind(params); err != nil {
 		return c.JSON(http.StatusBadRequest, e)
 	}
@@ -146,7 +70,7 @@ func GetTasks(c echo.Context, log *log.Logger) error {
 //   200: single-task-response
 //   400: error-response
 func GetTaskById(c echo.Context, log *log.Logger) error {
-	e := new(types.Error)
+	e := new(models.Error)
 	e.Code = "get_task_failed"
 	e.Message = "Failed to retrieve task"
 
@@ -154,7 +78,7 @@ func GetTaskById(c echo.Context, log *log.Logger) error {
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
-	params := new(GetTaskRequest)
+	params := new(models.GetTaskRequest)
 	if err := c.Bind(params); err != nil {
 		return c.JSON(http.StatusBadRequest, e)
 	}
@@ -191,7 +115,7 @@ func GetTaskById(c echo.Context, log *log.Logger) error {
 //   200: single-task-response
 //   400: error-response
 func EditTask(c echo.Context, log *log.Logger) error {
-	e := new(types.Error)
+	e := new(models.Error)
 	e.Code = "update_task_failed"
 	e.Message = "Failed to update task"
 
@@ -199,7 +123,7 @@ func EditTask(c echo.Context, log *log.Logger) error {
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
-	params := new(UpdateTaskRequest)
+	params := new(models.UpdateTaskRequest)
 	if err := c.Bind(params); err != nil {
 		return c.JSON(http.StatusBadRequest, e)
 	}
@@ -237,7 +161,7 @@ func EditTask(c echo.Context, log *log.Logger) error {
 //   200: single-task-response
 //   400: error-response
 func CreateTask(c echo.Context, log *log.Logger) error {
-	e := new(types.Error)
+	e := new(models.Error)
 	e.Code = "add_task_failed"
 	e.Message = "Failed to create new task"
 
@@ -245,7 +169,7 @@ func CreateTask(c echo.Context, log *log.Logger) error {
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
-	params := new(UpdateTaskRequest)
+	params := new(models.UpdateTaskRequest)
 	if err := c.Bind(params); err != nil {
 		return c.JSON(http.StatusBadRequest, e)
 	}
@@ -283,7 +207,7 @@ func CreateTask(c echo.Context, log *log.Logger) error {
 //   200:
 //   400: error-response
 func DeleteTask(c echo.Context, log *log.Logger) error {
-	e := new(types.Error)
+	e := new(models.Error)
 	e.Code = "delete_task_failed"
 	e.Message = "Failed to delete task"
 
@@ -291,7 +215,7 @@ func DeleteTask(c echo.Context, log *log.Logger) error {
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
-	params := new(DeleteTaskRequest)
+	params := new(models.DeleteTaskRequest)
 	if err := c.Bind(params); err != nil {
 		return c.JSON(http.StatusBadRequest, e)
 	}
@@ -317,8 +241,8 @@ func DeleteTask(c echo.Context, log *log.Logger) error {
 	return c.JSON(http.StatusAccepted, nil)
 }
 
-func retrieveAllTasks(columnGid string) ([]types.Task, error) {
-	tasks := []types.Task{}
+func retrieveAllTasks(columnGid string) ([]models.Task, error) {
+	tasks := []models.Task{}
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
@@ -348,7 +272,7 @@ func retrieveAllTasks(columnGid string) ([]types.Task, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var task types.Task
+		var task models.Task
 		err = rows.Scan(&task.Id, &task.Gid, &task.Title, &task.Description, &task.TaskColumnId)
 		if err != nil {
 			return tasks, err
@@ -359,8 +283,8 @@ func retrieveAllTasks(columnGid string) ([]types.Task, error) {
 	return tasks, nil
 }
 
-func retrieveTaskByGid(columnGid string, taskGid string) (types.Task, error) {
-	task := types.Task{}
+func retrieveTaskByGid(columnGid string, taskGid string) (models.Task, error) {
+	task := models.Task{}
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
@@ -391,8 +315,8 @@ func retrieveTaskByGid(columnGid string, taskGid string) (types.Task, error) {
 	return task, nil
 }
 
-func updateTask(params *UpdateTaskRequest) (types.Task, error) {
-	var task types.Task
+func updateTask(params *models.UpdateTaskRequest) (models.Task, error) {
+	var task models.Task
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
@@ -447,8 +371,8 @@ func updateTask(params *UpdateTaskRequest) (types.Task, error) {
 	return task, nil
 }
 
-func addTask(params *UpdateTaskRequest) (types.Task, error) {
-	var task types.Task
+func addTask(params *models.UpdateTaskRequest) (models.Task, error) {
+	var task models.Task
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
 	if err != nil {
@@ -533,7 +457,7 @@ func removeTask(taskGid string) error {
 }
 
 // Removes whitespace from title, description
-func cleanTaskData(params *UpdateTaskRequest) {
+func cleanTaskData(params *models.UpdateTaskRequest) {
 	params.Title = strings.TrimSpace(params.Title)
 	params.Description = strings.TrimSpace(params.Description)
 }

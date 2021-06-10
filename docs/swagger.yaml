@@ -8,7 +8,7 @@ definitions:
         type: string
         x-go-name: JWT
     type: object
-    x-go-package: organizr/server/types
+    x-go-package: organizr/server/models
   Board:
     properties:
       board_member_count:
@@ -26,7 +26,7 @@ definitions:
         type: string
         x-go-name: Title
     type: object
-    x-go-package: organizr/server/types
+    x-go-package: organizr/server/models
   Error:
     properties:
       code:
@@ -36,7 +36,7 @@ definitions:
         type: string
         x-go-name: Message
     type: object
-    x-go-package: organizr/server/types
+    x-go-package: organizr/server/models
   Task:
     properties:
       description:
@@ -57,7 +57,7 @@ definitions:
         type: string
         x-go-name: Title
     type: object
-    x-go-package: organizr/server/types
+    x-go-package: organizr/server/models
   TaskColumn:
     properties:
       board_id:
@@ -75,7 +75,7 @@ definitions:
         type: string
         x-go-name: Title
     type: object
-    x-go-package: organizr/server/types
+    x-go-package: organizr/server/models
 host: localhost:1323
 info:
   description: API Documentation.

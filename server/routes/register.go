@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"organizr/server/types"
+	"organizr/server/models"
 	"os"
 	"strings"
 
@@ -14,24 +14,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// swagger:parameters authentication register
-type RegisterBodyParams struct {
-	// in: formData
-	// required: true
-	// example: andrew
-	Username string `form:"username"`
-
-	// in: formData
-	// required: true
-	// example: user@email.com
-	Email string `form:"email"`
-
-	// in: formData
-	// required: true
-	// example: password1234
-	Password string `form:"password"`
-}
-
 // swagger:route POST /api/register authentication register
 //
 // Registers a new member using the supplied username, email, and password
@@ -40,11 +22,11 @@ type RegisterBodyParams struct {
 //   200:
 //   400: error-response
 func RegisterMember(c echo.Context, log *log.Logger) error {
-	e := new(types.Error)
+	e := new(models.Error)
 	e.Code = "register_failed"
 	e.Message = "Failed to create member"
 
-	params := new(RegisterBodyParams)
+	params := new(models.RegisterRequest)
 	if err := c.Bind(params); err != nil {
 		return c.JSON(http.StatusInternalServerError, e)
 	}
@@ -66,7 +48,7 @@ func RegisterMember(c echo.Context, log *log.Logger) error {
 }
 
 // Saves new member into the database, first hashing their password
-func createMember(params *RegisterBodyParams) error {
+func createMember(params *models.RegisterRequest) error {
 	hash, err := hashPassword(params.Password)
 	if err != nil {
 		return err
@@ -113,7 +95,7 @@ func hashPassword(password string) (string, error) {
 }
 
 // Validates user data before insert
-func validateRegisterData(params *RegisterBodyParams) error {
+func validateRegisterData(params *models.RegisterRequest) error {
 
 	if len(params.Username) < 1 || len(params.Username) > 32 {
 		return errors.New("Invalid Username")
@@ -127,7 +109,7 @@ func validateRegisterData(params *RegisterBodyParams) error {
 }
 
 // Removes whitespace and lowers username, email
-func cleanRegisterData(params *RegisterBodyParams) {
+func cleanRegisterData(params *models.RegisterRequest) {
 	params.Username = strings.ToLower(strings.TrimSpace(params.Username))
 	params.Email = strings.ToLower(strings.TrimSpace(params.Email))
 	params.Password = strings.TrimSpace(params.Password)
