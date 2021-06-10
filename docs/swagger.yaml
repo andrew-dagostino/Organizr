@@ -1,6 +1,28 @@
 basePath: /
 consumes:
 - application/x-www-form-urlencoded
+definitions:
+  Task:
+    properties:
+      description:
+        type: string
+        x-go-name: Description
+      gid:
+        type: string
+        x-go-name: Gid
+      id:
+        format: int64
+        type: integer
+        x-go-name: Id
+      task_column_id:
+        format: int64
+        type: integer
+        x-go-name: TaskColumnId
+      title:
+        type: string
+        x-go-name: Title
+    type: object
+    x-go-package: organizr/server/types
 host: localhost:1323
 info:
   description: API Documentation.
@@ -58,13 +80,149 @@ paths:
           $ref: '#/responses/error-response'
       tags:
       - authentication
+  /api/task/{Column_GID}:
+    get:
+      description: Retrieves all tasks by parent column UUID
+      operationId: retrieve-all
+      parameters:
+      - description: UUID of parent column
+        in: path
+        name: Column_GID
+        required: true
+        type: string
+      responses:
+        "200":
+          $ref: '#/responses/multi-task-response'
+        "400":
+          $ref: '#/responses/error-response'
+      tags:
+      - task
+    post:
+      description: Creates a task in the column specified by UUID
+      operationId: create
+      responses:
+        "200":
+          $ref: '#/responses/single-task-response'
+        "400":
+          $ref: '#/responses/error-response'
+      tags:
+      - task
+  /api/task/{Column_GID}/{Task_GID}:
+    delete:
+      description: Deletes task by parent column and task UUIDs
+      operationId: delete
+      parameters:
+      - description: UUID of parent column
+        in: path
+        name: Column_GID
+        required: true
+        type: string
+      - description: UUID of task
+        in: path
+        name: Task_GID
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+        "400":
+          $ref: '#/responses/error-response'
+      tags:
+      - task
+    get:
+      description: Retrieves task by parent column and task UUIDs
+      operationId: retrieve-one
+      parameters:
+      - description: UUID of parent column
+        in: path
+        name: Column_GID
+        required: true
+        type: string
+      - description: UUID of task
+        in: path
+        name: Task_GID
+        required: true
+        type: string
+      responses:
+        "200":
+          $ref: '#/responses/single-task-response'
+        "400":
+          $ref: '#/responses/error-response'
+      tags:
+      - task
+    put:
+      description: Updates task by parent column and task UUIDs
+      operationId: update
+      parameters:
+      - description: UUID of parent column
+        in: path
+        name: Column_GID
+        required: true
+        type: string
+      - description: UUID of task
+        in: path
+        name: Task_GID
+        required: true
+        type: string
+      - description: Title of task
+        in: body
+        name: Title
+        schema:
+          type: string
+      - description: Description of task
+        in: body
+        name: Description
+        schema:
+          type: string
+      responses:
+        "200":
+          $ref: '#/responses/single-task-response'
+        "400":
+          $ref: '#/responses/error-response'
+      tags:
+      - task
 produces:
 - application/json
 responses:
   error-response:
     description: Error Response
+    headers:
+      Data: {}
+    schema:
+      properties:
+        code:
+          description: 'in: body'
+          example: login_failed
+          type: string
+          x-go-name: Code
+        message:
+          description: 'in: body'
+          example: Username and/or password are incorrect
+          type: string
+          x-go-name: Message
+      type: object
   login-response:
     description: Authentication Response
+    headers:
+      Data: {}
+    schema:
+      properties:
+        jwt:
+          description: 'in: body'
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+          type: string
+          x-go-name: JWT
+      type: object
+  multi-task-response:
+    description: ""
+    schema:
+      items:
+        $ref: '#/definitions/Task'
+      type: array
+  single-task-response:
+    description: ""
+    schema:
+      $ref: '#/definitions/Task'
 schemes:
 - http
 securityDefinitions:

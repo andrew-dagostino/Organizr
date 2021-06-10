@@ -34,22 +34,26 @@ type LoginBodyParams struct {
 //
 // swagger:response login-response
 type LoginBodyResponse struct {
-	// in: body
-	// example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
-	JWT string `json:"jwt"`
+	Data struct {
+		// in: body
+		// example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+		JWT string `json:"jwt"`
+	}
 }
 
 // Error Response
 //
 // swagger:response error-response
 type Error struct {
-	// in: body
-	// example: login_failed
-	Code string `json:"code"`
+	Data struct {
+		// in: body
+		// example: login_failed
+		Code string `json:"code"`
 
-	// in: body
-	// example: Username and/or password are incorrect
-	Message string `json:"message"`
+		// in: body
+		// example: Username and/or password are incorrect
+		Message string `json:"message"`
+	}
 }
 
 // swagger:route POST /api/login authentication login
@@ -61,8 +65,8 @@ type Error struct {
 //   400: error-response
 func LoginMember(c echo.Context, log *log.Logger) error {
 	e := new(Error)
-	e.Code = "login_failed"
-	e.Message = "Username and/or password are incorrect"
+	e.Data.Code = "login_failed"
+	e.Data.Message = "Username and/or password are incorrect"
 
 	params := new(LoginBodyParams)
 	if err := c.Bind(params); err != nil {
@@ -88,7 +92,7 @@ func LoginMember(c echo.Context, log *log.Logger) error {
 	}
 
 	res := new(LoginBodyResponse)
-	res.JWT = token
+	res.Data.JWT = token
 	return c.JSON(http.StatusOK, res)
 }
 
