@@ -228,10 +228,7 @@ export default class ViewBoard extends React.Component {
             formdata.append('title', column.title);
 
             columnTimers[column.gid] = setTimeout(
-                () =>
-                    updateColumn(gid, column.gid, formdata).then(({ data }) => {
-                        this.updateColumnUI(data);
-                    }),
+                () => updateColumn(gid, column.gid, formdata),
                 500
             );
 

@@ -1,4 +1,4 @@
-package types
+package models
 
 type Member struct {
 	Id       int    `json:"id"`
@@ -26,4 +26,13 @@ type Task struct {
 	Title        string `json:"title"`
 	Description  string `json:"description"`
 	TaskColumnId int    `json:"task_column_id"`
+}
+
+type Error struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
+type AuthDetail struct {
+	JWT string `json:"jwt"`
 }

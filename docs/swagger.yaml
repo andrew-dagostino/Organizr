@@ -1,0 +1,501 @@
+basePath: /
+consumes:
+- application/x-www-form-urlencoded
+definitions:
+  AuthDetail:
+    properties:
+      jwt:
+        type: string
+        x-go-name: JWT
+    type: object
+    x-go-package: organizr/server/models
+  Board:
+    properties:
+      board_member_count:
+        format: int64
+        type: integer
+        x-go-name: MemberCount
+      gid:
+        type: string
+        x-go-name: Gid
+      id:
+        format: int64
+        type: integer
+        x-go-name: Id
+      title:
+        type: string
+        x-go-name: Title
+    type: object
+    x-go-package: organizr/server/models
+  Error:
+    properties:
+      code:
+        type: string
+        x-go-name: Code
+      message:
+        type: string
+        x-go-name: Message
+    type: object
+    x-go-package: organizr/server/models
+  Task:
+    properties:
+      description:
+        type: string
+        x-go-name: Description
+      gid:
+        type: string
+        x-go-name: Gid
+      id:
+        format: int64
+        type: integer
+        x-go-name: Id
+      task_column_id:
+        format: int64
+        type: integer
+        x-go-name: TaskColumnId
+      title:
+        type: string
+        x-go-name: Title
+    type: object
+    x-go-package: organizr/server/models
+  TaskColumn:
+    properties:
+      board_id:
+        format: int64
+        type: integer
+        x-go-name: BoardId
+      gid:
+        type: string
+        x-go-name: Gid
+      id:
+        format: int64
+        type: integer
+        x-go-name: Id
+      title:
+        type: string
+        x-go-name: Title
+    type: object
+    x-go-package: organizr/server/models
+host: localhost:1323
+info:
+  description: API Documentation.
+  title: Organizr
+  version: 1.0.0
+paths:
+  /api/board:
+    get:
+      description: Retrieves all boards
+      operationId: board-retrieve-all
+      responses:
+        "200":
+          $ref: '#/responses/multi-board-response'
+        "400":
+          $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
+      tags:
+      - board
+    post:
+      description: Creates a board
+      operationId: board-create
+      responses:
+        "200":
+          $ref: '#/responses/single-board-response'
+        "400":
+          $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
+      tags:
+      - board
+  /api/board/{Board_GID}:
+    delete:
+      description: Deletes board by UUID
+      operationId: board-delete
+      parameters:
+      - description: UUID of board
+        in: path
+        name: Board_GID
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+        "400":
+          $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
+      tags:
+      - board
+    get:
+      description: Retrieves board by UUID
+      operationId: board-retrieve-one
+      parameters:
+      - description: UUID of board
+        in: path
+        name: Board_GID
+        required: true
+        type: string
+      responses:
+        "200":
+          $ref: '#/responses/single-board-response'
+        "400":
+          $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
+      tags:
+      - board
+    put:
+      description: Updates board by UUID
+      operationId: board-update
+      parameters:
+      - description: UUID of board
+        in: path
+        name: Board_GID
+        required: true
+        type: string
+      - description: Title of board
+        in: body
+        name: Title
+        schema:
+          type: string
+      responses:
+        "200":
+          $ref: '#/responses/single-board-response'
+        "400":
+          $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
+      tags:
+      - board
+  /api/column/{Board_GID}:
+    get:
+      description: Retrieves all columns by parent board UUID
+      operationId: column-retrieve-all
+      parameters:
+      - description: UUID of parent board
+        in: path
+        name: Board_GID
+        required: true
+        type: string
+      responses:
+        "200":
+          $ref: '#/responses/multi-column-response'
+        "400":
+          $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
+      tags:
+      - column
+    post:
+      description: Creates a column in the board specified by UUID
+      operationId: column-create
+      responses:
+        "200":
+          $ref: '#/responses/single-column-response'
+        "400":
+          $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
+      tags:
+      - column
+  /api/column/{Board_GID}/{Column_GID}:
+    delete:
+      description: Deletes column by parent board and column UUIDs
+      operationId: column-delete
+      parameters:
+      - description: UUID of parent board
+        in: path
+        name: Board_GID
+        required: true
+        type: string
+      - description: UUID of column
+        in: path
+        name: Column_GID
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+        "400":
+          $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
+      tags:
+      - column
+    get:
+      description: Retrieves column by parent board and column UUIDs
+      operationId: column-retrieve-one
+      parameters:
+      - description: UUID of parent board
+        in: path
+        name: Board_GID
+        required: true
+        type: string
+      - description: UUID of column
+        in: path
+        name: Column_GID
+        required: true
+        type: string
+      responses:
+        "200":
+          $ref: '#/responses/single-column-response'
+        "400":
+          $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
+      tags:
+      - column
+    put:
+      description: Updates column by parent board and column UUIDs
+      operationId: column-update
+      parameters:
+      - description: UUID of parent board
+        in: path
+        name: Board_GID
+        required: true
+        type: string
+      - description: UUID of column
+        in: path
+        name: Column_GID
+        required: true
+        type: string
+      - description: Title of column
+        in: body
+        name: Title
+        schema:
+          type: string
+      responses:
+        "200":
+          $ref: '#/responses/single-column-response'
+        "400":
+          $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
+      tags:
+      - column
+  /api/login:
+    post:
+      description: Authenticates a member with their username and password from a
+        POST, returning a new JWT session token
+      operationId: login
+      parameters:
+      - example: user@email.com
+        in: formData
+        name: Username
+        required: true
+        type: string
+      - example: password1234
+        in: formData
+        name: Password
+        required: true
+        type: string
+      responses:
+        "200":
+          $ref: '#/responses/login-response'
+        "400":
+          $ref: '#/responses/error-response'
+      tags:
+      - authentication
+  /api/register:
+    post:
+      description: Registers a new member using the supplied username, email, and
+        password
+      operationId: register
+      parameters:
+      - example: andrew
+        in: formData
+        name: Username
+        required: true
+        type: string
+      - example: user@email.com
+        in: formData
+        name: Email
+        required: true
+        type: string
+      - example: password1234
+        in: formData
+        name: Password
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+        "400":
+          $ref: '#/responses/error-response'
+      tags:
+      - authentication
+  /api/task/{Column_GID}:
+    get:
+      description: Retrieves all tasks by parent column UUID
+      operationId: task-retrieve-all
+      parameters:
+      - description: UUID of parent column
+        in: path
+        name: Column_GID
+        required: true
+        type: string
+      responses:
+        "200":
+          $ref: '#/responses/multi-task-response'
+        "400":
+          $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
+      tags:
+      - task
+    post:
+      description: Creates a task in the column specified by UUID
+      operationId: task-create
+      responses:
+        "200":
+          $ref: '#/responses/single-task-response'
+        "400":
+          $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
+      tags:
+      - task
+  /api/task/{Column_GID}/{Task_GID}:
+    delete:
+      description: Deletes task by parent column and task UUIDs
+      operationId: task-delete
+      parameters:
+      - description: UUID of parent column
+        in: path
+        name: Column_GID
+        required: true
+        type: string
+      - description: UUID of task
+        in: path
+        name: Task_GID
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+        "400":
+          $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
+      tags:
+      - task
+    get:
+      description: Retrieves task by parent column and task UUIDs
+      operationId: task-retrieve-one
+      parameters:
+      - description: UUID of parent column
+        in: path
+        name: Column_GID
+        required: true
+        type: string
+      - description: UUID of task
+        in: path
+        name: Task_GID
+        required: true
+        type: string
+      responses:
+        "200":
+          $ref: '#/responses/single-task-response'
+        "400":
+          $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
+      tags:
+      - task
+    put:
+      description: Updates task by parent column and task UUIDs
+      operationId: task-update
+      parameters:
+      - description: UUID of parent column
+        in: path
+        name: Column_GID
+        required: true
+        type: string
+      - description: UUID of task
+        in: path
+        name: Task_GID
+        required: true
+        type: string
+      - description: Title of task
+        in: body
+        name: Title
+        schema:
+          type: string
+      - description: Description of task
+        in: body
+        name: Description
+        schema:
+          type: string
+      responses:
+        "200":
+          $ref: '#/responses/single-task-response'
+        "400":
+          $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
+      tags:
+      - task
+produces:
+- application/json
+responses:
+  error-response:
+    description: ""
+    schema:
+      $ref: '#/definitions/Error'
+  login-response:
+    description: ""
+    schema:
+      $ref: '#/definitions/AuthDetail'
+  multi-board-response:
+    description: ""
+    schema:
+      items:
+        $ref: '#/definitions/Board'
+      type: array
+  multi-column-response:
+    description: ""
+    schema:
+      items:
+        $ref: '#/definitions/TaskColumn'
+      type: array
+  multi-task-response:
+    description: ""
+    schema:
+      items:
+        $ref: '#/definitions/Task'
+      type: array
+  single-board-response:
+    description: ""
+    schema:
+      $ref: '#/definitions/Board'
+  single-column-response:
+    description: ""
+    schema:
+      $ref: '#/definitions/TaskColumn'
+  single-task-response:
+    description: ""
+    schema:
+      $ref: '#/definitions/Task'
+schemes:
+- http
+securityDefinitions:
+  Bearer:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
