@@ -50,53 +50,112 @@ paths:
   /api/column/{Board_GID}:
     get:
       description: Retrieves all columns by parent board UUID
-      operationId: retrieve-all
+      operationId: column-retrieve-all
+      parameters:
+      - description: UUID of parent board
+        in: path
+        name: Board_GID
+        required: true
+        type: string
       responses:
         "200":
           $ref: '#/responses/multi-column-response'
         "400":
           $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
       tags:
       - column
     post:
       description: Creates a column in the board specified by UUID
-      operationId: create
+      operationId: column-create
       responses:
         "200":
           $ref: '#/responses/single-column-response'
         "400":
           $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
       tags:
       - column
   /api/column/{Board_GID}/{Column_GID}:
     delete:
       description: Deletes column by parent board and column UUIDs
-      operationId: delete
+      operationId: column-delete
+      parameters:
+      - description: UUID of parent board
+        in: path
+        name: Board_GID
+        required: true
+        type: string
+      - description: UUID of column
+        in: path
+        name: Column_GID
+        required: true
+        type: string
       responses:
         "200":
           description: ""
         "400":
           $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
       tags:
       - column
     get:
       description: Retrieves column by parent board and column UUIDs
-      operationId: retrieve-one
+      operationId: column-retrieve-one
+      parameters:
+      - description: UUID of parent board
+        in: path
+        name: Board_GID
+        required: true
+        type: string
+      - description: UUID of column
+        in: path
+        name: Column_GID
+        required: true
+        type: string
       responses:
         "200":
           $ref: '#/responses/single-column-response'
         "400":
           $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
       tags:
       - column
     put:
       description: Updates column by parent board and column UUIDs
-      operationId: update
+      operationId: column-update
+      parameters:
+      - description: UUID of parent board
+        in: path
+        name: Board_GID
+        required: true
+        type: string
+      - description: UUID of column
+        in: path
+        name: Column_GID
+        required: true
+        type: string
+      - description: Title of column
+        in: body
+        name: Title
+        schema:
+          type: string
       responses:
         "200":
           $ref: '#/responses/single-column-response'
         "400":
           $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
       tags:
       - column
   /api/login:
@@ -153,53 +212,117 @@ paths:
   /api/task/{Column_GID}:
     get:
       description: Retrieves all tasks by parent column UUID
-      operationId: retrieve-all
+      operationId: task-retrieve-all
+      parameters:
+      - description: UUID of parent column
+        in: path
+        name: Column_GID
+        required: true
+        type: string
       responses:
         "200":
           $ref: '#/responses/multi-task-response'
         "400":
           $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
       tags:
       - task
     post:
       description: Creates a task in the column specified by UUID
-      operationId: create
+      operationId: task-create
       responses:
         "200":
           $ref: '#/responses/single-task-response'
         "400":
           $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
       tags:
       - task
   /api/task/{Column_GID}/{Task_GID}:
     delete:
       description: Deletes task by parent column and task UUIDs
-      operationId: delete
+      operationId: task-delete
+      parameters:
+      - description: UUID of parent column
+        in: path
+        name: Column_GID
+        required: true
+        type: string
+      - description: UUID of task
+        in: path
+        name: Task_GID
+        required: true
+        type: string
       responses:
         "200":
           description: ""
         "400":
           $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
       tags:
       - task
     get:
       description: Retrieves task by parent column and task UUIDs
-      operationId: retrieve-one
+      operationId: task-retrieve-one
+      parameters:
+      - description: UUID of parent column
+        in: path
+        name: Column_GID
+        required: true
+        type: string
+      - description: UUID of task
+        in: path
+        name: Task_GID
+        required: true
+        type: string
       responses:
         "200":
           $ref: '#/responses/single-task-response'
         "400":
           $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
       tags:
       - task
     put:
       description: Updates task by parent column and task UUIDs
-      operationId: update
+      operationId: task-update
+      parameters:
+      - description: UUID of parent column
+        in: path
+        name: Column_GID
+        required: true
+        type: string
+      - description: UUID of task
+        in: path
+        name: Task_GID
+        required: true
+        type: string
+      - description: Title of task
+        in: body
+        name: Title
+        schema:
+          type: string
+      - description: Description of task
+        in: body
+        name: Description
+        schema:
+          type: string
       responses:
         "200":
           $ref: '#/responses/single-task-response'
         "400":
           $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
       tags:
       - task
 produces:
@@ -208,7 +331,7 @@ responses:
   error-response:
     description: Error Response
     headers:
-      Data: {}
+      Body: {}
     schema:
       properties:
         code:
@@ -257,6 +380,8 @@ responses:
 schemes:
 - http
 securityDefinitions:
-  basic:
-    type: basic
+  Bearer:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

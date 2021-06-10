@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/jackc/pgx/v4"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -42,8 +42,8 @@ type RegisterBodyParams struct {
 //   400: error-response
 func RegisterMember(c echo.Context, log *log.Logger) error {
 	e := new(Error)
-	e.Data.Code = "register_failed"
-	e.Data.Message = "Failed to create member"
+	e.Body.Code = "register_failed"
+	e.Body.Message = "Failed to create member"
 
 	params := new(RegisterBodyParams)
 	if err := c.Bind(params); err != nil {

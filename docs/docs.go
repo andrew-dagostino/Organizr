@@ -16,9 +16,11 @@
 //     Security:
 //     - basic
 //
-//    SecurityDefinitions:
-//    basic:
-//      type: basic
+//     SecurityDefinitions:
+//       Bearer:
+//         type: apiKey
+//         name: Authorization
+//         in: header
 //
 // swagger:meta
 package docs

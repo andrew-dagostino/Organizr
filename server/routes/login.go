@@ -10,7 +10,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jackc/pgx/v4"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -45,7 +45,7 @@ type LoginBodyResponse struct {
 //
 // swagger:response error-response
 type Error struct {
-	Data struct {
+	Body struct {
 		// in: body
 		// example: login_failed
 		Code string `json:"code"`
@@ -65,8 +65,8 @@ type Error struct {
 //   400: error-response
 func LoginMember(c echo.Context, log *log.Logger) error {
 	e := new(Error)
-	e.Data.Code = "login_failed"
-	e.Data.Message = "Username and/or password are incorrect"
+	e.Body.Code = "login_failed"
+	e.Body.Message = "Username and/or password are incorrect"
 
 	params := new(LoginBodyParams)
 	if err := c.Bind(params); err != nil {

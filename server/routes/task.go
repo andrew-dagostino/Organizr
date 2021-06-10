@@ -10,7 +10,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jackc/pgx/v4"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 )
 
@@ -20,13 +20,13 @@ type GetTasksRequest struct {
 	//
 	// in: path
 	// required: true
-	Column_GID string
+	Column_GID string `param:"column_gid"`
 }
 
 // swagger:response multi-task-response
 type GetTasksResponse struct {
 	// in: body
-	Data []types.Task
+	Body []types.Task
 }
 
 // swagger:parameters task task-retrieve-one
@@ -35,19 +35,19 @@ type GetTaskRequest struct {
 	//
 	// in: path
 	// required: true
-	Column_GID string
+	Column_GID string `param:"column_gid"`
 
 	// UUID of task
 	//
 	// in: path
 	// required: true
-	Task_GID string
+	Task_GID string `param:"task_gid"`
 }
 
 // swagger:response single-task-response
 type GetTaskResponse struct {
 	// in: body
-	Data types.Task
+	Body types.Task
 }
 
 // swagger:parameters task task-update
@@ -56,13 +56,13 @@ type UpdateTaskRequest struct {
 	//
 	// in: path
 	// required: true
-	Column_GID string
+	Column_GID string `param:"column_gid"`
 
 	// UUID of task
 	//
 	// in: path
 	// required: true
-	Task_GID string
+	Task_GID string `param:"task_gid"`
 
 	// Title of task
 	//
@@ -81,26 +81,29 @@ type DeleteTaskRequest struct {
 	//
 	// in: path
 	// required: true
-	Column_GID string
+	Column_GID string `param:"column_gid"`
 
 	// UUID of task
 	//
 	// in: path
 	// required: true
-	Task_GID string
+	Task_GID string `param:"task_gid"`
 }
 
-// swagger:route GET /api/task/{Column_GID} task retrieve-all
+// swagger:route GET /api/task/{Column_GID} task task-retrieve-all
 //
 // Retrieves all tasks by parent column UUID
+//
+// Security:
+// - Bearer: []
 //
 // Responses:
 //   200: multi-task-response
 //   400: error-response
 func GetTasks(c echo.Context, log *log.Logger) error {
 	e := new(Error)
-	e.Data.Code = "get_tasks_failed"
-	e.Data.Message = "Failed to retrieve tasks"
+	e.Body.Code = "get_tasks_failed"
+	e.Body.Message = "Failed to retrieve tasks"
 
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
@@ -118,8 +121,8 @@ func GetTasks(c echo.Context, log *log.Logger) error {
 	}
 
 	if !hasPermission {
-		e.Data.Code = "invalid_permission"
-		e.Data.Message = "Invalid permissions to retrieve tasks"
+		e.Body.Code = "invalid_permission"
+		e.Body.Message = "Invalid permissions to retrieve tasks"
 		return c.JSON(http.StatusForbidden, e)
 	}
 
@@ -132,17 +135,20 @@ func GetTasks(c echo.Context, log *log.Logger) error {
 	return c.JSON(http.StatusOK, tasks)
 }
 
-// swagger:route GET /api/task/{Column_GID}/{Task_GID} task retrieve-one
+// swagger:route GET /api/task/{Column_GID}/{Task_GID} task task-retrieve-one
 //
 // Retrieves task by parent column and task UUIDs
+//
+// Security:
+// - Bearer: []
 //
 // Responses:
 //   200: single-task-response
 //   400: error-response
 func GetTaskById(c echo.Context, log *log.Logger) error {
 	e := new(Error)
-	e.Data.Code = "get_task_failed"
-	e.Data.Message = "Failed to retrieve task"
+	e.Body.Code = "get_task_failed"
+	e.Body.Message = "Failed to retrieve task"
 
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
@@ -160,8 +166,8 @@ func GetTaskById(c echo.Context, log *log.Logger) error {
 	}
 
 	if !hasPermission {
-		e.Data.Code = "invalid_permission"
-		e.Data.Message = "Invalid permissions to retrieve task"
+		e.Body.Code = "invalid_permission"
+		e.Body.Message = "Invalid permissions to retrieve task"
 		return c.JSON(http.StatusForbidden, e)
 	}
 
@@ -174,17 +180,20 @@ func GetTaskById(c echo.Context, log *log.Logger) error {
 	return c.JSON(http.StatusOK, task)
 }
 
-// swagger:route PUT /api/task/{Column_GID}/{Task_GID} task update
+// swagger:route PUT /api/task/{Column_GID}/{Task_GID} task task-update
 //
 // Updates task by parent column and task UUIDs
+//
+// Security:
+// - Bearer: []
 //
 // Responses:
 //   200: single-task-response
 //   400: error-response
 func EditTask(c echo.Context, log *log.Logger) error {
 	e := new(Error)
-	e.Data.Code = "update_task_failed"
-	e.Data.Message = "Failed to update task"
+	e.Body.Code = "update_task_failed"
+	e.Body.Message = "Failed to update task"
 
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
@@ -203,8 +212,8 @@ func EditTask(c echo.Context, log *log.Logger) error {
 	}
 
 	if !hasPermission {
-		e.Data.Code = "invalid_permission"
-		e.Data.Message = "Invalid permissions to update task"
+		e.Body.Code = "invalid_permission"
+		e.Body.Message = "Invalid permissions to update task"
 		return c.JSON(http.StatusForbidden, e)
 	}
 
@@ -217,17 +226,20 @@ func EditTask(c echo.Context, log *log.Logger) error {
 	return c.JSON(http.StatusOK, task)
 }
 
-// swagger:route POST /api/task/{Column_GID} task create
+// swagger:route POST /api/task/{Column_GID} task task-create
 //
 // Creates a task in the column specified by UUID
+//
+// Security:
+// - Bearer: []
 //
 // Responses:
 //   200: single-task-response
 //   400: error-response
 func CreateTask(c echo.Context, log *log.Logger) error {
 	e := new(Error)
-	e.Data.Code = "add_task_failed"
-	e.Data.Message = "Failed to create new task"
+	e.Body.Code = "add_task_failed"
+	e.Body.Message = "Failed to create new task"
 
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
@@ -246,8 +258,8 @@ func CreateTask(c echo.Context, log *log.Logger) error {
 	}
 
 	if !hasPermission {
-		e.Data.Code = "invalid_permission"
-		e.Data.Message = "Invalid permissions to create task"
+		e.Body.Code = "invalid_permission"
+		e.Body.Message = "Invalid permissions to create task"
 		return c.JSON(http.StatusForbidden, e)
 	}
 
@@ -260,17 +272,20 @@ func CreateTask(c echo.Context, log *log.Logger) error {
 	return c.JSON(http.StatusCreated, task)
 }
 
-// swagger:route DELETE /api/task/{Column_GID}/{Task_GID} task delete
+// swagger:route DELETE /api/task/{Column_GID}/{Task_GID} task task-delete
 //
 // Deletes task by parent column and task UUIDs
+//
+// Security:
+// - Bearer: []
 //
 // Responses:
 //   200:
 //   400: error-response
 func DeleteTask(c echo.Context, log *log.Logger) error {
 	e := new(Error)
-	e.Data.Code = "delete_task_failed"
-	e.Data.Message = "Failed to delete task"
+	e.Body.Code = "delete_task_failed"
+	e.Body.Message = "Failed to delete task"
 
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
@@ -288,8 +303,8 @@ func DeleteTask(c echo.Context, log *log.Logger) error {
 	}
 
 	if !hasPermission {
-		e.Data.Code = "invalid_permission"
-		e.Data.Message = "Invalid permissions to delete task"
+		e.Body.Code = "invalid_permission"
+		e.Body.Message = "Invalid permissions to delete task"
 		return c.JSON(http.StatusForbidden, e)
 	}
 

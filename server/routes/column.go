@@ -10,7 +10,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jackc/pgx/v4"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 )
 
@@ -20,13 +20,13 @@ type GetColumnsRequest struct {
 	//
 	// in: path
 	// required: true
-	Board_GID string
+	Board_GID string `param:"board_gid"`
 }
 
 // swagger:response multi-column-response
 type GetColumnsResponse struct {
 	// in: body
-	Data []types.TaskColumn
+	Body []types.TaskColumn
 }
 
 // swagger:parameters column column-retrieve-one
@@ -35,19 +35,19 @@ type GetColumnRequest struct {
 	//
 	// in: path
 	// required: true
-	Board_GID string
+	Board_GID string `param:"board_gid"`
 
 	// UUID of column
 	//
 	// in: path
 	// required: true
-	Column_GID string
+	Column_GID string `param:"column_gid"`
 }
 
 // swagger:response single-column-response
 type GetColumnResponse struct {
 	// in: body
-	Data types.TaskColumn
+	Body types.TaskColumn
 }
 
 // swagger:parameters column column-update
@@ -56,13 +56,13 @@ type UpdateColumnRequest struct {
 	//
 	// in: path
 	// required: true
-	Board_GID string
+	Board_GID string `param:"board_gid"`
 
 	// UUID of column
 	//
 	// in: path
 	// required: true
-	Column_GID string
+	Column_GID string `param:"column_gid"`
 
 	// Title of column
 	//
@@ -76,26 +76,29 @@ type DeleteColumnRequest struct {
 	//
 	// in: path
 	// required: true
-	Board_GID string
+	Board_GID string `param:"board_gid"`
 
 	// UUID of column
 	//
 	// in: path
 	// required: true
-	Column_GID string
+	Column_GID string `param:"column_gid"`
 }
 
-// swagger:route GET /api/column/{Board_GID} column retrieve-all
+// swagger:route GET /api/column/{Board_GID} column column-retrieve-all
 //
 // Retrieves all columns by parent board UUID
+//
+// Security:
+// - Bearer: []
 //
 // Responses:
 //   200: multi-column-response
 //   400: error-response
 func GetColumns(c echo.Context, log *log.Logger) error {
 	e := new(Error)
-	e.Data.Code = "get_columns_failed"
-	e.Data.Message = "Failed to retrieve columns"
+	e.Body.Code = "get_columns_failed"
+	e.Body.Message = "Failed to retrieve columns"
 
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
@@ -106,6 +109,8 @@ func GetColumns(c echo.Context, log *log.Logger) error {
 		return c.JSON(http.StatusBadRequest, e)
 	}
 
+	println(params.Board_GID)
+
 	hasPermission, err := auth.VerifyBoardPermission(memberId, params.Board_GID, auth.VIEW_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
@@ -113,8 +118,8 @@ func GetColumns(c echo.Context, log *log.Logger) error {
 	}
 
 	if !hasPermission {
-		e.Data.Code = "invalid_permission"
-		e.Data.Message = "Invalid permissions to retrieve columns"
+		e.Body.Code = "invalid_permission"
+		e.Body.Message = "Invalid permissions to retrieve columns"
 		return c.JSON(http.StatusForbidden, e)
 	}
 
@@ -127,17 +132,20 @@ func GetColumns(c echo.Context, log *log.Logger) error {
 	return c.JSON(http.StatusOK, columns)
 }
 
-// swagger:route GET /api/column/{Board_GID}/{Column_GID} column retrieve-one
+// swagger:route GET /api/column/{Board_GID}/{Column_GID} column column-retrieve-one
 //
 // Retrieves column by parent board and column UUIDs
+//
+// Security:
+// - Bearer: []
 //
 // Responses:
 //   200: single-column-response
 //   400: error-response
 func GetColumnById(c echo.Context, log *log.Logger) error {
 	e := new(Error)
-	e.Data.Code = "get_column_failed"
-	e.Data.Message = "Failed to retrieve column"
+	e.Body.Code = "get_column_failed"
+	e.Body.Message = "Failed to retrieve column"
 
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
@@ -155,8 +163,8 @@ func GetColumnById(c echo.Context, log *log.Logger) error {
 	}
 
 	if !hasPermission {
-		e.Data.Code = "invalid_permission"
-		e.Data.Message = "Invalid permissions to retrieve column"
+		e.Body.Code = "invalid_permission"
+		e.Body.Message = "Invalid permissions to retrieve column"
 		return c.JSON(http.StatusForbidden, e)
 	}
 
@@ -169,17 +177,20 @@ func GetColumnById(c echo.Context, log *log.Logger) error {
 	return c.JSON(http.StatusOK, column)
 }
 
-// swagger:route PUT /api/column/{Board_GID}/{Column_GID} column update
+// swagger:route PUT /api/column/{Board_GID}/{Column_GID} column column-update
 //
 // Updates column by parent board and column UUIDs
+//
+// Security:
+// - Bearer: []
 //
 // Responses:
 //   200: single-column-response
 //   400: error-response
 func EditColumn(c echo.Context, log *log.Logger) error {
 	e := new(Error)
-	e.Data.Code = "update_task_failed"
-	e.Data.Message = "Failed to update column"
+	e.Body.Code = "update_task_failed"
+	e.Body.Message = "Failed to update column"
 
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
@@ -198,8 +209,8 @@ func EditColumn(c echo.Context, log *log.Logger) error {
 	}
 
 	if !hasPermission {
-		e.Data.Code = "invalid_permission"
-		e.Data.Message = "Invalid permissions to update column"
+		e.Body.Code = "invalid_permission"
+		e.Body.Message = "Invalid permissions to update column"
 		return c.JSON(http.StatusForbidden, e)
 	}
 
@@ -212,17 +223,20 @@ func EditColumn(c echo.Context, log *log.Logger) error {
 	return c.JSON(http.StatusOK, column)
 }
 
-// swagger:route POST /api/column/{Board_GID} column create
+// swagger:route POST /api/column/{Board_GID} column column-create
 //
 // Creates a column in the board specified by UUID
+//
+// Security:
+// - Bearer: []
 //
 // Responses:
 //   200: single-column-response
 //   400: error-response
 func CreateColumn(c echo.Context, log *log.Logger) error {
 	e := new(Error)
-	e.Data.Code = "add_column_failed"
-	e.Data.Message = "Failed to create new column"
+	e.Body.Code = "add_column_failed"
+	e.Body.Message = "Failed to create new column"
 
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
@@ -241,8 +255,8 @@ func CreateColumn(c echo.Context, log *log.Logger) error {
 	}
 
 	if !hasPermission {
-		e.Data.Code = "invalid_permission"
-		e.Data.Message = "Invalid permissions to create column"
+		e.Body.Code = "invalid_permission"
+		e.Body.Message = "Invalid permissions to create column"
 		return c.JSON(http.StatusForbidden, e)
 	}
 
@@ -255,17 +269,20 @@ func CreateColumn(c echo.Context, log *log.Logger) error {
 	return c.JSON(http.StatusCreated, column)
 }
 
-// swagger:route DELETE /api/column/{Board_GID}/{Column_GID} column delete
+// swagger:route DELETE /api/column/{Board_GID}/{Column_GID} column column-delete
 //
 // Deletes column by parent board and column UUIDs
+//
+// Security:
+// - Bearer: []
 //
 // Responses:
 //   200:
 //   400: error-response
 func DeleteColumn(c echo.Context, log *log.Logger) error {
 	e := new(Error)
-	e.Data.Code = "delete_column_failed"
-	e.Data.Message = "Failed to delete column"
+	e.Body.Code = "delete_column_failed"
+	e.Body.Message = "Failed to delete column"
 
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
@@ -283,8 +300,8 @@ func DeleteColumn(c echo.Context, log *log.Logger) error {
 	}
 
 	if !hasPermission {
-		e.Data.Code = "invalid_permission"
-		e.Data.Message = "Invalid permissions to delete column"
+		e.Body.Code = "invalid_permission"
+		e.Body.Message = "Invalid permissions to delete column"
 		return c.JSON(http.StatusForbidden, e)
 	}
 
