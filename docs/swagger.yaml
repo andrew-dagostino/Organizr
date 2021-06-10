@@ -2,6 +2,24 @@ basePath: /
 consumes:
 - application/x-www-form-urlencoded
 definitions:
+  Board:
+    properties:
+      board_member_count:
+        format: int64
+        type: integer
+        x-go-name: MemberCount
+      gid:
+        type: string
+        x-go-name: Gid
+      id:
+        format: int64
+        type: integer
+        x-go-name: Id
+      title:
+        type: string
+        x-go-name: Title
+    type: object
+    x-go-package: organizr/server/types
   Task:
     properties:
       description:
@@ -47,6 +65,96 @@ info:
   title: Organizr
   version: 1.0.0
 paths:
+  /api/board:
+    get:
+      description: Retrieves all boards
+      operationId: board-retrieve-all
+      responses:
+        "200":
+          $ref: '#/responses/multi-board-response'
+        "400":
+          $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
+      tags:
+      - board
+    post:
+      description: Creates a board
+      operationId: board-create
+      responses:
+        "200":
+          $ref: '#/responses/single-board-response'
+        "400":
+          $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
+      tags:
+      - board
+  /api/board/{Board_GID}:
+    delete:
+      description: Deletes board by UUID
+      operationId: board-delete
+      parameters:
+      - description: UUID of board
+        in: path
+        name: Board_GID
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+        "400":
+          $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
+      tags:
+      - board
+    get:
+      description: Retrieves board by UUID
+      operationId: board-retrieve-one
+      parameters:
+      - description: UUID of board
+        in: path
+        name: Board_GID
+        required: true
+        type: string
+      responses:
+        "200":
+          $ref: '#/responses/single-board-response'
+        "400":
+          $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
+      tags:
+      - board
+    put:
+      description: Updates board by UUID
+      operationId: board-update
+      parameters:
+      - description: UUID of board
+        in: path
+        name: Board_GID
+        required: true
+        type: string
+      - description: Title of board
+        in: body
+        name: Title
+        schema:
+          type: string
+      responses:
+        "200":
+          $ref: '#/responses/single-board-response'
+        "400":
+          $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
+      tags:
+      - board
   /api/column/{Board_GID}:
     get:
       description: Retrieves all columns by parent board UUID
@@ -357,6 +465,12 @@ responses:
           type: string
           x-go-name: JWT
       type: object
+  multi-board-response:
+    description: ""
+    schema:
+      items:
+        $ref: '#/definitions/Board'
+      type: array
   multi-column-response:
     description: ""
     schema:
@@ -369,6 +483,8 @@ responses:
       items:
         $ref: '#/definitions/Task'
       type: array
+  single-board-response:
+    description: ""
   single-column-response:
     description: ""
     schema:
