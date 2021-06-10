@@ -14,183 +14,284 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
+// swagger:parameters column column-retrieve-all
+type GetColumnsRequest struct {
+	// UUID of parent board
+	//
+	// in: path
+	// required: true
+	Board_GID string
+}
+
+// swagger:response multi-column-response
+type GetColumnsResponse struct {
+	// in: body
+	Data []types.TaskColumn
+}
+
+// swagger:parameters column column-retrieve-one
+type GetColumnRequest struct {
+	// UUID of parent board
+	//
+	// in: path
+	// required: true
+	Board_GID string
+
+	// UUID of column
+	//
+	// in: path
+	// required: true
+	Column_GID string
+}
+
+// swagger:response single-column-response
+type GetColumnResponse struct {
+	// in: body
+	Data types.TaskColumn
+}
+
+// swagger:parameters column column-update
+type UpdateColumnRequest struct {
+	// UUID of parent board
+	//
+	// in: path
+	// required: true
+	Board_GID string
+
+	// UUID of column
+	//
+	// in: path
+	// required: true
+	Column_GID string
+
+	// Title of column
+	//
+	// in: body
+	Title string `form:"title"`
+}
+
+// swagger:parameters column column-delete
+type DeleteColumnRequest struct {
+	// UUID of parent board
+	//
+	// in: path
+	// required: true
+	Board_GID string
+
+	// UUID of column
+	//
+	// in: path
+	// required: true
+	Column_GID string
+}
+
+// swagger:route GET /api/column/{Board_GID} column retrieve-all
+//
+// Retrieves all columns by parent board UUID
+//
+// Responses:
+//   200: multi-column-response
+//   400: error-response
 func GetColumns(c echo.Context, log *log.Logger) error {
+	e := new(Error)
+	e.Data.Code = "get_columns_failed"
+	e.Data.Message = "Failed to retrieve columns"
+
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
-	boardGid := c.Param("board_gid")
+	params := new(GetColumnsRequest)
+	if err := c.Bind(params); err != nil {
+		return c.JSON(http.StatusBadRequest, e)
+	}
 
-	hasPermission, err := auth.VerifyBoardPermission(memberId, boardGid, auth.VIEW_PERM)
+	hasPermission, err := auth.VerifyBoardPermission(memberId, params.Board_GID, auth.VIEW_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":    "get_columns_failed",
-			"message": "Failed to retrieve columns",
-		})
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
 	if !hasPermission {
-		return c.JSON(http.StatusForbidden, map[string]string{
-			"code":    "invalid_permission",
-			"message": "Invalid permissions to retrieve columns",
-		})
+		e.Data.Code = "invalid_permission"
+		e.Data.Message = "Invalid permissions to retrieve columns"
+		return c.JSON(http.StatusForbidden, e)
 	}
 
-	columns, err := retrieveAllColumns(boardGid)
+	columns, err := retrieveAllColumns(params.Board_GID)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":    "get_columns_failed",
-			"message": "Failed to retrieve columns",
-		})
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
 	return c.JSON(http.StatusOK, columns)
 }
 
+// swagger:route GET /api/column/{Board_GID}/{Column_GID} column retrieve-one
+//
+// Retrieves column by parent board and column UUIDs
+//
+// Responses:
+//   200: single-column-response
+//   400: error-response
 func GetColumnById(c echo.Context, log *log.Logger) error {
+	e := new(Error)
+	e.Data.Code = "get_column_failed"
+	e.Data.Message = "Failed to retrieve column"
+
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
-	boardGid := c.Param("board_gid")
-	columnGid := c.Param("column_gid")
+	params := new(GetColumnRequest)
+	if err := c.Bind(params); err != nil {
+		return c.JSON(http.StatusBadRequest, e)
+	}
 
-	hasPermission, err := auth.VerifyBoardPermission(memberId, boardGid, auth.VIEW_PERM)
+	hasPermission, err := auth.VerifyBoardPermission(memberId, params.Board_GID, auth.VIEW_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":    "get_column_failed",
-			"message": "Failed to retrieve column",
-		})
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
 	if !hasPermission {
-		return c.JSON(http.StatusForbidden, map[string]string{
-			"code":    "invalid_permission",
-			"message": "Invalid permissions to retrieve column",
-		})
+		e.Data.Code = "invalid_permission"
+		e.Data.Message = "Invalid permissions to retrieve column"
+		return c.JSON(http.StatusForbidden, e)
 	}
 
-	column, err := retrieveColumnByGid(boardGid, columnGid)
+	column, err := retrieveColumnByGid(params.Board_GID, params.Column_GID)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":    "get_column_failed",
-			"message": "Failed to retrieve column",
-		})
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
 	return c.JSON(http.StatusOK, column)
 }
 
+// swagger:route PUT /api/column/{Board_GID}/{Column_GID} column update
+//
+// Updates column by parent board and column UUIDs
+//
+// Responses:
+//   200: single-column-response
+//   400: error-response
 func EditColumn(c echo.Context, log *log.Logger) error {
+	e := new(Error)
+	e.Data.Code = "update_task_failed"
+	e.Data.Message = "Failed to update column"
+
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
-	title := strings.TrimSpace(c.FormValue("title"))
+	params := new(UpdateColumnRequest)
+	if err := c.Bind(params); err != nil {
+		return c.JSON(http.StatusBadRequest, e)
+	}
+	cleanColumnData(params)
 
-	boardGid := c.Param("board_gid")
-	columnGid := c.Param("column_gid")
-
-	hasPermission, err := auth.VerifyBoardPermission(memberId, boardGid, auth.EDIT_PERM)
+	hasPermission, err := auth.VerifyBoardPermission(memberId, params.Board_GID, auth.EDIT_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":    "update_column_failed",
-			"message": "Failed to update column",
-		})
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
 	if !hasPermission {
-		return c.JSON(http.StatusForbidden, map[string]string{
-			"code":    "invalid_permission",
-			"message": "Invalid permissions to update column",
-		})
+		e.Data.Code = "invalid_permission"
+		e.Data.Message = "Invalid permissions to update column"
+		return c.JSON(http.StatusForbidden, e)
 	}
 
-	column, err := updateColumn(columnGid, title)
+	column, err := updateColumn(params)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":    "update_column_failed",
-			"message": "Failed to update column",
-		})
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
 	return c.JSON(http.StatusOK, column)
 }
 
+// swagger:route POST /api/column/{Board_GID} column create
+//
+// Creates a column in the board specified by UUID
+//
+// Responses:
+//   200: single-column-response
+//   400: error-response
 func CreateColumn(c echo.Context, log *log.Logger) error {
+	e := new(Error)
+	e.Data.Code = "add_column_failed"
+	e.Data.Message = "Failed to create new column"
+
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
-	title := strings.TrimSpace(c.FormValue("title"))
+	params := new(UpdateColumnRequest)
+	if err := c.Bind(params); err != nil {
+		return c.JSON(http.StatusBadRequest, e)
+	}
+	cleanColumnData(params)
 
-	boardGid := c.Param("board_gid")
-
-	hasPermission, err := auth.VerifyBoardPermission(memberId, boardGid, auth.EDIT_PERM)
+	hasPermission, err := auth.VerifyBoardPermission(memberId, params.Board_GID, auth.EDIT_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":    "update_column_failed",
-			"message": "Failed to update column",
-		})
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
 	if !hasPermission {
-		return c.JSON(http.StatusForbidden, map[string]string{
-			"code":    "invalid_permission",
-			"message": "Invalid permissions to create column",
-		})
+		e.Data.Code = "invalid_permission"
+		e.Data.Message = "Invalid permissions to create column"
+		return c.JSON(http.StatusForbidden, e)
 	}
 
-	column, err := addColumn(boardGid, title)
+	column, err := addColumn(params)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":    "add_column_failed",
-			"message": "Failed to create new column",
-		})
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
 	return c.JSON(http.StatusCreated, column)
 }
 
+// swagger:route DELETE /api/column/{Board_GID}/{Column_GID} column delete
+//
+// Deletes column by parent board and column UUIDs
+//
+// Responses:
+//   200:
+//   400: error-response
 func DeleteColumn(c echo.Context, log *log.Logger) error {
+	e := new(Error)
+	e.Data.Code = "delete_column_failed"
+	e.Data.Message = "Failed to delete column"
+
 	member := c.Get("user").(*jwt.Token)
 	claims := member.Claims.(jwt.MapClaims)
 	memberId := int(claims["id"].(float64))
 
-	columnGid := c.Param("column_gid")
-	boardGid := c.Param("board_gid")
+	params := new(DeleteColumnRequest)
+	if err := c.Bind(params); err != nil {
+		return c.JSON(http.StatusBadRequest, e)
+	}
 
-	hasPermission, err := auth.VerifyBoardPermission(memberId, boardGid, auth.EDIT_PERM)
+	hasPermission, err := auth.VerifyBoardPermission(memberId, params.Board_GID, auth.EDIT_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":    "delete_column_failed",
-			"message": "Failed to delete column",
-		})
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
 	if !hasPermission {
-		return c.JSON(http.StatusForbidden, map[string]string{
-			"code":    "invalid_permission",
-			"message": "Invalid permissions to delete column",
-		})
+		e.Data.Code = "invalid_permission"
+		e.Data.Message = "Invalid permissions to delete column"
+		return c.JSON(http.StatusForbidden, e)
 	}
 
-	err = removeColumn(columnGid)
+	err = removeColumn(params.Column_GID)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"code":    "delete_column_failed",
-			"message": "Failed to delete column",
-		})
+		return c.JSON(http.StatusBadRequest, e)
 	}
 
 	return c.JSON(http.StatusAccepted, nil)
@@ -269,7 +370,7 @@ func retrieveColumnByGid(boardGid string, columnGid string) (types.TaskColumn, e
 	return column, nil
 }
 
-func updateColumn(columnGid string, title string) (types.TaskColumn, error) {
+func updateColumn(params *UpdateColumnRequest) (types.TaskColumn, error) {
 	var column types.TaskColumn
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
@@ -292,7 +393,7 @@ func updateColumn(columnGid string, title string) (types.TaskColumn, error) {
 				updated = CURRENT_TIMESTAMP
 			WHERE gid = $2;
 		`,
-		title, columnGid,
+		params.Title, params.Column_GID,
 	)
 	if err != nil {
 		return column, err
@@ -308,7 +409,7 @@ func updateColumn(columnGid string, title string) (types.TaskColumn, error) {
 			FROM task_column
 			WHERE gid = $1;
 		`,
-		columnGid,
+		params.Column_GID,
 	).Scan(&column.Id, &column.Gid, &column.Title, &column.BoardId)
 	if err != nil {
 		return column, err
@@ -322,7 +423,7 @@ func updateColumn(columnGid string, title string) (types.TaskColumn, error) {
 	return column, nil
 }
 
-func addColumn(boardGid string, title string) (types.TaskColumn, error) {
+func addColumn(params *UpdateColumnRequest) (types.TaskColumn, error) {
 	var column types.TaskColumn
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
@@ -344,7 +445,7 @@ func addColumn(boardGid string, title string) (types.TaskColumn, error) {
 			SELECT $2, id FROM board WHERE board.gid = $1
 			RETURNING task_column.id;
 		`,
-		boardGid, title,
+		params.Board_GID, params.Title,
 	).Scan(&columnId)
 	if err != nil {
 		return column, err
@@ -404,4 +505,9 @@ func removeColumn(columnGid string) error {
 	}
 
 	return nil
+}
+
+// Removes whitespace from title
+func cleanColumnData(params *UpdateColumnRequest) {
+	params.Title = strings.TrimSpace(params.Title)
 }

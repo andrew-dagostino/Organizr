@@ -14,7 +14,7 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
-// swagger:parameters task retrieve-all
+// swagger:parameters task task-retrieve-all
 type GetTasksRequest struct {
 	// UUID of parent column
 	//
@@ -29,7 +29,7 @@ type GetTasksResponse struct {
 	Data []types.Task
 }
 
-// swagger:parameters task retrieve-one
+// swagger:parameters task task-retrieve-one
 type GetTaskRequest struct {
 	// UUID of parent column
 	//
@@ -50,7 +50,7 @@ type GetTaskResponse struct {
 	Data types.Task
 }
 
-// swagger:parameters task update
+// swagger:parameters task task-update
 type UpdateTaskRequest struct {
 	// UUID of parent column
 	//
@@ -75,7 +75,7 @@ type UpdateTaskRequest struct {
 	Description string `form:"description"`
 }
 
-// swagger:parameters task delete
+// swagger:parameters task task-delete
 type DeleteTaskRequest struct {
 	// UUID of parent column
 	//

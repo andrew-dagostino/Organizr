@@ -23,12 +23,82 @@ definitions:
         x-go-name: Title
     type: object
     x-go-package: organizr/server/types
+  TaskColumn:
+    properties:
+      board_id:
+        format: int64
+        type: integer
+        x-go-name: BoardId
+      gid:
+        type: string
+        x-go-name: Gid
+      id:
+        format: int64
+        type: integer
+        x-go-name: Id
+      title:
+        type: string
+        x-go-name: Title
+    type: object
+    x-go-package: organizr/server/types
 host: localhost:1323
 info:
   description: API Documentation.
   title: Organizr
   version: 1.0.0
 paths:
+  /api/column/{Board_GID}:
+    get:
+      description: Retrieves all columns by parent board UUID
+      operationId: retrieve-all
+      responses:
+        "200":
+          $ref: '#/responses/multi-column-response'
+        "400":
+          $ref: '#/responses/error-response'
+      tags:
+      - column
+    post:
+      description: Creates a column in the board specified by UUID
+      operationId: create
+      responses:
+        "200":
+          $ref: '#/responses/single-column-response'
+        "400":
+          $ref: '#/responses/error-response'
+      tags:
+      - column
+  /api/column/{Board_GID}/{Column_GID}:
+    delete:
+      description: Deletes column by parent board and column UUIDs
+      operationId: delete
+      responses:
+        "200":
+          description: ""
+        "400":
+          $ref: '#/responses/error-response'
+      tags:
+      - column
+    get:
+      description: Retrieves column by parent board and column UUIDs
+      operationId: retrieve-one
+      responses:
+        "200":
+          $ref: '#/responses/single-column-response'
+        "400":
+          $ref: '#/responses/error-response'
+      tags:
+      - column
+    put:
+      description: Updates column by parent board and column UUIDs
+      operationId: update
+      responses:
+        "200":
+          $ref: '#/responses/single-column-response'
+        "400":
+          $ref: '#/responses/error-response'
+      tags:
+      - column
   /api/login:
     post:
       description: Authenticates a member with their username and password from a
@@ -84,12 +154,6 @@ paths:
     get:
       description: Retrieves all tasks by parent column UUID
       operationId: retrieve-all
-      parameters:
-      - description: UUID of parent column
-        in: path
-        name: Column_GID
-        required: true
-        type: string
       responses:
         "200":
           $ref: '#/responses/multi-task-response'
@@ -111,17 +175,6 @@ paths:
     delete:
       description: Deletes task by parent column and task UUIDs
       operationId: delete
-      parameters:
-      - description: UUID of parent column
-        in: path
-        name: Column_GID
-        required: true
-        type: string
-      - description: UUID of task
-        in: path
-        name: Task_GID
-        required: true
-        type: string
       responses:
         "200":
           description: ""
@@ -132,17 +185,6 @@ paths:
     get:
       description: Retrieves task by parent column and task UUIDs
       operationId: retrieve-one
-      parameters:
-      - description: UUID of parent column
-        in: path
-        name: Column_GID
-        required: true
-        type: string
-      - description: UUID of task
-        in: path
-        name: Task_GID
-        required: true
-        type: string
       responses:
         "200":
           $ref: '#/responses/single-task-response'
@@ -153,27 +195,6 @@ paths:
     put:
       description: Updates task by parent column and task UUIDs
       operationId: update
-      parameters:
-      - description: UUID of parent column
-        in: path
-        name: Column_GID
-        required: true
-        type: string
-      - description: UUID of task
-        in: path
-        name: Task_GID
-        required: true
-        type: string
-      - description: Title of task
-        in: body
-        name: Title
-        schema:
-          type: string
-      - description: Description of task
-        in: body
-        name: Description
-        schema:
-          type: string
       responses:
         "200":
           $ref: '#/responses/single-task-response'
@@ -213,12 +234,22 @@ responses:
           type: string
           x-go-name: JWT
       type: object
+  multi-column-response:
+    description: ""
+    schema:
+      items:
+        $ref: '#/definitions/TaskColumn'
+      type: array
   multi-task-response:
     description: ""
     schema:
       items:
         $ref: '#/definitions/Task'
       type: array
+  single-column-response:
+    description: ""
+    schema:
+      $ref: '#/definitions/TaskColumn'
   single-task-response:
     description: ""
     schema:

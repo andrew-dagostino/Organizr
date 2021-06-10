@@ -42,8 +42,8 @@ type RegisterBodyParams struct {
 //   400: error-response
 func RegisterMember(c echo.Context, log *log.Logger) error {
 	e := new(Error)
-	e.Code = "register_failed"
-	e.Message = "Failed to create member"
+	e.Data.Code = "register_failed"
+	e.Data.Message = "Failed to create member"
 
 	params := new(RegisterBodyParams)
 	if err := c.Bind(params); err != nil {
