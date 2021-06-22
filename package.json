@@ -12,7 +12,8 @@
         "build-server": "go build server/server.go",
         "build-docs": "swagger generate spec -o ./docs/swagger.yaml",
         "serve-docs": "swagger serve -F=swagger ./docs/swagger.yaml",
-        "test": "react-scripts test --env=jsdom",
+        "test-ui": "react-scripts test --env=jsdom",
+        "test-server": "cd ./server/tests; go test ./...",
         "eject": "react-scripts eject"
     },
     "repository": {
