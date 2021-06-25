@@ -17,8 +17,18 @@ jobs:
             - name: Checkout Repository
               uses: actions/checkout@v2
 
-            - name: Get Packages
+            - name: Retrive Go Modules
               run: go mod download
+              
+            - name: Cache Go Modules
+              uses: actions/cache@preview
+              with:
+                path: ~/go/pkg/mod
+                key: ${{ runner.os }}-build-${{ hashFiles('**/go.sum') }}
+                restore-keys: |
+                  ${{ runner.OS }}-build-${{ env.cache-name }}-
+                  ${{ runner.OS }}-build-
+                  ${{ runner.OS }}-
 
             - name: Run API Tests
               run: go test ./server/tests/... --json > tests.json
