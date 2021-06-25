@@ -1,5 +1,7 @@
 # Organizr
 
+![Tests](https://github.com/andrew-dagostino/Organizr/actions/workflows/ci.yml/badge.svg?job=test)
+
 ## Description
 
 Building an organizational app to learn and experiment with Go and React.
