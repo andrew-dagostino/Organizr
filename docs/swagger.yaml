@@ -82,7 +82,32 @@ info:
   title: Organizr
   version: 1.0.0
 paths:
-  /api/board:
+  /api/login:
+    post:
+      description: Authenticates a member with their username and password from a
+        POST, returning a new JWT session token
+      operationId: login
+      parameters:
+      - example: user@email.com
+        in: formData
+        name: username
+        required: true
+        type: string
+        x-go-name: Username
+      - example: password1234
+        in: formData
+        name: password
+        required: true
+        type: string
+        x-go-name: Password
+      responses:
+        "200":
+          $ref: '#/responses/login-response'
+        "400":
+          $ref: '#/responses/error-response'
+      tags:
+      - authentication
+  /api/r/board:
     get:
       description: Retrieves all boards
       operationId: board-retrieve-all
@@ -109,7 +134,7 @@ paths:
         - '[]'
       tags:
       - board
-  /api/board/{Board_GID}:
+  /api/r/board/{Board_GID}:
     delete:
       description: Deletes board by UUID
       operationId: board-delete
@@ -159,9 +184,10 @@ paths:
         type: string
       - description: Title of board
         in: body
-        name: Title
+        name: title
         schema:
           type: string
+        x-go-name: Title
       responses:
         "200":
           $ref: '#/responses/single-board-response'
@@ -172,26 +198,7 @@ paths:
         - '[]'
       tags:
       - board
-  /api/column/{Board_GID}:
-    get:
-      description: Retrieves all columns by parent board UUID
-      operationId: column-retrieve-all
-      parameters:
-      - description: UUID of parent board
-        in: path
-        name: Board_GID
-        required: true
-        type: string
-      responses:
-        "200":
-          $ref: '#/responses/multi-column-response'
-        "400":
-          $ref: '#/responses/error-response'
-      security:
-      - Bearer:
-        - '[]'
-      tags:
-      - column
+  /api/r/column:
     post:
       description: Creates a column in the board specified by UUID
       operationId: column-create
@@ -205,16 +212,11 @@ paths:
         - '[]'
       tags:
       - column
-  /api/column/{Board_GID}/{Column_GID}:
+  /api/r/column/{Column_GID}:
     delete:
       description: Deletes column by parent board and column UUIDs
       operationId: column-delete
       parameters:
-      - description: UUID of parent board
-        in: path
-        name: Board_GID
-        required: true
-        type: string
       - description: UUID of column
         in: path
         name: Column_GID
@@ -234,11 +236,6 @@ paths:
       description: Retrieves column by parent board and column UUIDs
       operationId: column-retrieve-one
       parameters:
-      - description: UUID of parent board
-        in: path
-        name: Board_GID
-        required: true
-        type: string
       - description: UUID of column
         in: path
         name: Column_GID
@@ -259,10 +256,12 @@ paths:
       operationId: column-update
       parameters:
       - description: UUID of parent board
-        in: path
-        name: Board_GID
+        in: body
+        name: board_gid
         required: true
-        type: string
+        schema:
+          type: string
+        x-go-name: Board_GID
       - description: UUID of column
         in: path
         name: Column_GID
@@ -270,9 +269,10 @@ paths:
         type: string
       - description: Title of column
         in: body
-        name: Title
+        name: title
         schema:
           type: string
+        x-go-name: Title
       responses:
         "200":
           $ref: '#/responses/single-column-response'
@@ -283,77 +283,27 @@ paths:
         - '[]'
       tags:
       - column
-  /api/login:
-    post:
-      description: Authenticates a member with their username and password from a
-        POST, returning a new JWT session token
-      operationId: login
-      parameters:
-      - example: user@email.com
-        in: formData
-        name: Username
-        required: true
-        type: string
-      - example: password1234
-        in: formData
-        name: Password
-        required: true
-        type: string
-      responses:
-        "200":
-          $ref: '#/responses/login-response'
-        "400":
-          $ref: '#/responses/error-response'
-      tags:
-      - authentication
-  /api/register:
-    post:
-      description: Registers a new member using the supplied username, email, and
-        password
-      operationId: register
-      parameters:
-      - example: andrew
-        in: formData
-        name: Username
-        required: true
-        type: string
-      - example: user@email.com
-        in: formData
-        name: Email
-        required: true
-        type: string
-      - example: password1234
-        in: formData
-        name: Password
-        required: true
-        type: string
-      responses:
-        "200":
-          description: ""
-        "400":
-          $ref: '#/responses/error-response'
-      tags:
-      - authentication
-  /api/task/{Column_GID}:
+  /api/r/column?board_gid={Board_GID}:
     get:
-      description: Retrieves all tasks by parent column UUID
-      operationId: task-retrieve-all
+      description: Retrieves all columns by parent board UUID
+      operationId: column-retrieve-all
       parameters:
-      - description: UUID of parent column
-        in: path
-        name: Column_GID
+      - description: UUID of parent board
+        in: query
+        name: Board_GID
         required: true
         type: string
       responses:
         "200":
-          $ref: '#/responses/multi-task-response'
+          $ref: '#/responses/multi-column-response'
         "400":
           $ref: '#/responses/error-response'
       security:
       - Bearer:
         - '[]'
       tags:
-      - task
+      - column
+  /api/r/task:
     post:
       description: Creates a task in the column specified by UUID
       operationId: task-create
@@ -367,16 +317,11 @@ paths:
         - '[]'
       tags:
       - task
-  /api/task/{Column_GID}/{Task_GID}:
+  /api/r/task/{Task_GID}:
     delete:
       description: Deletes task by parent column and task UUIDs
       operationId: task-delete
       parameters:
-      - description: UUID of parent column
-        in: path
-        name: Column_GID
-        required: true
-        type: string
       - description: UUID of task
         in: path
         name: Task_GID
@@ -396,11 +341,6 @@ paths:
       description: Retrieves task by parent column and task UUIDs
       operationId: task-retrieve-one
       parameters:
-      - description: UUID of parent column
-        in: path
-        name: Column_GID
-        required: true
-        type: string
       - description: UUID of task
         in: path
         name: Task_GID
@@ -421,10 +361,12 @@ paths:
       operationId: task-update
       parameters:
       - description: UUID of parent column
-        in: path
-        name: Column_GID
+        in: body
+        name: column_gid
         required: true
-        type: string
+        schema:
+          type: string
+        x-go-name: Column_GID
       - description: UUID of task
         in: path
         name: Task_GID
@@ -432,14 +374,16 @@ paths:
         type: string
       - description: Title of task
         in: body
-        name: Title
+        name: title
         schema:
           type: string
+        x-go-name: Title
       - description: Description of task
         in: body
-        name: Description
+        name: description
         schema:
           type: string
+        x-go-name: Description
       responses:
         "200":
           $ref: '#/responses/single-task-response'
@@ -450,6 +394,57 @@ paths:
         - '[]'
       tags:
       - task
+  /api/r/task?column_gid={Column_GID}:
+    get:
+      description: Retrieves all tasks by parent column UUID
+      operationId: task-retrieve-all
+      parameters:
+      - description: UUID of parent column
+        in: query
+        name: Column_GID
+        required: true
+        type: string
+      responses:
+        "200":
+          $ref: '#/responses/multi-task-response'
+        "400":
+          $ref: '#/responses/error-response'
+      security:
+      - Bearer:
+        - '[]'
+      tags:
+      - task
+  /api/register:
+    post:
+      description: Registers a new member using the supplied username, email, and
+        password
+      operationId: register
+      parameters:
+      - example: andrew
+        in: formData
+        name: username
+        required: true
+        type: string
+        x-go-name: Username
+      - example: user@email.com
+        in: formData
+        name: email
+        required: true
+        type: string
+        x-go-name: Email
+      - example: password1234
+        in: formData
+        name: password
+        required: true
+        type: string
+        x-go-name: Password
+      responses:
+        "200":
+          description: ""
+        "400":
+          $ref: '#/responses/error-response'
+      tags:
+      - authentication
 produces:
 - application/json
 responses:

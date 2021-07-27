@@ -14,7 +14,7 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
-// swagger:route GET /api/column/{Board_GID} column column-retrieve-all
+// swagger:route GET /api/r/column?board_gid={Board_GID} column column-retrieve-all
 //
 // Retrieves all columns by parent board UUID
 //
@@ -59,7 +59,7 @@ func GetColumns(c echo.Context, log *log.Logger) error {
 	return c.JSON(http.StatusOK, columns)
 }
 
-// swagger:route GET /api/column/{Board_GID}/{Column_GID} column column-retrieve-one
+// swagger:route GET /api/r/column/{Column_GID} column column-retrieve-one
 //
 // Retrieves column by parent board and column UUIDs
 //
@@ -83,7 +83,7 @@ func GetColumnById(c echo.Context, log *log.Logger) error {
 		return c.JSON(http.StatusBadRequest, e)
 	}
 
-	hasPermission, err := auth.VerifyBoardPermission(memberId, params.Board_GID, auth.VIEW_PERM)
+	hasPermission, err := auth.VerifyColumnPermission(memberId, params.Column_GID, auth.VIEW_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, e)
@@ -95,7 +95,7 @@ func GetColumnById(c echo.Context, log *log.Logger) error {
 		return c.JSON(http.StatusForbidden, e)
 	}
 
-	column, err := retrieveColumnByGid(params.Board_GID, params.Column_GID)
+	column, err := retrieveColumnByGid(params.Column_GID)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, e)
@@ -104,7 +104,7 @@ func GetColumnById(c echo.Context, log *log.Logger) error {
 	return c.JSON(http.StatusOK, column)
 }
 
-// swagger:route PUT /api/column/{Board_GID}/{Column_GID} column column-update
+// swagger:route PUT /api/r/column/{Column_GID} column column-update
 //
 // Updates column by parent board and column UUIDs
 //
@@ -129,7 +129,7 @@ func EditColumn(c echo.Context, log *log.Logger) error {
 	}
 	cleanColumnData(params)
 
-	hasPermission, err := auth.VerifyBoardPermission(memberId, params.Board_GID, auth.EDIT_PERM)
+	hasPermission, err := auth.VerifyColumnPermission(memberId, params.Column_GID, auth.EDIT_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, e)
@@ -150,7 +150,7 @@ func EditColumn(c echo.Context, log *log.Logger) error {
 	return c.JSON(http.StatusOK, column)
 }
 
-// swagger:route POST /api/column/{Board_GID} column column-create
+// swagger:route POST /api/r/column column column-create
 //
 // Creates a column in the board specified by UUID
 //
@@ -196,7 +196,7 @@ func CreateColumn(c echo.Context, log *log.Logger) error {
 	return c.JSON(http.StatusCreated, column)
 }
 
-// swagger:route DELETE /api/column/{Board_GID}/{Column_GID} column column-delete
+// swagger:route DELETE /api/r/column/{Column_GID} column column-delete
 //
 // Deletes column by parent board and column UUIDs
 //
@@ -220,7 +220,7 @@ func DeleteColumn(c echo.Context, log *log.Logger) error {
 		return c.JSON(http.StatusBadRequest, e)
 	}
 
-	hasPermission, err := auth.VerifyBoardPermission(memberId, params.Board_GID, auth.EDIT_PERM)
+	hasPermission, err := auth.VerifyColumnPermission(memberId, params.Column_GID, auth.EDIT_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, e)
@@ -282,7 +282,7 @@ func retrieveAllColumns(boardGid string) ([]models.TaskColumn, error) {
 	return columns, nil
 }
 
-func retrieveColumnByGid(boardGid string, columnGid string) (models.TaskColumn, error) {
+func retrieveColumnByGid(columnGid string) (models.TaskColumn, error) {
 	column := models.TaskColumn{}
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
@@ -299,13 +299,9 @@ func retrieveColumnByGid(boardGid string, columnGid string) (models.TaskColumn, 
 				title,
 				board_id
 			FROM task_column
-			WHERE gid = $2
-			AND board_id = (
-				SELECT id
-				FROM board WHERE gid = $1
-			);
+			WHERE gid = $1;
 		`,
-		boardGid, columnGid,
+		columnGid,
 	).Scan(&column.Id, &column.Gid, &column.Title, &column.BoardId)
 
 	if err != nil {

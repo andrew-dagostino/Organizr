@@ -117,6 +117,7 @@ export default class ViewBoard extends React.Component {
         retrieveBoard(boardGid)
             .then(({ data }) => this.setState({ title: data.title }))
             .catch(() => window.location.replace('/board'));
+
         retrieveColumns(boardGid).then(({ data }) => {
             const columns = data;
             columns.forEach(async (column, index, arr) => {
@@ -169,10 +170,11 @@ export default class ViewBoard extends React.Component {
             task.task_column_id = dColumn.id;
 
             const formdata = new FormData();
+            formdata.append('column_gid', dColumn.gid);
             formdata.append('title', task.title || '');
             formdata.append('description', task.description || '');
 
-            updateTask(dColumn.gid, taskGid, formdata).then(() => {
+            updateTask(taskGid, formdata).then(() => {
                 this.updateColumnUI({
                     gid: sColumn.gid,
                     title: sColumn.title,
@@ -191,9 +193,10 @@ export default class ViewBoard extends React.Component {
         const { gid } = this.state;
 
         const formdata = new FormData();
+        formdata.append('board_gid', gid);
         formdata.append('title', '');
 
-        createColumn(gid, formdata).then(({ data }) => {
+        createColumn(formdata).then(({ data }) => {
             const { columns } = this.state;
             this.setState({ columns: columns.concat([data]) });
         });
@@ -225,10 +228,11 @@ export default class ViewBoard extends React.Component {
             clearTimeout(columnTimers[column.gid]);
 
             const formdata = new FormData();
+            formdata.append('board_gid', gid);
             formdata.append('title', column.title);
 
             columnTimers[column.gid] = setTimeout(
-                () => updateColumn(gid, column.gid, formdata),
+                () => updateColumn(column.gid, formdata),
                 500
             );
 
@@ -239,11 +243,7 @@ export default class ViewBoard extends React.Component {
     };
 
     handleColumnRemove = (column) => {
-        const { gid } = this.state;
-
-        deleteColumn(gid, column.gid).then(() => {
-            this.removeColumn(column.gid);
-        });
+        deleteColumn(column.gid).then(() => this.removeColumn(column.gid));
     };
 
     getColumn = (gid) => {

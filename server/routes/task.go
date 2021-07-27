@@ -14,7 +14,7 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
-// swagger:route GET /api/task/{Column_GID} task task-retrieve-all
+// swagger:route GET /api/r/task?column_gid={Column_GID} task task-retrieve-all
 //
 // Retrieves all tasks by parent column UUID
 //
@@ -59,7 +59,7 @@ func GetTasks(c echo.Context, log *log.Logger) error {
 	return c.JSON(http.StatusOK, tasks)
 }
 
-// swagger:route GET /api/task/{Column_GID}/{Task_GID} task task-retrieve-one
+// swagger:route GET /api/r/task/{Task_GID} task task-retrieve-one
 //
 // Retrieves task by parent column and task UUIDs
 //
@@ -83,7 +83,7 @@ func GetTaskById(c echo.Context, log *log.Logger) error {
 		return c.JSON(http.StatusBadRequest, e)
 	}
 
-	hasPermission, err := auth.VerifyColumnPermission(memberId, params.Column_GID, auth.VIEW_PERM)
+	hasPermission, err := auth.VerifyTaskPermission(memberId, params.Task_GID, auth.VIEW_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, e)
@@ -95,7 +95,7 @@ func GetTaskById(c echo.Context, log *log.Logger) error {
 		return c.JSON(http.StatusForbidden, e)
 	}
 
-	task, err := retrieveTaskByGid(params.Column_GID, params.Task_GID)
+	task, err := retrieveTaskByGid(params.Task_GID)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, e)
@@ -104,7 +104,7 @@ func GetTaskById(c echo.Context, log *log.Logger) error {
 	return c.JSON(http.StatusOK, task)
 }
 
-// swagger:route PUT /api/task/{Column_GID}/{Task_GID} task task-update
+// swagger:route PUT /api/r/task/{Task_GID} task task-update
 //
 // Updates task by parent column and task UUIDs
 //
@@ -150,7 +150,7 @@ func EditTask(c echo.Context, log *log.Logger) error {
 	return c.JSON(http.StatusOK, task)
 }
 
-// swagger:route POST /api/task/{Column_GID} task task-create
+// swagger:route POST /api/r/task task task-create
 //
 // Creates a task in the column specified by UUID
 //
@@ -196,7 +196,7 @@ func CreateTask(c echo.Context, log *log.Logger) error {
 	return c.JSON(http.StatusCreated, task)
 }
 
-// swagger:route DELETE /api/task/{Column_GID}/{Task_GID} task task-delete
+// swagger:route DELETE /api/r/task/{Task_GID} task task-delete
 //
 // Deletes task by parent column and task UUIDs
 //
@@ -220,7 +220,7 @@ func DeleteTask(c echo.Context, log *log.Logger) error {
 		return c.JSON(http.StatusBadRequest, e)
 	}
 
-	hasPermission, err := auth.VerifyColumnPermission(memberId, params.Column_GID, auth.EDIT_PERM)
+	hasPermission, err := auth.VerifyTaskPermission(memberId, params.Task_GID, auth.EDIT_PERM)
 	if err != nil {
 		log.Error(strings.TrimSpace(err.Error()))
 		return c.JSON(http.StatusBadRequest, e)
@@ -283,7 +283,7 @@ func retrieveAllTasks(columnGid string) ([]models.Task, error) {
 	return tasks, nil
 }
 
-func retrieveTaskByGid(columnGid string, taskGid string) (models.Task, error) {
+func retrieveTaskByGid(taskGid string) (models.Task, error) {
 	task := models.Task{}
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("PG_URL"))
@@ -301,12 +301,9 @@ func retrieveTaskByGid(columnGid string, taskGid string) (models.Task, error) {
 				description,
 				task_column_id
 			FROM task
-			WHERE gid = $2
-			AND task_column_id = (
-				SELECT id FROM task_column WHERE gid = $1
-			);
+			WHERE gid = $1;
 		`,
-		columnGid, taskGid,
+		taskGid,
 	).Scan(&task.Id, &task.Gid, &task.Title, &task.Description, &task.TaskColumnId)
 
 	if err != nil {

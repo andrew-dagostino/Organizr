@@ -38,63 +38,33 @@ func main() {
 		return routes.LoginMember(c, logger)
 	})
 
+	// Authenticated Paths
+	r := e.Group("/api/r")
+	r.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+		SigningKey: []byte(os.Getenv("JWT_SECRET")),
+	}))
+
 	// Board Routes
-	e.GET("/api/board", func(c echo.Context) error {
-		return routes.GetBoards(c, logger)
-	}, authenticated())
-	e.GET("/api/board/:board_gid", func(c echo.Context) error {
-		return routes.GetBoardById(c, logger)
-	}, authenticated())
-	e.PUT("/api/board/:board_gid", func(c echo.Context) error {
-		return routes.EditBoard(c, logger)
-	}, authenticated())
-	e.POST("/api/board", func(c echo.Context) error {
-		return routes.CreateBoard(c, logger)
-	}, authenticated())
-	e.DELETE("/api/board/:board_gid", func(c echo.Context) error {
-		return routes.DeleteBoard(c, logger)
-	}, authenticated())
+	r.GET("/board", func(c echo.Context) error { return routes.GetBoards(c, logger) })
+	r.GET("/board/:board_gid", func(c echo.Context) error { return routes.GetBoardById(c, logger) })
+	r.PUT("/board/:board_gid", func(c echo.Context) error { return routes.EditBoard(c, logger) })
+	r.POST("/board", func(c echo.Context) error { return routes.CreateBoard(c, logger) })
+	r.DELETE("/board/:board_gid", func(c echo.Context) error { return routes.DeleteBoard(c, logger) })
 
 	// Task Column Routes
-	e.GET("/api/column/:board_gid", func(c echo.Context) error {
-		return routes.GetColumns(c, logger)
-	}, authenticated())
-	e.GET("/api/column/:board_gid/:column_gid", func(c echo.Context) error {
-		return routes.GetColumnById(c, logger)
-	}, authenticated())
-	e.PUT("/api/column/:board_gid/:column_gid", func(c echo.Context) error {
-		return routes.EditColumn(c, logger)
-	}, authenticated())
-	e.POST("/api/column/:board_gid", func(c echo.Context) error {
-		return routes.CreateColumn(c, logger)
-	}, authenticated())
-	e.DELETE("/api/column/:board_gid/:column_gid", func(c echo.Context) error {
-		return routes.DeleteColumn(c, logger)
-	}, authenticated())
+	r.GET("/column", func(c echo.Context) error { return routes.GetColumns(c, logger) })
+	r.GET("/column/:column_gid", func(c echo.Context) error { return routes.GetColumnById(c, logger) })
+	r.PUT("/column/:column_gid", func(c echo.Context) error { return routes.EditColumn(c, logger) })
+	r.POST("/column", func(c echo.Context) error { return routes.CreateColumn(c, logger) })
+	r.DELETE("/column/:column_gid", func(c echo.Context) error { return routes.DeleteColumn(c, logger) })
 
 	// Task Routes
-	e.GET("/api/task/:column_gid", func(c echo.Context) error {
-		return routes.GetTasks(c, logger)
-	}, authenticated())
-	e.GET("/api/task/:column_gid/:task_gid", func(c echo.Context) error {
-		return routes.GetTaskById(c, logger)
-	}, authenticated())
-	e.PUT("/api/task/:column_gid/:task_gid", func(c echo.Context) error {
-		return routes.EditTask(c, logger)
-	}, authenticated())
-	e.POST("/api/task/:column_gid", func(c echo.Context) error {
-		return routes.CreateTask(c, logger)
-	}, authenticated())
-	e.DELETE("/api/task/:column_gid/:task_gid", func(c echo.Context) error {
-		return routes.DeleteTask(c, logger)
-	}, authenticated())
+	r.GET("/task", func(c echo.Context) error { return routes.GetTasks(c, logger) })
+	r.GET("/task/:task_gid", func(c echo.Context) error { return routes.GetTaskById(c, logger) })
+	r.PUT("/task/:task_gid", func(c echo.Context) error { return routes.EditTask(c, logger) })
+	r.POST("/task", func(c echo.Context) error { return routes.CreateTask(c, logger) })
+	r.DELETE("/task/:task_gid", func(c echo.Context) error { return routes.DeleteTask(c, logger) })
 
 	// Start server
 	e.Logger.Fatal(e.Start(":1323"))
-}
-
-func authenticated() echo.MiddlewareFunc {
-	return middleware.JWTWithConfig(middleware.JWTConfig{
-		SigningKey: []byte(os.Getenv("JWT_SECRET")),
-	})
 }

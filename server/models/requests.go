@@ -5,12 +5,12 @@ type LoginRequest struct {
 	// in: formData
 	// required: true
 	// example: user@email.com
-	Username string `form:"username"`
+	Username string `form:"username" json:"username"`
 
 	// in: formData
 	// required: true
 	// example: password1234
-	Password string `form:"password"`
+	Password string `form:"password" json:"password"`
 }
 
 // swagger:parameters authentication register
@@ -18,17 +18,17 @@ type RegisterRequest struct {
 	// in: formData
 	// required: true
 	// example: andrew
-	Username string `form:"username"`
+	Username string `form:"username" json:"username"`
 
 	// in: formData
 	// required: true
 	// example: user@email.com
-	Email string `form:"email"`
+	Email string `form:"email" json:"email"`
 
 	// in: formData
 	// required: true
 	// example: password1234
-	Password string `form:"password"`
+	Password string `form:"password" json:"password"`
 }
 
 // swagger:parameters board board-retrieve-one
@@ -51,7 +51,7 @@ type UpdateBoardRequest struct {
 	// Title of board
 	//
 	// in: body
-	Title string `form:"title"`
+	Title string `form:"title" json:"title"`
 }
 
 // swagger:parameters board board-delete
@@ -67,19 +67,13 @@ type DeleteBoardRequest struct {
 type GetColumnsRequest struct {
 	// UUID of parent board
 	//
-	// in: path
+	// in: query
 	// required: true
-	Board_GID string `param:"board_gid"`
+	Board_GID string `query:"board_gid"`
 }
 
 // swagger:parameters column column-retrieve-one
 type GetColumnRequest struct {
-	// UUID of parent board
-	//
-	// in: path
-	// required: true
-	Board_GID string `param:"board_gid"`
-
 	// UUID of column
 	//
 	// in: path
@@ -91,9 +85,9 @@ type GetColumnRequest struct {
 type UpdateColumnRequest struct {
 	// UUID of parent board
 	//
-	// in: path
+	// in: body
 	// required: true
-	Board_GID string `param:"board_gid"`
+	Board_GID string `form:"board_gid" json:"board_gid"`
 
 	// UUID of column
 	//
@@ -104,17 +98,11 @@ type UpdateColumnRequest struct {
 	// Title of column
 	//
 	// in: body
-	Title string `form:"title"`
+	Title string `form:"title" json:"title"`
 }
 
 // swagger:parameters column column-delete
 type DeleteColumnRequest struct {
-	// UUID of parent board
-	//
-	// in: path
-	// required: true
-	Board_GID string `param:"board_gid"`
-
 	// UUID of column
 	//
 	// in: path
@@ -126,19 +114,13 @@ type DeleteColumnRequest struct {
 type GetTasksRequest struct {
 	// UUID of parent column
 	//
-	// in: path
+	// in: query
 	// required: true
-	Column_GID string `param:"column_gid"`
+	Column_GID string `query:"column_gid"`
 }
 
 // swagger:parameters task task-retrieve-one
 type GetTaskRequest struct {
-	// UUID of parent column
-	//
-	// in: path
-	// required: true
-	Column_GID string `param:"column_gid"`
-
 	// UUID of task
 	//
 	// in: path
@@ -150,9 +132,9 @@ type GetTaskRequest struct {
 type UpdateTaskRequest struct {
 	// UUID of parent column
 	//
-	// in: path
+	// in: body
 	// required: true
-	Column_GID string `param:"column_gid"`
+	Column_GID string `form:"column_gid" json:"column_gid"`
 
 	// UUID of task
 	//
@@ -163,22 +145,16 @@ type UpdateTaskRequest struct {
 	// Title of task
 	//
 	// in: body
-	Title string `form:"title"`
+	Title string `form:"title" json:"title"`
 
 	// Description of task
 	//
 	// in: body
-	Description string `form:"description"`
+	Description string `form:"description" json:"description"`
 }
 
 // swagger:parameters task task-delete
 type DeleteTaskRequest struct {
-	// UUID of parent column
-	//
-	// in: path
-	// required: true
-	Column_GID string `param:"column_gid"`
-
 	// UUID of task
 	//
 	// in: path

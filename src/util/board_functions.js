@@ -46,25 +46,16 @@ function deleteBoard(bGid) {
     });
 }
 
-function retrieveColumns(gid) {
-    return axios.get(`${config.API_URL}/column/${gid}`, {
+function retrieveColumns(bGid) {
+    return axios.get(`${config.API_URL}/column?board_gid=${bGid}`, {
         headers: {
             Authorization: `Bearer ${JWT}`,
         },
     });
 }
 
-function updateColumn(bGid, cGid, formdata) {
-    return axios.put(`${config.API_URL}/column/${bGid}/${cGid}`, formdata, {
-        headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${JWT}`,
-        },
-    });
-}
-
-function createColumn(cGid, formdata) {
-    return axios.post(`${config.API_URL}/column/${cGid}`, formdata, {
+function updateColumn(cGid, formdata) {
+    return axios.put(`${config.API_URL}/column/${cGid}`, formdata, {
         headers: {
             'Content-Type': 'multipart/form-data',
             Authorization: `Bearer ${JWT}`,
@@ -72,8 +63,17 @@ function createColumn(cGid, formdata) {
     });
 }
 
-function deleteColumn(bGid, cGid) {
-    return axios.delete(`${config.API_URL}/column/${bGid}/${cGid}`, {
+function createColumn(formdata) {
+    return axios.post(`${config.API_URL}/column`, formdata, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${JWT}`,
+        },
+    });
+}
+
+function deleteColumn(cGid) {
+    return axios.delete(`${config.API_URL}/column/${cGid}`, {
         headers: {
             'Content-Type': 'multipart/form-data',
             Authorization: `Bearer ${JWT}`,
@@ -82,24 +82,15 @@ function deleteColumn(bGid, cGid) {
 }
 
 function retrieveTasks(cGid) {
-    return axios.get(`${config.API_URL}/task/${cGid}`, {
+    return axios.get(`${config.API_URL}/task?column_gid=${cGid}`, {
         headers: {
             Authorization: `Bearer ${JWT}`,
         },
     });
 }
 
-function updateTask(cGid, tGid, formdata) {
-    return axios.put(`${config.API_URL}/task/${cGid}/${tGid}`, formdata, {
-        headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${JWT}`,
-        },
-    });
-}
-
-function createTask(cGid, formdata) {
-    return axios.post(`${config.API_URL}/task/${cGid}`, formdata, {
+function updateTask(tGid, formdata) {
+    return axios.put(`${config.API_URL}/task/${tGid}`, formdata, {
         headers: {
             'Content-Type': 'multipart/form-data',
             Authorization: `Bearer ${JWT}`,
@@ -107,8 +98,17 @@ function createTask(cGid, formdata) {
     });
 }
 
-function deleteTask(cGid, tGid) {
-    return axios.delete(`${config.API_URL}/task/${cGid}/${tGid}`, {
+function createTask(formdata) {
+    return axios.post(`${config.API_URL}/task`, formdata, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${JWT}`,
+        },
+    });
+}
+
+function deleteTask(tGid) {
+    return axios.delete(`${config.API_URL}/task/${tGid}`, {
         headers: {
             'Content-Type': 'multipart/form-data',
             Authorization: `Bearer ${JWT}`,

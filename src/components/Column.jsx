@@ -41,10 +41,11 @@ class Column extends React.Component {
         const { gid, title, tasks, updateColumn } = this.props;
 
         const formdata = new FormData();
+        formdata.append('column_gid', gid);
         formdata.append('title', '');
         formdata.append('description', '');
 
-        createTask(gid, formdata).then((data) => {
+        createTask(formdata).then((data) => {
             updateColumn({
                 gid,
                 title,
@@ -88,11 +89,12 @@ class Column extends React.Component {
             clearTimeout(taskTimers[task.gid]);
 
             const formdata = new FormData();
+            formdata.append('column_gid', gid);
             formdata.append('title', task.title);
             formdata.append('description', task.description);
 
             taskTimers[task.gid] = setTimeout(
-                () => updateTask(gid, task.gid, formdata),
+                () => updateTask(task.gid, formdata),
                 500
             );
 

@@ -22,7 +22,7 @@ function LoginForm({ setError }) {
         formdata.append('remember', remember);
 
         axios
-            .post(`${config.API_URL}/login`, formdata, {
+            .post(`${config.UNAUTH_API_URL}/login`, formdata, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             })
             .then((response) => {
@@ -105,7 +105,7 @@ function RegisterForm({ setError }) {
         formdata.append('password', password);
 
         axios
-            .post(`${config.API_URL}/register`, formdata, {
+            .post(`${config.UNAUTH_API_URL}/register`, formdata, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             })
             .then((response) => {
