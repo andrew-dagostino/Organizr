@@ -14,7 +14,7 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
-// swagger:route GET /api/board board board-retrieve-all
+// swagger:route GET /api/r/board board board-retrieve-all
 //
 // Retrieves all boards
 //
@@ -42,7 +42,7 @@ func GetBoards(c echo.Context, log *log.Logger) error {
 	return c.JSON(http.StatusOK, boards)
 }
 
-// swagger:route GET /api/board/{Board_GID} board board-retrieve-one
+// swagger:route GET /api/r/board/{Board_GID} board board-retrieve-one
 //
 // Retrieves board by UUID
 //
@@ -87,7 +87,7 @@ func GetBoardById(c echo.Context, log *log.Logger) error {
 	return c.JSON(http.StatusOK, board)
 }
 
-// swagger:route PUT /api/board/{Board_GID} board board-update
+// swagger:route PUT /api/r/board/{Board_GID} board board-update
 //
 // Updates board by UUID
 //
@@ -133,7 +133,7 @@ func EditBoard(c echo.Context, log *log.Logger) error {
 	return c.JSON(http.StatusOK, board)
 }
 
-// swagger:route POST /api/board board board-create
+// swagger:route POST /api/r/board board board-create
 //
 // Creates a board
 //
@@ -167,7 +167,7 @@ func CreateBoard(c echo.Context, log *log.Logger) error {
 	return c.JSON(http.StatusCreated, board)
 }
 
-// swagger:route DELETE /api/board/{Board_GID} board board-delete
+// swagger:route DELETE /api/r/board/{Board_GID} board board-delete
 //
 // Deletes board by UUID
 //
