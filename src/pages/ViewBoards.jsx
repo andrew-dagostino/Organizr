@@ -1,4 +1,6 @@
 import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+
 import { Card, Grid, Icon, Loader } from 'semantic-ui-react';
 import BoardCard from '../components/BoardCard';
 import Header from '../components/Header';
@@ -9,6 +11,9 @@ import {
     deleteBoard,
 } from '../util/board_functions';
 
+const boardStore = useSelector((state) => Object.values(state));
+const dispatch = useDispatch();
+
 /**
  * Card widget linking to the new board page
  */
@@ -17,9 +22,14 @@ function AddBoardWidget() {
         const formdata = new FormData();
         formdata.append('title', '');
 
-        createBoard(formdata).then(({ data }) =>
-            window.location.replace(`/board/${data.gid}`)
-        );
+        createBoard(formdata).then(({ data }) => {
+            dispatch({
+                type: 'board/add',
+                payload: data,
+            });
+
+            window.location.replace(`/board/${data.gid}`);
+        });
     }
 
     return (
@@ -77,12 +87,25 @@ export default class ViewBoards extends React.Component {
 
     componentDidMount() {
         retrieveBoards().then(({ data }) => {
+            dispatch({
+                type: 'init',
+                payload: data,
+            });
+
             this.setState({ boards: data, loaded: true });
         });
     }
 
     removeBoard = (bGid) => {
         const { boards } = this.state;
+
+        dispatch({
+            type: 'board/remove',
+            payload: {
+                gid: bGid,
+            },
+        });
+
         boards.splice(
             boards.findIndex((b) => b.gid === bGid),
             1
@@ -97,7 +120,7 @@ export default class ViewBoards extends React.Component {
     };
 
     render() {
-        const { boards, loaded } = this.state;
+        const { loaded } = this.state;
 
         return (
             <>
@@ -105,7 +128,7 @@ export default class ViewBoards extends React.Component {
                 {loaded ? (
                     <Grid columns="4" container doubling stackable>
                         <Grid.Row>
-                            {boards.map((board) => (
+                            {boardStore.map((board) => (
                                 <Grid.Column key={board.gid}>
                                     <BoardCard
                                         gid={board.gid}
