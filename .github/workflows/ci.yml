@@ -1,0 +1,41 @@
+name: CI
+
+on:
+    push:
+        branches: [master, develop]
+    pull_request:
+        branches: [master, develop]
+
+    # Allows you to run this workflow manually from the Actions tab
+    workflow_dispatch:
+
+jobs:
+    test:
+        runs-on: pi-4b
+        container: golang:1.16.5-buster
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v2
+
+            - name: Retrieve Go Modules
+              run: go mod download
+
+            - name: Cache Go Modules
+              uses: actions/cache@preview
+              with:
+                  path: ~/go/pkg/mod
+                  key: ${{ runner.os }}-build-${{ hashFiles('**/go.sum') }}
+                  restore-keys: |
+                      ${{ runner.OS }}-build-${{ env.cache-name }}-
+                      ${{ runner.OS }}-build-
+                      ${{ runner.OS }}-
+
+            - name: Run API Tests
+              run: go test ./server/tests/... --json > tests.json
+
+            - name: Upload Artifact
+              uses: actions/upload-artifact@v2
+              with:
+                  name: api-test-result
+                  path: tests.json
+                  retention-days: 7
